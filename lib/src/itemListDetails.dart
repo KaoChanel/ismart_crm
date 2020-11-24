@@ -17,14 +17,38 @@ class ItemListDetails extends StatelessWidget {
     final Widget content = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          item?.title ?? 'No item selected!',
-          style: textTheme.headline,
-        ),
-        Text(
-          item?.subtitle ?? 'Please select one on the left.',
-          style: textTheme.subhead,
-        ),
+        Container(
+          color: Colors.grey,
+          child: Row(
+            children: [
+              SizedBox(height: 20,),
+              Flexible(
+                flex: 6,
+                child: ListTile(
+                  //
+                  title: TextFormField(
+                    initialValue: '',
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelText: "รหัสสินค้า",
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+        // Text(
+        //   item?.title ?? 'No item selected!',
+        //   style: textTheme.headline,
+        // ),
+        // Text(
+        //   item?.subtitle ?? 'Please select one on the left.',
+        //   style: textTheme.subhead,
+        // ),
       ],
     );
 
@@ -34,9 +58,13 @@ class ItemListDetails extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title),
+        title: Center(child: Text(item.title)),
       ),
-      body: Center(child: content),
+      body: ListView(
+          children: [
+            Center(child: content),
+          ]
+      ),
     );
   }
 }
