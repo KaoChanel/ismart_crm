@@ -3,6 +3,9 @@ import 'package:ismart_crm/widgets/navDrawer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'saleOrder.dart';
+import 'containerCustomer.dart';
+
+import 'package:flutter/cupertino.dart';
 
 class Item {
   const Item(this.name, this.icon);
@@ -158,38 +161,36 @@ class DashboardPageState extends State<DashboardPage> {
         SafeArea(
         child: ListView(
           children: <Widget>[
+            SizedBox(height: 10,),
+          Container(padding: EdgeInsets.all(10), child:
             Row(
               children: [
                 //Padding(padding: null)
-                Text("ลูกค้า : "),
-                DropdownButton<Item>(
-                  hint: Text("Select item"),
-                  value: selectedUser,
-                  onChanged: (Item Value) {
-                    setState(() {
-                      selectedUser = Value;
-                    });
-                  },
-                  items: users.map((Item user) {
-                    return DropdownMenuItem<Item>(
-                      value: user,
-                      child: Row(
-                        children: <Widget>[
-                          user.icon,
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            user.name,
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
+              // SizedBox(
+              // width: 60,
+              // child: Text('ลูกค้า : ',
+              //       style: TextStyle(fontSize: 18)),
+              // ),
+                Flexible(
+                    child: TextFormField(
+                      readOnly: true,
+                      initialValue: 'โรงงานสัตว์เลี้ยง 55555',
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        suffixIcon: Icon(Icons.arrow_drop_down),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                        contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "ลูกค้าของคุณ",
                       ),
-                    );
-                  }).toList(),
+                      onTap: (){
+                        Navigator.push(context, CupertinoPageRoute(builder: (context) => ContainerCustomer()));
+                      },
+                    )
                 ),
               ],
-            ),
+            )
+          ),
             Row(
               children: <Widget>[
                 Expanded(
@@ -220,7 +221,7 @@ class DashboardPageState extends State<DashboardPage> {
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () => Navigator.push(
                                     context,
-                                    MaterialPageRoute(
+                                    CupertinoPageRoute(
                                         builder: (context) => SaleOrder())),
                               )))
                     ]))),

@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'masterDetailContainer.dart';
-//import 'package:ismart_crm/widgets/allDatePickers.dart';
+import 'containerProduct.dart';
 
 // Show Dialog function
 void _showDialog(context) {
@@ -673,7 +672,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         onPressed: () => {
                           Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                   builder: (context) =>
                                       MasterDetailContainer()))
                         },

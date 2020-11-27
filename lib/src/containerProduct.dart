@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/models/item.dart';
 
-import 'itemList.dart';
-import 'itemListDetails.dart';
+import 'itemProductList.dart';
+import 'itemProductListDetails.dart';
 
 // Widget _buildMobileLayout() {
 //   return ItemListing(
@@ -22,7 +23,7 @@ class MasterDetailContainer extends StatefulWidget {
 }
 
 class _MasterDetailContainerState extends State<MasterDetailContainer> {
-  static const int kTabletBreakpoint = 600;
+  static const int kTabletBreakpoint = 400;
   Item _selectedItem;
   Widget _buildTabletLayout() {
     // For tablets, return a layout that has item listing on the left
@@ -30,7 +31,7 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
     return Row(
       children: [
         Flexible(
-          flex: 1,
+          flex: 2,
           child: ItemList(
             // Instead of pushing a new route here, we update
             // the currently selected item, which is a part of
@@ -42,8 +43,9 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
             },
           ),
         ),
+
         Flexible(
-          flex: 3,
+          flex: 4,
           child: ItemListDetails(
             // The item details just blindly accepts whichever
             // item we throw in its way, just like before.
@@ -62,13 +64,14 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
 
     if (shortestSide < kTabletBreakpoint) {
       //content = _buildMobileLayout();
+      content = _buildTabletLayout();
     } else {
       content = _buildTabletLayout();
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Master-detail flow sample'),
+        title: Center(child: Text('สั่งสินค้ารายการที่ ', style: GoogleFonts.sarabun(fontSize: 20),)),
       ),
       body: content,
     );

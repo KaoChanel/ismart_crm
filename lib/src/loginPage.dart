@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/src/dashboardPage.dart';
 import 'package:ismart_crm/widgets/bezierContainer.dart';
+import 'package:ismart_crm/models/company.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key, this.title}) : super(key: key);
@@ -13,6 +14,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  Company compValue;
+
   Widget _backButton() {
     return InkWell(
       onTap: () {
@@ -61,7 +65,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget _submitButton() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardPage()));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => DashboardPage()));
         print("tapped on Inkwell container");
       },
       child: Container(
@@ -179,19 +184,55 @@ class _LoginPageState extends State<LoginPage> {
   //   );
   // }
 
-  Widget _title(){
+  Widget _title() {
     return Image(
-      image : AssetImage('assets/biosci_logo.png'),
+      image: AssetImage('assets/biosci_logo.png'),
     );
   }
 
   Widget _emailPasswordWidget() {
     return Column(
       children: <Widget>[
-        _entryField("Email id"),
+        _entryField("Username"),
         _entryField("Password", isPassword: true),
       ],
     );
+  }
+
+  Widget _companySelect() {
+    return Container(
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+          Text(
+            'Company',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+              SizedBox(
+                height: 10,
+              ),
+          DropdownButtonFormField<Company>(
+            value: compValue,
+            isExpanded: true,
+            items: companys.map((Company value) {
+              return DropdownMenuItem<Company>(
+                value: value,
+                child: Text(value.compName),
+              );
+            }).toList(),
+            onChanged: (Company value) {
+              setState(() {
+                compValue = value;
+                FocusScope.of(context).requestFocus(new FocusNode());
+                print(compValue.compCode);
+              });
+            },
+              decoration: InputDecoration(
+                  border: InputBorder.none,
+                  fillColor: Color(0xfff3f3f4),
+                  filled: true)
+          )
+        ]));
   }
 
   @override
@@ -199,45 +240,46 @@ class _LoginPageState extends State<LoginPage> {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
         body: Container(
-          height: height,
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                  top: -height * .15,
-                  right: -MediaQuery.of(context).size.width * .4,
-                  child: BezierContainer()
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(height: height * .2),
-                      _title(),
-                      SizedBox(height: 20),
-                      _emailPasswordWidget(),
-                      SizedBox(height: 20),
-                      _submitButton(),
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        alignment: Alignment.centerRight,
-                        child: Text('Forgot Password ?',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
-                      ),
-                      _divider(),
-                      //_facebookButton(),
-                      SizedBox(height: height * .055),
-                      _createAccountLabel(),
-                    ],
+      height: height,
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+              top: -height * .15,
+              right: -MediaQuery.of(context).size.width * .4,
+              child: BezierContainer()),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(height: height * .2),
+                  _title(),
+                  SizedBox(height: 20),
+                  _emailPasswordWidget(),
+                  SizedBox(height: 20),
+                  _companySelect(),
+                  SizedBox(height: 20),
+                  _submitButton(),
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    alignment: Alignment.centerRight,
+                    child: Text('Forgot Password ?',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w500)),
                   ),
-                ),
+                  _divider(),
+                  //_facebookButton(),
+                  SizedBox(height: height * .055),
+                  _createAccountLabel(),
+                ],
               ),
-              // Positioned(top: 40, left: 0, child: _backButton()),
-            ],
+            ),
           ),
-        ));
+          // Positioned(top: 40, left: 0, child: _backButton()),
+        ],
+      ),
+    ));
   }
 }
