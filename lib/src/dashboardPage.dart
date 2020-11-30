@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ismart_crm/widgets/navDrawer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'saleOrder.dart';
@@ -99,22 +98,24 @@ Card dashboardCard(String title, String path) {
       ));
 }
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sale CRM',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: DashboardPage(),
-    );
-  }
-}
+// void main() => runApp(MyApp());
+//
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Sale CRM',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: DashboardPage(),
+//     );
+//   }
+// }
 
 class DashboardPage extends StatefulWidget {
+  static const routeName = '/';
+
   State createState() => DashboardPageState();
 }
 
@@ -150,138 +151,114 @@ class DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavDrawer(),
-      appBar: AppBar(
-        title: Text('Sale CRM'),
-      ),
-      body: DoubleBackToCloseApp(
-    snackBar: const SnackBar(
-    content: Text('Tap back again to leave', textAlign: TextAlign.center,)),
-        child:
-        SafeArea(
-        child: ListView(
-          children: <Widget>[
-            SizedBox(height: 10,),
-          Container(padding: EdgeInsets.all(10), child:
-            Row(
-              children: [
-                //Padding(padding: null)
-              // SizedBox(
-              // width: 60,
-              // child: Text('ลูกค้า : ',
-              //       style: TextStyle(fontSize: 18)),
-              // ),
-                Flexible(
-                    child: TextFormField(
-                      readOnly: true,
-                      initialValue: 'โรงงานสัตว์เลี้ยง 55555',
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        suffixIcon: Icon(Icons.arrow_drop_down),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-                        contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ลูกค้าของคุณ",
-                      ),
-                      onTap: (){
-                        Navigator.push(context, CupertinoPageRoute(builder: (context) => ContainerCustomer()));
-                      },
-                    )
-                ),
-              ],
-            )
+      body: SafeArea(
+          child: ListView(
+            children: <Widget>[
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      //Padding(padding: null)
+                      // SizedBox(
+                      // width: 60,
+                      // child: Text('ลูกค้า : ',
+                      //       style: TextStyle(fontSize: 18)),
+                      // ),
+                      Flexible(
+                          child: TextFormField(
+                        readOnly: true,
+                        initialValue: 'โรงงานสัตว์เลี้ยง 55555',
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          suffixIcon: Icon(Icons.arrow_drop_down),
+                          border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20))),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                          labelText: "ลูกค้าของคุณ",
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                  builder: (context) => ContainerCustomer()));
+                        },
+                      )),
+                    ],
+                  )),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                      child: Container(
+                          child: Stack(
+                              //height: 200,
+                              children: [
+                        dashboardCard(
+                            'ใบเสนอราคา', 'assets/business_drawing.jpg'),
+                        new Positioned.fill(
+                            child: new Material(
+                                color: Colors.transparent,
+                                child: new InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () => null,
+                                )))
+                      ]))),
+                  Expanded(
+                      child: Container(
+                          child: Stack(
+                              //height: 200,
+                              children: [
+                        dashboardCard(
+                            'สั่งสินค้า', 'assets/business_click.jpg'),
+                        new Positioned.fill(
+                            child: new Material(
+                                color: Colors.transparent,
+                                child: new InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () => Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                          builder: (context) => SaleOrder())),
+                                )))
+                      ]))),
+                  Expanded(
+                      child: Container(
+                          child: Stack(
+                              //height: 200,
+                              children: [
+                        dashboardCard(
+                            'เข้าเยี่ยม', 'assets/business_marketing.jpg'),
+                        new Positioned.fill(
+                            child: new Material(
+                                color: Colors.transparent,
+                                child: new InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () => null,
+                                )))
+                      ]))),
+                  Expanded(
+                      child: Container(
+                          child: dashboardCard(
+                              'บริการ', 'assets/business_inventory.jpg'))),
+                ],
+              ),
+              Row(
+                children: [
+                  Container(
+                      height: 152.5,
+                      width: 190,
+                      child: dashboardCard(
+                          'บริการ', 'assets/business_support.jpg'))
+                ],
+              ),
+            ],
           ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                        child: Stack(
-                            //height: 200,
-                            children: [
-                      dashboardCard(
-                          'ใบเสนอราคา', 'assets/business_drawing.jpg'),
-                      new Positioned.fill(
-                          child: new Material(
-                              color: Colors.transparent,
-                              child: new InkWell(
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () => null,
-                              )))
-                    ]))),
-                Expanded(
-                    child: Container(
-                        child: Stack(
-                            //height: 200,
-                            children: [
-                      dashboardCard('สั่งสินค้า', 'assets/business_click.jpg'),
-                      new Positioned.fill(
-                          child: new Material(
-                              color: Colors.transparent,
-                              child: new InkWell(
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () => Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                        builder: (context) => SaleOrder())),
-                              )))
-                    ]))),
-                Expanded(
-                    child: Container(
-                        child: Stack(
-                            //height: 200,
-                            children: [
-                      dashboardCard(
-                          'เข้าเยี่ยม', 'assets/business_marketing.jpg'),
-                      new Positioned.fill(
-                          child: new Material(
-                              color: Colors.transparent,
-                              child: new InkWell(
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () => null,
-                              )))
-                    ]))),
-                Expanded(
-                    child: Container(
-                        child: dashboardCard(
-                            'บริการ', 'assets/business_inventory.jpg'))),
-              ],
-            ),
-            Row(
-              children: [
-                Container(
-                    height: 152.5,
-                    width: 190,
-                    child:
-                        dashboardCard('บริการ', 'assets/business_support.jpg'))
-              ],
-            ),
-          ],
         ),
-      ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Main'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            title: Text('Reports'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info_outlined),
-            title: Text('News'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            title: Text('Profile'),
-          ),
-        ],
-        // currentIndex: _selectedIndex,
-        // onTap: _onItemTapped,
-      ),
+
     );
   }
 }

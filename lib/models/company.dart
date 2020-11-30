@@ -2,12 +2,12 @@ import 'package:meta/meta.dart';
 
 class Company{
   Company({
-    @required this.compCode,
-    @required this.compName,
+    this.compCode,
+    this.compName,
   });
 
-  final String compCode;
-  final String compName;
+  String compCode;
+  String compName;
 }
 
 final companys = <Company>[

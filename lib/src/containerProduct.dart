@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/models/item.dart';
 
-import 'itemProductList.dart';
-import 'itemProductListDetails.dart';
+import 'item_product.dart';
+import 'item_product_detail.dart';
 
 // Widget _buildMobileLayout() {
 //   return ItemListing(

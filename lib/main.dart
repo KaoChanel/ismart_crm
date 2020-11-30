@@ -6,43 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/src/loginPage.dart';
 
-Future<void> fetchData() async {
-  //final response = await http.get('https://jsonplaceholder.typicode.com/albums/1');
-  var response = await http.get('https://10.0.2.2:45457/weatherforecast');
-
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
-    //return WeatherForecast.fromJson(jsonDecode(response.body));
-    print(response.body);
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load weather forecast.');
-  }
-}
-
-class WeatherForecast {
-  final int temperatureC;
-  final int temperatureF;
-  final String summary;
-
-  WeatherForecast({this.temperatureC, this.temperatureF, this.summary});
-
-  factory WeatherForecast.fromJson(Map<String, dynamic> json) {
-    return WeatherForecast(
-      temperatureC: json['temperatureC'],
-      temperatureF: json['temperatureF'],
-      summary: json['summary'],
-    );
-  }
-}
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight])
       .then((_) {
+
     runApp(MyApp());
   }
   );
@@ -99,8 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState(){
     super.initState();
-
-    fetchData();
   }
 
   @override
