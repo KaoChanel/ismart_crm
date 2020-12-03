@@ -3,42 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'saleOrder.dart';
 import 'containerCustomer.dart';
-
 import 'package:flutter/cupertino.dart';
-
-class Item {
-  const Item(this.name, this.icon);
-
-  final String name;
-  final Icon icon;
-}
-
-List<Item> users = <Item>[
-  const Item(
-      'Android',
-      Icon(
-        Icons.android,
-        color: const Color(0xFF167F67),
-      )),
-  const Item(
-      'Flutter',
-      Icon(
-        Icons.flag,
-        color: const Color(0xFF167F67),
-      )),
-  const Item(
-      'ReactNative',
-      Icon(
-        Icons.format_indent_decrease,
-        color: const Color(0xFF167F67),
-      )),
-  const Item(
-      'iOS',
-      Icon(
-        Icons.mobile_screen_share,
-        color: const Color(0xFF167F67),
-      )),
-];
+import 'package:ismart_crm/models/customer.dart';
+import 'package:http/http.dart' as http;
+import 'package:ismart_crm/globals.dart' as globals;
 
 Widget _menuCard(String _path) {
   return Card(
@@ -120,33 +88,24 @@ class DashboardPage extends StatefulWidget {
 }
 
 class DashboardPageState extends State<DashboardPage> {
-  Item selectedUser;
-  List<Item> users = <Item>[
-    const Item(
-        'Android',
-        Icon(
-          Icons.android,
-          color: const Color(0xFF167F67),
-        )),
-    const Item(
-        'Flutter',
-        Icon(
-          Icons.flag,
-          color: const Color(0xFF167F67),
-        )),
-    const Item(
-        'ReactNative',
-        Icon(
-          Icons.format_indent_decrease,
-          color: const Color(0xFF167F67),
-        )),
-    const Item(
-        'iOS',
-        Icon(
-          Icons.mobile_screen_share,
-          color: const Color(0xFF167F67),
-        )),
-  ];
+  TextEditingController txtCustomer = new TextEditingController();
+
+  Future<void> getCustomer() async{
+    String strUrl =
+        '${globals.publicAddress}/api/customers/${globals.employee.empId}';
+    var response = await http.get(strUrl);
+
+    setState(() {
+      globals.allCustomer = customerFromJson(response.body);
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCustomer();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +129,8 @@ class DashboardPageState extends State<DashboardPage> {
                       Flexible(
                           child: TextFormField(
                         readOnly: true,
-                        initialValue: 'โรงงานสัตว์เลี้ยง 55555',
+                        //initialValue: 'โรงงานสัตว์เลี้ยง 55555',
+                            controller: txtCustomer,
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           suffixIcon: Icon(Icons.arrow_drop_down),
@@ -185,7 +145,11 @@ class DashboardPageState extends State<DashboardPage> {
                           Navigator.push(
                               context,
                               CupertinoPageRoute(
-                                  builder: (context) => ContainerCustomer()));
+                                  builder: (context) => ContainerCustomer())).then((value) {
+                            setState(() {
+                              txtCustomer.text = globals.customer?.custName;
+                            });
+                          });
                         },
                       )),
                     ],
@@ -219,10 +183,26 @@ class DashboardPageState extends State<DashboardPage> {
                                 color: Colors.transparent,
                                 child: new InkWell(
                                   borderRadius: BorderRadius.circular(10),
-                                  onTap: () => Navigator.push(
+                                  onTap: () {
+                                    if(globals.customer == null){
+                                      return showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) => new CupertinoAlertDialog(
+                                          title: new Text("แจ้งเตือน"),
+                                          content: new Text("กรุณาเลือกลูกค้าของคุณ", style: TextStyle(fontSize: 18),),
+                                          actions: [
+                                            CupertinoDialogAction(
+                                                isDefaultAction: true, onPressed: () => Navigator.pop(context), child: Text("ปิดหน้าต่าง"))
+                                          ],
+                                        ),
+                                      );
+                                    }
+
+                                    Navigator.push(
                                       context,
                                       CupertinoPageRoute(
-                                          builder: (context) => SaleOrder())),
+                                          builder: (context) => SaleOrder()));
+                                  },
                                 )))
                       ]))),
                   Expanded(
@@ -243,7 +223,7 @@ class DashboardPageState extends State<DashboardPage> {
                   Expanded(
                       child: Container(
                           child: dashboardCard(
-                              'บริการ', 'assets/business_inventory.jpg'))),
+                              'เช็คสต๊อค', 'assets/business_inventory.jpg'))),
                 ],
               ),
               Row(

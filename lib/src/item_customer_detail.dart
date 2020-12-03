@@ -1,28 +1,57 @@
-import 'package:ismart_crm/models/item.dart';
+import 'package:ismart_crm/models/customer.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 class ItemCustomerDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
   const ItemCustomerDetail({
     @required this.isInTabletLayout,
-    @required this.item,
+    @required this.customer,
   });
 
   final bool isInTabletLayout;
-  final Item item;
+  final Customer customer;
 
   @override
   _ItemCustomerDetailState createState() => _ItemCustomerDetailState();
 }
-class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
 
-  bool _isFreeProduct = false;
+class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
+  TextEditingController txtCustName = new TextEditingController();
+  TextEditingController txtCustCode = new TextEditingController();
+  TextEditingController txtAddress = new TextEditingController();
+  TextEditingController txtContact = new TextEditingController();
+  TextEditingController txtTel = new TextEditingController();
+  TextEditingController txtRemark = new TextEditingController();
+  TextEditingController txtCustGroup = new TextEditingController();
+  TextEditingController txtCustType = new TextEditingController();
+  TextEditingController txtCustTaxId = new TextEditingController();
+  TextEditingController txtBranch = new TextEditingController();
+  TextEditingController txtCreditType = new TextEditingController();
+  TextEditingController txtCreditDays = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme
-        .of(context)
-        .textTheme;
+    setState(() {
+      //globals.customer = widget.customer;
+      txtCustCode.text = widget.customer?.custCode;
+      txtCustName.text = widget.customer?.custName;
+      txtAddress.text = '${widget.customer?.custAddr1} ${widget.customer?.custAddr2}';
+      //txtTel.text = widget.customer?;
+      txtCustType.text = widget.customer?.custTypeName;
+      txtBranch.text = widget.customer?.brchName;
+      txtCustTaxId.text = widget.customer?.taxId;
+      //txtCreditType.text = widget.customer?.typ;
+      txtCreditDays.text = widget.customer?.creditDays.toString();
+    });
+
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final Widget content = ListView(
       children: [
         Column(
@@ -35,51 +64,16 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('ชื่อลูกค้า',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
-                Flexible(
-                    child: ListTile(
-                      title: TextFormField(
-                        initialValue: '',
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                          // floatingLabelBehavior: FloatingLabelBehavior.always,
-                          labelText: "ชื่อลูกค้า",
-                        ),
-                      ),
-                    )),
-                ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      'เช็คสต๊อค',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
                     child: Text('รหัสลูกค้า',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 4,
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+
+                      controller: txtCustCode,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -91,6 +85,55 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                 ),
               ],
             ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                    width: 100,
+                    child: Text('ชื่อลูกค้า',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(fontSize: 16))),
+                Flexible(
+                  flex: 5,
+                    child: ListTile(
+                  title: TextFormField(
+                    //initialValue: txtCustName,
+                    readOnly: true,
+                    controller: txtCustName,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      // floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelText: "ชื่อลูกค้า",
+                    ),
+                  ),
+                )
+                ),
+
+                // Flexible(
+                //   flex: 2,
+                //     child: ElevatedButton.icon(
+                //         onPressed: () {
+                //           setState(() {
+                //             globals.customer = widget.customer;
+                //           });
+                //
+                //           Navigator.pop(context);
+                //         },
+                //         icon: Icon(Icons.check_circle_sharp),
+                //         label: Text(
+                //           'เลือกลูกค้า',
+                //           style: TextStyle(fontSize: 18),
+                //         ),
+                //         style:
+                //         ElevatedButton.styleFrom(padding: EdgeInsets.all(12), primary: Colors.green)
+                //     ),
+                // ),
+              ],
+            ),
 
             SizedBox(
               height: 10,
@@ -99,21 +142,20 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('จำนวน',
+                    child: Text('ที่อยู่',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtAddress,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         //floatingLabelBehavior: FloatingLabelBehavior.always,
-                        labelText: "จำนวน",
+                        labelText: "ที่อยู่",
                       ),
                     ),
                   ),
@@ -128,10 +170,9 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('ราคา / หน่วย',
+                    child: Text('ผู้ติดต่อ',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -140,8 +181,22 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "ผู้ติดต่อ",
+                      ),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      controller: txtTel,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
                         EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ราคา / หน่วย",
+                        labelText: "โทรศัพท์",
                       ),
                     ),
                   ),
@@ -156,10 +211,9 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('ราคา',
+                    child: Text('กลุ่มลูกค้า',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -169,8 +223,8 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ราคา",
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "กลุ่มลูกค้า",
                       ),
                     ),
                   ),
@@ -185,33 +239,69 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('รวมราคา',
+                    child: Text('ประเภทลูกค้า',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtCustType,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "ประเภทลูกค้า",
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                    width: 100,
+                    child: Text('เลขประจำตัวผู้เสียภาษี',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(fontSize: 16))),
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    //
+                    title: TextFormField(
+                      controller: txtCustTaxId,
+                      textAlign: TextAlign.left,
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "เลขประจำตัวผู้เสียภาษี",
+                      ),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      controller: txtBranch,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
                         EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "รวมราคา",
+                        labelText: "สาขา",
                       ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      'THB',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
               ],
             ),
 
@@ -222,35 +312,42 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('ส่วนลด',
+                    child: Text('วงเงินทั้งหมด',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
-                    //
                     title: TextFormField(
+                      readOnly: true,
                       initialValue: '',
                       textAlign: TextAlign.right,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ส่วนลด",
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "วงเงินทั้งหมด",
                       ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      '%',
-                      style: TextStyle(fontSize: 18),
+
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      readOnly: true,
+                      initialValue: '',
+                      textAlign: TextAlign.right,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "วงเงินที่ใช้ไป",
+                      ),
                     ),
-                    style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                  ),
+                ),
               ],
             ),
 
@@ -261,9 +358,22 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('รวมสุทธิ',
+                    child: Text('วงเงินคงเหลือ',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
+                        style: TextStyle(fontSize: 16))),
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      initialValue: '',
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "วงเงินคงเหลือ",
+                      ),
+                    ),
+                  ),
                 ),
                 Flexible(
                   flex: 6,
@@ -276,11 +386,12 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                         border: OutlineInputBorder(),
                         contentPadding:
                         EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "รวมสุทธิ",
+                        labelText: "สถานะ",
                       ),
                     ),
                   ),
                 ),
+
               ],
             ),
 
@@ -291,59 +402,35 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
               children: [
                 SizedBox(
                     width: 100,
-                    child: Text('Promotion Code',
+                    child: Text('ประเภทเครดิต',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtCreditType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "Promotion Code",
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "ประเภทเครดิต",
                       ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: () {
-
-                    },
-                    //icon: Icon(Icons.),
-                    child: Text(
-                      'Coupon',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12), primary: Colors.deepOrangeAccent)),
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('หมายเหตุสินค้า',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
                 Flexible(
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
-                      initialValue: '',
+                      readOnly: true,
+                      controller: txtCreditDays,
+                      textAlign: TextAlign.left,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
                         EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "หมายเหตุสินค้า",
+                        labelText: "เครดิต / วัน",
                       ),
                     ),
                   ),
@@ -354,28 +441,73 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
             SizedBox(
               height: 20,
             ),
+
             Row(
               children: [
                 SizedBox(
-                  width: 115,
+                    width: 100,
+                    child: Text('DSO',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(fontSize: 16))),
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      initialValue: '',
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "DSO",
+                      ),
+                    ),
+                  ),
                 ),
-
-                Expanded(
-                    flex: 6,
-                    child: ElevatedButton.icon(
-                        onPressed: (){
-
-                        },
-                        style: ElevatedButton.styleFrom(primary: Colors.green, padding: EdgeInsets.only(top:15,bottom: 15)),
-                        label: Text('เลือกลูกค้ารายนี้', style: TextStyle(fontSize: 22),),
-                        icon: Icon(Icons.check, size: 30,)
-                    )
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      readOnly: true,
+                      initialValue: '',
+                      textAlign: TextAlign.left,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "ชำระเงินครั้งล่าสุด",
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
 
             SizedBox(
-              height: 10,
+              height: 20,
+            ),
+
+            Row(
+              children: [
+                SizedBox(
+                    width: 100,
+                    child: Text('หมายเหตุ',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontSize: 16))),
+                Flexible(
+                  flex: 6,
+                  child: ListTile(
+                    title: TextFormField(
+                      initialValue: '',
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: "หมายเหตุ",
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             // Text(
@@ -397,7 +529,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text(widget.item.title)),
+        title: Center(child: Text(widget.customer?.custName)),
       ),
       body: ListView(children: [
         Center(child: content),

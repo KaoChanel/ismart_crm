@@ -4,18 +4,18 @@
 
 import 'dart:convert';
 
-Customer customerFromJson(String str) => Customer.fromJson(json.decode(str));
+List<Customer> customerFromJson(String str) => List<Customer>.from(json.decode(str).map((x) => Customer.fromJson(x)));
 
-String customerToJson(Customer data) => json.encode(data.toJson());
+String customerToJson(List<Customer> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Customer {
   Customer({
-    this.rowId,
     this.custId,
     this.custCode,
     this.custName,
-    this.custNameEng,
-    this.shortName,
+    this.custStartDate,
+    this.inactive,
+    this.creditDays,
     this.taxId,
     this.custAddr1,
     this.custAddr2,
@@ -23,87 +23,121 @@ class Customer {
     this.amphur,
     this.province,
     this.postCode,
-    this.tel,
-    this.fax,
-    this.email,
-    this.lineId,
-    this.cardNo,
-    this.busiTypeId,
-    this.creditType,
-    this.creditState,
-    this.creditDays,
+    this.custTypeName,
+    this.brchName,
+    this.saleAreaId,
+    this.saleAreaName,
+    this.custMapFullPath,
+    this.empId,
+    this.empCode,
+    this.empName,
   });
 
-  int rowId;
   int custId;
   String custCode;
   String custName;
-  dynamic custNameEng;
-  String shortName;
+  dynamic custStartDate;
+  dynamic inactive;
+  int creditDays;
   String taxId;
   dynamic custAddr1;
   dynamic custAddr2;
   String district;
   String amphur;
-  String province;
+  Province province;
   String postCode;
-  dynamic tel;
-  dynamic fax;
-  dynamic email;
-  dynamic lineId;
-  dynamic cardNo;
-  int busiTypeId;
-  dynamic creditType;
-  String creditState;
-  int creditDays;
+  dynamic custTypeName;
+  String brchName;
+  dynamic saleAreaId;
+  dynamic saleAreaName;
+  String custMapFullPath;
+  int empId;
+  EmpCode empCode;
+  EmpName empName;
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
-    rowId: json["rowId"] == null ? null : json["rowId"],
     custId: json["custId"] == null ? null : json["custId"],
     custCode: json["custCode"] == null ? null : json["custCode"],
     custName: json["custName"] == null ? null : json["custName"],
-    custNameEng: json["custNameEng"],
-    shortName: json["shortName"] == null ? null : json["shortName"],
+    custStartDate: json["custStartDate"],
+    inactive: json["inactive"],
+    creditDays: json["creditDays"] == null ? null : json["creditDays"],
     taxId: json["taxId"] == null ? null : json["taxId"],
     custAddr1: json["custAddr1"],
     custAddr2: json["custAddr2"],
     district: json["district"] == null ? null : json["district"],
     amphur: json["amphur"] == null ? null : json["amphur"],
-    province: json["province"] == null ? null : json["province"],
+    province: json["province"] == null ? null : provinceValues.map[json["province"]],
     postCode: json["postCode"] == null ? null : json["postCode"],
-    tel: json["tel"],
-    fax: json["fax"],
-    email: json["email"],
-    lineId: json["lineId"],
-    cardNo: json["cardNo"],
-    busiTypeId: json["busiTypeId"] == null ? null : json["busiTypeId"],
-    creditType: json["creditType"],
-    creditState: json["creditState"] == null ? null : json["creditState"],
-    creditDays: json["creditDays"] == null ? null : json["creditDays"],
+    custTypeName: json["custTypeName"],
+    brchName: json["brchName"] == null ? null : json["brchName"],
+    saleAreaId: json["saleAreaId"],
+    saleAreaName: json["saleAreaName"],
+    custMapFullPath: json["custMapFullPath"] == null ? null : json["custMapFullPath"],
+    empId: json["empId"] == null ? null : json["empId"],
+    empCode: json["empCode"] == null ? null : empCodeValues.map[json["empCode"]],
+    empName: json["empName"] == null ? null : empNameValues.map[json["empName"]],
   );
 
   Map<String, dynamic> toJson() => {
-    "rowId": rowId == null ? null : rowId,
     "custId": custId == null ? null : custId,
     "custCode": custCode == null ? null : custCode,
     "custName": custName == null ? null : custName,
-    "custNameEng": custNameEng,
-    "shortName": shortName == null ? null : shortName,
+    "custStartDate": custStartDate,
+    "inactive": inactive,
+    "creditDays": creditDays == null ? null : creditDays,
     "taxId": taxId == null ? null : taxId,
     "custAddr1": custAddr1,
     "custAddr2": custAddr2,
     "district": district == null ? null : district,
     "amphur": amphur == null ? null : amphur,
-    "province": province == null ? null : province,
+    "province": province == null ? null : provinceValues.reverse[province],
     "postCode": postCode == null ? null : postCode,
-    "tel": tel,
-    "fax": fax,
-    "email": email,
-    "lineId": lineId,
-    "cardNo": cardNo,
-    "busiTypeId": busiTypeId == null ? null : busiTypeId,
-    "creditType": creditType,
-    "creditState": creditState == null ? null : creditState,
-    "creditDays": creditDays == null ? null : creditDays,
+    "custTypeName": custTypeName,
+    "brchName": brchName == null ? null : brchName,
+    "saleAreaId": saleAreaId,
+    "saleAreaName": saleAreaName,
+    "custMapFullPath": custMapFullPath == null ? null : custMapFullPath,
+    "empId": empId == null ? null : empId,
+    "empCode": empCode == null ? null : empCodeValues.reverse[empCode],
+    "empName": empName == null ? null : empNameValues.reverse[empName],
   };
+}
+
+enum EmpCode { EMS_0045 }
+
+final empCodeValues = EnumValues({
+  "EMS-0045": EmpCode.EMS_0045
+});
+
+enum EmpName { EMPTY }
+
+final empNameValues = EnumValues({
+  "สโรชาพัชร์ บุณยะโสรัจจ์": EmpName.EMPTY
+});
+
+enum Province { EMPTY, PROVINCE, PURPLE, FLUFFY, SAMUTPRAKARN, TENTACLED, STICKY }
+
+final provinceValues = EnumValues({
+  "กทม.": Province.EMPTY,
+  "จ.สมุทรปราการ": Province.FLUFFY,
+  "จ.สมุทรปราการ ": Province.PROVINCE,
+  "กรุงเทพมหานคร": Province.PURPLE,
+  "Samutprakarn": Province.SAMUTPRAKARN,
+  "จ.นนทบุรี": Province.STICKY,
+  "จ.ปทุมธานี": Province.TENTACLED
+});
+
+class EnumValues<T> {
+  Map<String, T> map;
+  Map<T, String> reverseMap;
+
+  EnumValues(this.map);
+
+  Map<T, String> get reverse {
+    if (reverseMap == null) {
+      reverseMap = map.map((k, v) => new MapEntry(v, k));
+    }
+    return reverseMap;
+  }
 }

@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ismart_crm/models/employee.dart';
 import 'package:ismart_crm/src/launcher.dart';
 import 'package:ismart_crm/widgets/bezierContainer.dart';
 import 'package:ismart_crm/models/company.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/models/user.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key, this.title}) : super(key: key);
@@ -35,20 +37,26 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> getUser(String company, String username, String password) async {
     http.Response response = await http.get(
-        'http://103.225.27.252/login/userloginauthor?_company=$company&username=$username&password=$password');
+        '${globals.publicAddress}/login/userloginauthor?_company=$company&username=$username&password=$password');
     print(response.body);
     var decode = jsonDecode(response.body);
+
     if (decode['empId'] > 0 || decode['empId'] != '0') {
       setState(() {
         _user = userFromJson(response.body);
       });
-    }
 
-    if (_user != null) {
+      String strUrl = '${globals.publicAddress}/api/employees/${_user.empId}';
+      response = await http.get(strUrl);
+      setState(() {
+        globals.employee = employeeFromJson(response.body);
+      });
+
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Launcher()));
-    } else {
+    }
+    else {
       showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
     }
 

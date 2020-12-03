@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'containerProduct.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 // Show Dialog function
 void _showDialog(context) {
@@ -460,7 +461,9 @@ class _SaleOrderState extends State<SaleOrder> {
                 Flexible(
                   flex: 2,
                   child: ListTile(
-                    title: TextField(
+                    title: TextFormField(
+                      enabled: false,
+                      initialValue: globals.employee?.empCode,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -474,7 +477,9 @@ class _SaleOrderState extends State<SaleOrder> {
                 Flexible(
                   flex: 2,
                   child: ListTile(
-                    title: TextField(
+                    title: TextFormField(
+                      enabled: false,
+                      initialValue: globals.employee?.empName,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -491,7 +496,9 @@ class _SaleOrderState extends State<SaleOrder> {
                 Flexible(
                   flex: 2,
                   child: ListTile(
-                    title: TextField(
+                    title: TextFormField(
+                      enabled: false,
+                      initialValue: globals.customer?.custCode,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -505,7 +512,9 @@ class _SaleOrderState extends State<SaleOrder> {
                 Flexible(
                   flex: 2,
                   child: ListTile(
-                    title: TextField(
+                    title: TextFormField(
+                      enabled: false,
+                      initialValue: globals.customer?.custName,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -536,7 +545,8 @@ class _SaleOrderState extends State<SaleOrder> {
                 Flexible(
                   flex: 2,
                   child: ListTile(
-                    title: TextField(
+                    title: TextFormField(
+                      //initialValue: globals.customer?,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -551,7 +561,7 @@ class _SaleOrderState extends State<SaleOrder> {
                   flex: 2,
                   child: ListTile(
                     //leading: const Icon(Icons.person),
-                    title: TextField(
+                    title: TextFormField(
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:

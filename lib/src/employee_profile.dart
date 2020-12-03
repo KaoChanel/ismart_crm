@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/models/employee.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 class EmployeeProfile extends StatefulWidget {
   @override
@@ -55,7 +56,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                   height: 60,
                 ),
                 Text(
-                  "${_employees?.empName}"
+                  "${globals.employee?.empName}"
                   ,style: TextStyle(
                     fontSize: 25.0,
                     color:Colors.blueGrey,
