@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
@@ -93,10 +95,10 @@ class DashboardPageState extends State<DashboardPage> {
   Future<void> getCustomer() async{
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.employee.empId}';
-    var response = await http.get(strUrl);
+    var response = await http.get(strUrl, headers: {'Content-Type': 'application/json'});
 
     setState(() {
-      globals.allCustomer = customerFromJson(response.body);
+      globals.allCustomer = customerFromJson(utf8.decode(response.bodyBytes));
     });
   }
 
@@ -139,7 +141,8 @@ class DashboardPageState extends State<DashboardPage> {
                                   BorderRadius.all(Radius.circular(20))),
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                          labelText: "ลูกค้าของคุณ",
+                          //labelText: "ลูกค้าของคุณ",
+                          hintText: "ลูกค้าของคุณ",
                         ),
                         onTap: () {
                           Navigator.push(

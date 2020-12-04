@@ -39,6 +39,7 @@ class _ItemCustomerState extends State<ItemCustomer> {
   void getScrollAtElement(int index){
     setState(() {
       //widget.allCustomer = globals.allCustomer;
+      /// Wait till Build finish.
       WidgetsBinding.instance.addPostFrameCallback((_){
         //write or call your logic
         //code will run when widget rendering complete

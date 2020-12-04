@@ -50,6 +50,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
   static const int kTabletBreakpoint = 400;
   Customer _selectedItem = globals.customer;
   List<Customer> allCustomer = globals.allCustomer;
+  TextEditingController txtKeyword = new TextEditingController();
 
   @override
   void initState() {
@@ -69,12 +70,13 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Center(
             child: Text(
-              'เลือกลูกค้าของคุณ ',
-              style: GoogleFonts.sarabun(fontSize: 20),
-            )),
+          'เลือกลูกค้าของคุณ ',
+          style: GoogleFonts.sarabun(fontSize: 20),
+        )),
       ),
       body: content,
     );
@@ -88,45 +90,73 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
         Flexible(
           flex: 2,
           child: Container(
-            decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 30,
-                  offset: Offset(0, 3), // changes position of shadow
-                ),]),
+            decoration: BoxDecoration(color: Colors.white, boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 30,
+                offset: Offset(0, 3), // changes position of shadow
+              ),
+            ]),
             child: Stack(children: [
               Column(children: <Widget>[
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+
                         Expanded(
+                          flex: 2,
                           child: TextFormField(
+                            controller: txtKeyword,
                             decoration: InputDecoration(
+                              hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                              hintText: 'ชื่อลูกค้า, รหัสลูกค้า, ที่อยู่',
                               border: OutlineInputBorder(),
                             ),
                           ),
                         ),
-                        Flexible(
-                            child: ElevatedButton.icon(
-                          onPressed: () {
-                            SearchAreaWidget();
-                          },
-                          icon: Icon(Icons.search),
-                          label: Text('ค้นหาลูกค้า'),
-                        ))
+                        SizedBox(
+                          height: 2,
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton.icon(
+                              onPressed: () {
+                                String query = txtKeyword.text;
+                                setState(() {
+                                  allCustomer = globals.allCustomer
+                                      .where((x) =>
+                                          x.custName
+                                              .toLowerCase()
+                                              .contains(query) ||
+                                          x.custCode
+                                              .toLowerCase()
+                                              .contains(query) ||
+                                          x.custAddr1
+                                              .toLowerCase()
+                                              .contains(query))
+                                      .toList();
+                                });
+                              },
+                              //style: ButtonStyle(padding:),
+                              icon: Icon(Icons.search),
+                              label: Text(
+                                'ค้นหาลูกค้า',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                        ),
+                        Expanded(flex: 2, child: SizedBox(),),
                       ],
                     ),
-                    color: Colors.indigo,
+                    color: Colors.transparent,
                   ),
                 ),
                 Expanded(
-                  flex: 5,
+                  flex: 6,
                   child: ItemCustomer(
                     // Instead of pushing a new route here, we update
                     // the currently selected item, which is a part of
@@ -157,13 +187,13 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
         ),
         Flexible(
           flex: 1,
-          child: SearchAreaWidget(),
+          child: searchAreaWidget(),
         ),
       ],
     );
   }
 
-  Widget SearchAreaWidget(){
+  Widget searchAreaWidget() {
     return ListView(children: [
       Column(children: [
         SizedBox(
@@ -196,8 +226,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
             style: TextStyle(fontSize: 18),
           ),
           style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.all(12),
-              primary: Colors.deepOrangeAccent)),
+              padding: EdgeInsets.all(12), primary: Colors.deepOrangeAccent)),
     ]);
   }
 }
