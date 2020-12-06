@@ -255,6 +255,7 @@ class _SaleOrderState extends State<SaleOrder> {
   TextEditingController txtCredit;
   TextEditingController txtStatus;
   TextEditingController txtRemark;
+
   TextEditingController txtDocuDate = TextEditingController(
       text: DateFormat('dd/MM/yyyy').format(DateTime.now()));
   TextEditingController txtShiptoDate = TextEditingController(
@@ -290,7 +291,7 @@ class _SaleOrderState extends State<SaleOrder> {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(20),
                           bottomRight: Radius.circular(0)),
-                      color: Colors.indigo,
+                      color: Colors.deepPurple,
                       // boxShadow: [
                       //   BoxShadow(color: Colors.green, spreadRadius: 3),
                       // ],
@@ -332,7 +333,8 @@ class _SaleOrderState extends State<SaleOrder> {
                             firstDate: DateTime(1995),
                             lastDate: DateTime(2030),
                           );
-                          txtDocuDate.text = DateFormat('dd/MM/yyyy').format(_docuDate);
+                          txtDocuDate.text =
+                              DateFormat('dd/MM/yyyy').format(_docuDate);
                         });
                       },
                       decoration: InputDecoration(
@@ -377,12 +379,15 @@ class _SaleOrderState extends State<SaleOrder> {
                         setState(() async {
                           _shiptoDate = await showDatePicker(
                             context: context,
-                            initialDate:
-                            _shiptoDate != null ? _shiptoDate : DateTime.now(),
+                            initialDate: _shiptoDate != null
+                                ? _shiptoDate
+                                : DateTime.now(),
                             firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(new Duration(hours: 168)),
+                            lastDate:
+                                DateTime.now().add(new Duration(hours: 168)),
                           );
-                          txtShiptoDate.text = DateFormat('dd/MM/yyyy').format(_shiptoDate);
+                          txtShiptoDate.text =
+                              DateFormat('dd/MM/yyyy').format(_shiptoDate);
                         });
                       },
                       decoration: InputDecoration(
@@ -422,12 +427,14 @@ class _SaleOrderState extends State<SaleOrder> {
                         setState(() async {
                           _orderDate = await showDatePicker(
                             context: context,
-                            initialDate:
-                            _orderDate != null ? _orderDate : DateTime.now(),
+                            initialDate: _orderDate != null
+                                ? _orderDate
+                                : DateTime.now(),
                             firstDate: DateTime(1995),
                             lastDate: DateTime(2030),
                           );
-                          txtOrderDate.text = DateFormat('dd/MM/yyyy').format(_orderDate);
+                          txtOrderDate.text =
+                              DateFormat('dd/MM/yyyy').format(_orderDate);
                         });
                       },
                       decoration: InputDecoration(
@@ -606,7 +613,7 @@ class _SaleOrderState extends State<SaleOrder> {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(20),
                           bottomRight: Radius.circular(0)),
-                      color: Colors.indigo,
+                      color: Colors.deepPurple,
                     ),
                   ),
                 ],
@@ -672,7 +679,7 @@ class _SaleOrderState extends State<SaleOrder> {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(20),
                           bottomRight: Radius.circular(0)),
-                      color: Colors.indigo,
+                      color: Colors.deepPurple,
                     ),
                   ),
                   SizedBox(height: 10),
@@ -709,7 +716,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         },
                         icon: Icon(Icons.local_fire_department,
                             color: Colors.white),
-                        color: Colors.deepOrange,
+                        color: Colors.deepOrange[400],
                         padding: EdgeInsets.all(10),
                         label: Text(
                           'เพิ่มรายการด่วน',
@@ -759,7 +766,7 @@ class _SaleOrderState extends State<SaleOrder> {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(20),
                           bottomRight: Radius.circular(0)),
-                      color: Colors.indigo,
+                      color: Colors.deepPurple,
                     ),
                   ),
                 ],

@@ -1,25 +1,93 @@
-import 'package:ismart_crm/models/item.dart';
-import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
+import 'dart:convert';
 
-class ItemListDetails extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:ismart_crm/models/product.dart';
+import 'package:meta/meta.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:ismart_crm/globals.dart' as globals;
+
+class ItemProductDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
-  const ItemListDetails({
+  const ItemProductDetail({
     @required this.isInTabletLayout,
-    @required this.item,
+    @required this.product,
+    this.goodQty,
+    this.goodPrice,
+    this.total
   });
 
   final bool isInTabletLayout;
-  final Item item;
+  final Product product;
+  final goodQty;
+  final goodPrice;
+  final total;
 
   @override
-  _ItemListDetailsState createState() => _ItemListDetailsState();
+  _ItemProductDetailState createState() => _ItemProductDetailState();
 }
-class _ItemListDetailsState extends State<ItemListDetails> {
-
+class _ItemProductDetailState extends State<ItemProductDetail> {
+  final currency = new NumberFormat("#,##0.00", "en_US");
   bool _isFreeProduct = false;
+  double _goodQty = 0;
+  double _discount;
+  String _discountType;
+  double _goodPrice = 0;
+  double _total = 0;
+  TextEditingController txtGoodName = TextEditingController();
+  TextEditingController txtGoodCode = TextEditingController();
+  TextEditingController txtQty = TextEditingController();
+  TextEditingController txtPrice = TextEditingController();
+  TextEditingController txtDiscountType = TextEditingController();
+  TextEditingController txtDiscount = TextEditingController();
+  TextEditingController txtTotal = TextEditingController();
+  TextEditingController txtTotalNet = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getPrice();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    txtGoodName.dispose();
+    txtGoodCode.dispose();
+    txtQty.dispose();
+    txtPrice.dispose();
+    txtDiscountType.dispose();
+    txtDiscount.dispose();
+    txtTotal.dispose();
+  }
+
+  Future<void> getPrice() async {
+    var response = await http.get('${globals.publicAddress}/api/product/${widget.product?.goodCode}/$_goodQty');
+    Map values = json.decode(response.body);
+    //print('Price / Unit: '+values['price']+'/n Total: '+values['total']);
+    setState(() {
+      _goodPrice = double.parse(values['price'].toString());
+      txtPrice.text = _goodPrice.toStringAsFixed(2) ?? '0';
+      print('Price / Unit: '+_goodPrice.toString()+'/n Total: '+values['total'].toString());
+    });
+    //return values['price'];
+  }
+
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      //getPrice();
+      txtGoodCode.text = widget.product?.goodCode;
+      txtGoodName.text = widget.product?.goodName1;
+      txtQty.text = currency.format(widget.goodQty) ?? '1';
+      txtPrice.text = currency.format(widget.goodPrice) ?? '0';
+      txtTotal.text = currency.format(widget.total) ?? '0';
+      // txtDiscountType.text = _discountType ?? '0';
+      // txtDiscount.text = _discount.toStringAsFixed(1) ?? '0';
+      // txtTotalNet.text = _total.toStringAsFixed(1) ?? '0';
+    });
     final TextTheme textTheme = Theme
         .of(context)
         .textTheme;
@@ -42,7 +110,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                 Flexible(
                     child: ListTile(
                       title: TextFormField(
-                        initialValue: '',
+                        controller: txtGoodName,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:
@@ -79,7 +147,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtGoodCode,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -122,7 +190,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtQty,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -151,7 +219,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtPrice,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -180,7 +248,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtTotal,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -209,7 +277,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtTotal,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -246,7 +314,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      controller: txtDiscount,
                       textAlign: TextAlign.right,
                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
@@ -285,7 +353,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
                   child: ListTile(
                     title: TextFormField(
                       readOnly: true,
-                      initialValue: '',
+                      controller: txtTotalNet,
                       textAlign: TextAlign.right,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -372,7 +440,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
             Row(
               children: [
                 SizedBox(
-                  width: 115,
+                  width: 20,
                 ),
 
                 Expanded(
@@ -412,7 +480,7 @@ class _ItemListDetailsState extends State<ItemListDetails> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text(widget.item.title)),
+        title: Center(child: Text(widget.product.goodName2)),
       ),
       body: ListView(children: [
         Center(child: content),

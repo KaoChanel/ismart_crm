@@ -7,6 +7,7 @@ import 'saleOrder.dart';
 import 'containerCustomer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:ismart_crm/models/customer.dart';
+import 'package:ismart_crm/models/product.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
 
@@ -95,10 +96,20 @@ class DashboardPageState extends State<DashboardPage> {
   Future<void> getCustomer() async{
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.employee.empId}';
-    var response = await http.get(strUrl, headers: {'Content-Type': 'application/json'});
+    var response = await http.get(strUrl);
 
     setState(() {
-      globals.allCustomer = customerFromJson(utf8.decode(response.bodyBytes));
+      globals.allCustomer = customerFromJson(response.body);
+    });
+  }
+
+  Future<void> getProduct() async{
+    String strUrl =
+        '${globals.publicAddress}/api/product';
+    var response = await http.get(strUrl);
+
+    setState(() {
+      globals.allProduct = productFromJson(response.body);
     });
   }
 
@@ -107,6 +118,7 @@ class DashboardPageState extends State<DashboardPage> {
     // TODO: implement initState
     super.initState();
     getCustomer();
+    getProduct();
   }
 
   @override

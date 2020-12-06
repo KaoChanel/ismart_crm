@@ -49,6 +49,8 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
       txtCustTaxId.text = widget.customer?.taxId;
       //txtCreditType.text = widget.customer?.typ;
       txtCreditDays.text = widget.customer?.creditDays.toString();
+
+      print('setState Customer...');
     });
 
     final TextTheme textTheme = Theme.of(context).textTheme;
