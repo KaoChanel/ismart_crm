@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:ismart_crm/models/product.dart';
@@ -6,34 +7,35 @@ import 'package:meta/meta.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
+import 'package:ismart_crm/models/product_cart.dart';
 
 class ItemProductDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
-  const ItemProductDetail({
-    @required this.isInTabletLayout,
-    @required this.product,
-    this.goodQty,
-    this.goodPrice,
-    this.total
-  });
+  ItemProductDetail(
+      {@required this.isInTabletLayout,
+      @required this.product,
+      @required this.price,
+      this.quantity,
+      this.total});
 
   final bool isInTabletLayout;
   final Product product;
-  final goodQty;
-  final goodPrice;
-  final total;
+  final double price;
+  final double quantity;
+  final double total;
 
   @override
   _ItemProductDetailState createState() => _ItemProductDetailState();
 }
+
 class _ItemProductDetailState extends State<ItemProductDetail> {
   final currency = new NumberFormat("#,##0.00", "en_US");
   bool _isFreeProduct = false;
-  double _goodQty = 0;
-  double _discount;
-  String _discountType;
-  double _goodPrice = 0;
-  double _total = 0;
+  double _goodQty;
+  double _totalAmount;
+  double _discount = 0;
+  String _discountType = 'THB';
+  double _totalNet = 0;
   TextEditingController txtGoodName = TextEditingController();
   TextEditingController txtGoodCode = TextEditingController();
   TextEditingController txtQty = TextEditingController();
@@ -42,13 +44,6 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   TextEditingController txtDiscount = TextEditingController();
   TextEditingController txtTotal = TextEditingController();
   TextEditingController txtTotalNet = TextEditingController();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getPrice();
-  }
 
   @override
   void dispose() {
@@ -61,38 +56,99 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     txtDiscountType.dispose();
     txtDiscount.dispose();
     txtTotal.dispose();
+    txtTotalNet.dispose();
   }
 
-  Future<void> getPrice() async {
-    var response = await http.get('${globals.publicAddress}/api/product/${widget.product?.goodCode}/$_goodQty');
-    Map values = json.decode(response.body);
-    //print('Price / Unit: '+values['price']+'/n Total: '+values['total']);
+  void setSelectedItem() {
     setState(() {
-      _goodPrice = double.parse(values['price'].toString());
-      txtPrice.text = _goodPrice.toStringAsFixed(2) ?? '0';
-      print('Price / Unit: '+_goodPrice.toString()+'/n Total: '+values['total'].toString());
+      if (widget.product?.goodCode == null) {
+        _goodQty = 0;
+      }
+      else {
+        if (globals.editingProductCart.goodCode == widget.product?.goodCode) {
+          _goodQty = widget.quantity;
+        }
+        else if(txtGoodCode.text != widget.product?.goodCode){
+          _goodQty = 1;
+        }
+      }
+
+      txtGoodCode.text = widget.product?.goodCode;
+      txtGoodName.text = widget.product?.goodName1;
+      // txtQty.text = currency.format(_goodQty) ?? '0.00';
+      // txtPrice.text = currency.format(widget.price) ?? '0.00';
+      // txtTotal.text = currency.format(_totalAmount) ?? '0.00';
+      // txtDiscount.text = currency.format(_discount) ?? '0.00';
+      // txtTotalNet.text = currency.format(_totalNet) ?? '0.00';
     });
-    //return values['price'];
+  }
+
+  void calculatedPrice(double _quantity) {
+    setState(() {
+      _goodQty = _quantity;
+      _totalAmount = widget.price * _goodQty;
+
+      if (_discountType == 'PER') {
+        //_discount = _total - (_total * _discount / 100);
+      } else {
+        //_discount = _total - _discount;
+      }
+
+      _totalNet = _totalAmount - _discount;
+      txtQty.text = currency.format(_goodQty) ?? '0';
+      txtPrice.text = currency.format(widget.price) ?? '0';
+      txtTotal.text = currency.format(_totalAmount) ?? '0';
+      txtDiscount.text = currency.format(_discount) ?? '0';
+      txtTotalNet.text = currency.format(_totalNet) ?? '0';
+      print('Price / Unit: ' +
+          widget.price.toString() +
+          ' Total: ' +
+          _totalNet.toString());
+      print('Quantity: ' + _goodQty.toString());
+    });
+  }
+
+  void addProductToCart() {
+    int row = 1;
+    if(globals.productCart != null){
+      row = globals.productCart.toList().length + 1;
+    }
+
+    if(globals.editingProductCart != null){
+      // int startIndex = globals.productCart.indexWhere((element) => element.rowIndex == globals.editingProductCart.rowIndex);
+      // globals.productCart.replaceRange(startIndex - 1, startIndex+1, [globals.editingProductCart]);
+      // print('Updated: ' + globals.editingProductCart.goodName1);
+    }
+    else{
+      ProductCart order = new ProductCart()
+        ..productCartId = UniqueKey().toString()
+        ..rowIndex = row
+        ..goodId = widget.product.goodId
+        ..goodCode = widget.product.goodCode
+        ..goodName1 = widget.product.goodName1
+        ..mainGoodUnitId = widget.product.mainGoodUnitId
+        ..goodQty = _goodQty
+        ..goodPrice = widget.price
+        ..discount = _discount
+        ..goodAmount = _totalNet
+        ..isFree = _isFreeProduct;
+
+      print('Add: ' + order.goodName1);
+      globals.productCart.add(order);
+    }
+
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    setState(() {
-      //getPrice();
-      txtGoodCode.text = widget.product?.goodCode;
-      txtGoodName.text = widget.product?.goodName1;
-      txtQty.text = currency.format(widget.goodQty) ?? '1';
-      txtPrice.text = currency.format(widget.goodPrice) ?? '0';
-      txtTotal.text = currency.format(widget.total) ?? '0';
-      // txtDiscountType.text = _discountType ?? '0';
-      // txtDiscount.text = _discount.toStringAsFixed(1) ?? '0';
-      // txtTotalNet.text = _total.toStringAsFixed(1) ?? '0';
-    });
-    final TextTheme textTheme = Theme
-        .of(context)
-        .textTheme;
-    final Widget content = ListView(
-      children: [
+    setSelectedItem();
+    calculatedPrice(_goodQty);
+    print('Qty: ' + _goodQty.toString());
+
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final Widget content = SingleChildScrollView(
+      child:
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -105,21 +161,22 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('ชื่อสินค้า',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                     child: ListTile(
-                      title: TextFormField(
-                        controller: txtGoodName,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
+                  title: TextFormField(
+                    readOnly: true,
+                    //enabled: false,
+                    controller: txtGoodName,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                          // floatingLabelBehavior: FloatingLabelBehavior.always,
-                          labelText: "ชื่อสินค้า",
-                        ),
-                      ),
-                    )),
+                      // floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelText: "ชื่อสินค้า",
+                    ),
+                  ),
+                )),
                 ElevatedButton(
                     onPressed: () {},
                     child: Text(
@@ -127,7 +184,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       style: TextStyle(fontSize: 18),
                     ),
                     style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                        ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
               ],
             ),
 
@@ -140,38 +197,35 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('รหัสสินค้า',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 4,
                   child: ListTile(
                     //
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtGoodCode,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "รหัสสินค้า",
                       ),
                     ),
                   ),
                 ),
-
                 Flexible(
-                  flex: 2,
-                  child:
-                CheckboxListTile(
-                  value: _isFreeProduct,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _isFreeProduct = value;
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
-                  title: Text('สินค้าแถม ?'),
-                )
-                )
+                    flex: 2,
+                    child: CheckboxListTile(
+                      value: _isFreeProduct,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isFreeProduct = value;
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text('สินค้าแถม ?'),
+                    ))
               ],
             ),
 
@@ -184,17 +238,27 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('จำนวน',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   child: ListTile(
                     //
                     title: TextFormField(
                       controller: txtQty,
+                      onChanged: (value) {
+                        //txtQty..text = value..selection = TextSelection.collapsed(offset: 0);
+                        calculatedPrice(double.parse(value));
+                      },
+                      // onEditingComplete: (value){
+                      //   setState(() {
+                      //     calculatedPrice(double.parse(value));
+                      //   });
+                      // },
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         //floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: "จำนวน",
                       ),
@@ -213,8 +277,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('ราคา / หน่วย',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -223,7 +286,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "ราคา / หน่วย",
                       ),
                     ),
@@ -241,18 +304,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('ราคา',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
                     //
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtTotal,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "ราคา",
                       ),
                     ),
@@ -270,18 +333,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('รวมราคา',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
                     //
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtTotal,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "รวมราคา",
                       ),
                     ),
@@ -294,7 +357,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       style: TextStyle(fontSize: 18),
                     ),
                     style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                        ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
               ],
             ),
 
@@ -307,8 +370,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('ส่วนลด',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -316,13 +378,20 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     title: TextFormField(
                       controller: txtDiscount,
                       textAlign: TextAlign.right,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "ส่วนลด",
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          _discount = double.parse(value);
+                          calculatedPrice(_goodQty);
+                        });
+                      },
                     ),
                   ),
                 ),
@@ -333,7 +402,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       style: TextStyle(fontSize: 18),
                     ),
                     style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                        ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
               ],
             ),
 
@@ -346,8 +415,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('รวมสุทธิ',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -358,7 +426,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "รวมสุทธิ",
                       ),
                     ),
@@ -376,8 +444,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('Promotion Code',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -386,23 +453,22 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "Promotion Code",
                       ),
                     ),
                   ),
                 ),
                 ElevatedButton(
-                    onPressed: () {
-
-                    },
+                    onPressed: () {},
                     //icon: Icon(Icons.),
                     child: Text(
                       'Coupon',
                       style: TextStyle(fontSize: 18),
                     ),
-                    style:
-                    ElevatedButton.styleFrom(padding: EdgeInsets.all(12), primary: Colors.deepOrangeAccent)),
+                    style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.all(12),
+                        primary: Colors.deepOrangeAccent)),
               ],
             ),
 
@@ -415,8 +481,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     width: 100,
                     child: Text('หมายเหตุสินค้า',
                         textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))
-                ),
+                        style: TextStyle(fontSize: 18))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
@@ -425,7 +490,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                         labelText: "หมายเหตุสินค้า",
                       ),
                     ),
@@ -442,18 +507,23 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                 SizedBox(
                   width: 20,
                 ),
-
                 Expanded(
-                  flex: 6,
-                  child: ElevatedButton.icon(
-                    onPressed: (){
-
-                    },
-                    style: ElevatedButton.styleFrom(primary: Colors.green, padding: EdgeInsets.only(top:15,bottom: 15)),
-                    label: Text('เพิ่มรายการสั่ง', style: TextStyle(fontSize: 22),),
-                    icon: Icon(Icons.add_circle_outline, size: 30,)
-                  )
-                ),
+                    flex: 6,
+                    child: ElevatedButton.icon(
+                        onPressed: () {
+                          addProductToCart();
+                        },
+                        style: ElevatedButton.styleFrom(
+                            primary: Colors.green,
+                            padding: EdgeInsets.only(top: 15, bottom: 15)),
+                        label: Text(
+                          'เพิ่มรายการสั่ง',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        icon: Icon(
+                          Icons.add_circle_outline,
+                          size: 30,
+                        ))),
               ],
             ),
 
@@ -471,7 +541,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
             // ),
           ],
         )
-      ],
+      ,
     );
 
     if (widget.isInTabletLayout) {

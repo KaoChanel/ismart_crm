@@ -203,6 +203,8 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
             onPressed: () {
               setState(() {
                 globals.customer = _selectedItem;
+                globals.selectedShipto = globals.allShipto.firstWhere((element) => element.custId == globals.customer?.custId);
+                print(globals.selectedShipto.shiptoAddr1);
               });
 
               Navigator.pop(context);

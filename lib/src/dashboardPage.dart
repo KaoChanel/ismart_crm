@@ -8,6 +8,7 @@ import 'containerCustomer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:ismart_crm/models/customer.dart';
 import 'package:ismart_crm/models/product.dart';
+import 'package:ismart_crm/models/shipto.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
 
@@ -55,12 +56,12 @@ Card dashboardCard(String title, String path) {
           ),
           //SizedBox(height: 5.0),
           Container(
-              color: Colors.blueAccent,
+              color: Colors.lightGreen,
               padding: EdgeInsets.only(bottom: 6, top: 3),
               child: Center(
                 child: new Text(title,
                     style: new TextStyle(
-                        fontSize: 16.0,
+                        fontSize: 18.0,
                         fontWeight: FontWeight.bold,
                         height: 1.5,
                         color: Colors.white)),
@@ -113,16 +114,45 @@ class DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  Future<void> getShipto() async{
+    try {
+      String strUrl =
+          '${globals.publicAddress}/api/shipto';
+
+      var response = await http.get(strUrl);
+
+      setState(() {
+        globals.allShipto = shiptoFromJson(response.body);
+      });
+    }
+    on FormatException{
+      showAboutDialog(context: context,
+          applicationName: 'Exception',
+          applicationIcon: Icon(Icons.error_outline),
+          children:[
+            Text('Format Exception')
+          ]);
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getCustomer();
     getProduct();
+    getShipto();
+    print('initState !!');
   }
 
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      txtCustomer.text = globals.customer?.custName;
+      // globals.selectedShipto = globals.allShipto?.firstWhere((element) => element.custId == globals.customer?.custId);
+      // print(globals.customer?.custId.toString());
+      // print(globals.selectedShipto?.shiptoAddr1);
+    });
     return Scaffold(
       body: SafeArea(
           child: ListView(
@@ -160,10 +190,8 @@ class DashboardPageState extends State<DashboardPage> {
                           Navigator.push(
                               context,
                               CupertinoPageRoute(
-                                  builder: (context) => ContainerCustomer())).then((value) {
-                            setState(() {
-                              txtCustomer.text = globals.customer?.custName;
-                            });
+                                  builder: (context) => ContainerCustomer())
+                          ).then((value) {setState(() {});
                           });
                         },
                       )),

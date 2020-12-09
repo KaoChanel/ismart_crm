@@ -20,7 +20,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const routeName = '/loginPage';
 
   User _user;
   Company compValue;

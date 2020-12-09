@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 class ProductCart {
   ProductCart({
+    this.rowIndex,
     this.productCartId,
     this.goodId,
     this.goodCode,
@@ -27,7 +28,8 @@ class ProductCart {
     this.isFree,
   });
 
-  int productCartId;
+  int rowIndex;
+  String productCartId;
   int goodId;
   String goodCode;
   String goodName1;

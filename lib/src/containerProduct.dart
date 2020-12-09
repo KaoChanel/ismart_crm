@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/models/product.dart';
+import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:http/http.dart' as http;
 
@@ -19,31 +20,60 @@ import 'item_product_detail.dart';
 //   );
 // }
 
-class MasterDetailContainer extends StatefulWidget {
-  const MasterDetailContainer({ Key key }) : super(key: key);
+class ContainerProduct extends StatefulWidget {
+  //const ContainerProduct({ Key key }) : super(key: key);
+  const ContainerProduct(this.editing_product);
+
+  final ProductCart editing_product;
 
   @override
-  _MasterDetailContainerState createState() => _MasterDetailContainerState();
+  _ContainerProductState createState() => _ContainerProductState();
 }
 
-class _MasterDetailContainerState extends State<MasterDetailContainer> {
+class _ContainerProductState extends State<ContainerProduct> {
   static const int kTabletBreakpoint = 400;
-  double _goodQty = 1;
-  double _discount;
-  String _discountType;
+  double _goodQty = 0;
   double _goodPrice = 0;
   double _total = 0;
+  double _discount = 0;
+  String _discountType;
   Product _selectedItem = globals.selectedProduct;
   List<Product> allProduct = globals.allProduct;
   TextEditingController txtKeyword = new TextEditingController();
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setEditingSelected();
+  }
+
+  void setEditingSelected(){
+    if(widget.editing_product != null ) {
+      setState(() {
+        globals.editingProductCart = widget.editing_product;
+        _selectedItem = allProduct.firstWhere((element) => element.goodCode ==
+            widget.editing_product.goodCode);
+        _goodQty = globals.editingProductCart.goodQty;
+        _goodPrice = globals.editingProductCart.goodPrice;
+        _discount = globals.editingProductCart.discount;
+        _total = globals.editingProductCart.goodAmount;
+
+        print(widget.editing_product.goodCode);
+        print(widget.editing_product.goodQty);
+        print(widget.editing_product.goodAmount);
+      });
+    }
+  }
   Future<void> getPrice() async {
-    var response = await http.get('${globals.publicAddress}/api/product/${_selectedItem?.goodCode}/$_goodQty');
+    var response = await http.get('${globals.publicAddress}/api/product/${_selectedItem?.goodCode}/1');
     Map values = json.decode(response.body);
 
     setState(() {
+      _goodQty = 1;
       _goodPrice = double.parse(values['price'].toString());
       _total = double.parse(values['total'].toString());
+
       print('Price / Unit: '+_goodPrice.toString()+' Total: '+values['total'].toString());
     });
   }
@@ -51,6 +81,7 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
   Widget _buildTabletLayout() {
     // For tablets, return a layout that has item listing on the left
     // and item details on the right.
+    //setEditingSelected();
     return Row(
       children: [
         Flexible(
@@ -67,29 +98,20 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
             child: Stack(children: [
               Column(children: <Widget>[
                 Expanded(
-                  flex: 2,
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
+                  flex: 1,
+                  child: ListView(
+                    children: [ TextFormField(
                             controller: txtKeyword,
                             decoration: InputDecoration(
                               hintStyle: TextStyle(fontStyle: FontStyle.italic),
-                              hintText: 'ชื่อลูกค้า, รหัสลูกค้า่',
+                              hintText: 'ชื่อสินค้า, รหัสสินค้า...',
                               border: OutlineInputBorder(),
                             ),
                           ),
-                        ),
                         SizedBox(
                           height: 2,
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: ElevatedButton.icon(
+                        ElevatedButton.icon(
                             onPressed: () {
                               String query = txtKeyword.text;
                               setState(() {
@@ -111,15 +133,14 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
                               style: TextStyle(fontSize: 18),
                             ),
                           ),
-                        ),
-                        Expanded(flex: 2, child: SizedBox(),),
+
+                        //Expanded(flex: 2, child: SizedBox(),),
                       ],
-                    ),
-                    color: Colors.transparent,
+                    //color: Colors.transparent,
                   ),
                 ),
                 Expanded(
-                  flex: 6,
+                  flex: 5,
                   child: ItemProduct(
                     // Instead of pushing a new route here, we update
                     // the currently selected item, which is a part of
@@ -128,8 +149,8 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
                     selectedItem: _selectedItem,
                     itemSelectedCallback: (item) {
                       setState(() {
-                        _selectedItem = item;
-                        getPrice();
+                          _selectedItem = item;
+                          getPrice();
                         // globals.customer = item;
                         print('Item selected: ${item.goodName1}');
                       });
@@ -146,8 +167,8 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
             // The item details just blindly accepts whichever
             // item we throw in its way, just like before.
             product: _selectedItem,
-            goodQty: _goodQty,
-            goodPrice: _goodPrice,
+            quantity: _goodQty,
+            price: _goodPrice,
             total: _total,
             isInTabletLayout: true,
           ),
@@ -169,7 +190,7 @@ class _MasterDetailContainerState extends State<MasterDetailContainer> {
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      //resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Center(child: Text('สั่งสินค้ารายการที่ ', style: GoogleFonts.sarabun(fontSize: 20),)),
       ),
