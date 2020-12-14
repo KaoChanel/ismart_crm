@@ -86,8 +86,9 @@ Widget build(BuildContext context) {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    SizedBox(height: height * .2),
+                    SizedBox(height: height * .1),
                     _title(),
                     SizedBox(height: 20),
                     _emailPasswordWidget(),
@@ -96,6 +97,10 @@ Widget build(BuildContext context) {
                     SizedBox(height: 20),
                     _submitButton(),
                     Container(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 2,
                       padding: EdgeInsets.symmetric(vertical: 10),
                       alignment: Alignment.centerRight,
                       child: Text('Forgot Password ?',
@@ -133,6 +138,7 @@ Widget _entryField(String title, TextEditingController controller,
         TextField(
             controller: controller,
             obscureText: isPassword,
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 fillColor: Color(0xfff3f3f4),
@@ -182,7 +188,7 @@ Widget _submitButton() {
       width: MediaQuery
           .of(context)
           .size
-          .width,
+          .width / 2,
       padding: EdgeInsets.symmetric(vertical: 15),
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -208,6 +214,7 @@ Widget _submitButton() {
 
 Widget _divider() {
   return Container(
+    width: 500,
     margin: EdgeInsets.symmetric(vertical: 10),
     child: Row(
       children: <Widget>[
@@ -298,21 +305,32 @@ Widget _createAccountLabel() {
 
 Widget _title() {
   return Image(
-    image: AssetImage('assets/biosci_logo.png'),
+    height: 200,
+    image: AssetImage('assets/bisgroup-logo.png'),
   );
 }
 
 Widget _emailPasswordWidget() {
-  return Column(
-    children: <Widget>[
-      _entryField("Username", txtUsername),
-      _entryField("Password", txtPassword, isPassword: true),
-    ],
+  return Container(
+    width: MediaQuery
+        .of(context)
+        .size
+        .width / 2,
+    child: Column(
+      children: <Widget>[
+        _entryField("Username", txtUsername),
+        _entryField("Password", txtPassword, isPassword: true),
+      ],
+    ),
   );
 }
 
 Widget _companySelect() {
   return Container(
+      width: MediaQuery
+          .of(context)
+          .size
+          .width / 2,
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

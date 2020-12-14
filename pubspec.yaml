@@ -27,8 +27,12 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.0
+
+  # CONNECTIVITY
   http: ^0.12.2
+
+  # UI
+  cupertino_icons: ^1.0.0
   google_fonts: ^1.1.1
   font_awesome_flutter: ^8.10.0
   double_back_to_close_app: ^1.2.0
@@ -62,6 +66,7 @@ flutter:
     - assets/business_marketing.jpg
     - assets/business_support.jpg
     - assets/business_inventory.jpg
+    - assets/bisgroup_logo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

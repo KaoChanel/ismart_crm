@@ -36,6 +36,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   double _discount = 0;
   String _discountType = 'THB';
   double _totalNet = 0;
+  FocusNode focusQty = FocusNode();
   TextEditingController txtGoodName = TextEditingController();
   TextEditingController txtGoodCode = TextEditingController();
   TextEditingController txtQty = TextEditingController();
@@ -46,9 +47,19 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   TextEditingController txtTotalNet = TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _isFreeProduct = globals.editingProductCart?.isFree ?? false;
+    txtQty = TextEditingController(text: _goodQty.toString());
+    txtQty.selection = new TextSelection(baseOffset: 0, extentOffset: _goodQty.toString().length,);
+  }
+
+  @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    focusQty.dispose();
     txtGoodName.dispose();
     txtGoodCode.dispose();
     txtQty.dispose();
@@ -63,12 +74,15 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     setState(() {
       if (widget.product?.goodCode == null) {
         _goodQty = 0;
-      }
-      else {
-        if (globals.editingProductCart.goodCode == widget.product?.goodCode) {
-          _goodQty = widget.quantity;
-        }
-        else if(txtGoodCode.text != widget.product?.goodCode){
+      } else {
+        if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
+          print('Compare < / Qty = $_goodQty');
+          if (_goodQty == null) {
+            _goodQty = widget.quantity;
+            _discount = globals.editingProductCart?.discount;
+          }
+          //_isFreeProduct = globals.editingProductCart.isFree;
+        } else if (txtGoodCode.text != widget.product?.goodCode) {
           _goodQty = 1;
         }
       }
@@ -83,15 +97,22 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     });
   }
 
-  void calculatedPrice(double _quantity) {
+  void calculatedPrice(double _quantity, double _discountValue) {
     setState(() {
       _goodQty = _quantity;
-      _totalAmount = widget.price * _goodQty;
-
-      if (_discountType == 'PER') {
-        //_discount = _total - (_total * _discount / 100);
+      _discount = _discountValue;
+      if (_isFreeProduct == true) {
+        _totalAmount = 0;
+        _totalNet = 0;
+        _discount = 0;
       } else {
-        //_discount = _total - _discount;
+        _totalAmount = widget.price * _goodQty;
+
+        if (_discountType == 'PER') {
+          //_discount = _total - (_total * _discount / 100);
+        } else {
+          //_discount = _total - _discount;
+        }
       }
 
       _totalNet = _totalAmount - _discount;
@@ -109,17 +130,31 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void addProductToCart() {
-    int row = 1;
-    if(globals.productCart != null){
-      row = globals.productCart.toList().length + 1;
+    int row;
+    if (globals.productCart.length > 0) {
+      print('Product Cart not equal null. ${globals.productCart.length}');
+      row = globals.productCart.length + 1;
     }
 
-    if(globals.editingProductCart != null){
-      // int startIndex = globals.productCart.indexWhere((element) => element.rowIndex == globals.editingProductCart.rowIndex);
-      // globals.productCart.replaceRange(startIndex - 1, startIndex+1, [globals.editingProductCart]);
+    if (globals.editingProductCart != null) {
+      print('globals.editingProductCart != null');
+      int startIndex = globals.productCart.indexWhere(
+          (element) => element.rowIndex == globals.editingProductCart?.rowIndex);
+      globals.productCart[startIndex].goodId = widget.product.goodId;
+      globals.productCart[startIndex].goodCode = widget.product.goodCode;
+      globals.productCart[startIndex].goodName1 = widget.product.goodName1;
+      globals.productCart[startIndex].goodQty = _goodQty;
+      globals.productCart[startIndex].goodPrice = widget.price;
+      globals.productCart[startIndex].discountType = _discountType;
+      globals.productCart[startIndex].discount = _discount;
+      globals.productCart[startIndex].goodAmount = _totalNet;
+      globals.productCart[startIndex].isFree = _isFreeProduct;
+      globals.editingProductCart = null;
+      // List<ProductCart> temp = globals.productCart.where((element) => element.rowIndex == globals.editingProductCart.rowIndex).toList();
+      // print('Index: $startIndex');
+      // globals.productCart.replaceRange(startIndex, startIndex, temp);
       // print('Updated: ' + globals.editingProductCart.goodName1);
-    }
-    else{
+    } else {
       ProductCart order = new ProductCart()
         ..productCartId = UniqueKey().toString()
         ..rowIndex = row
@@ -143,41 +178,42 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   @override
   Widget build(BuildContext context) {
     setSelectedItem();
-    calculatedPrice(_goodQty);
+    calculatedPrice(_goodQty, _discount);
     print('Qty: ' + _goodQty.toString());
 
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Widget content = SingleChildScrollView(
-      child:
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('ชื่อสินค้า',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                    child: ListTile(
-                  title: TextFormField(
-                    readOnly: true,
-                    //enabled: false,
-                    controller: txtGoodName,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                      // floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelText: "ชื่อสินค้า",
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('ชื่อสินค้า',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                  flex: 4,
+                  child: ListTile(
+                    title: TextFormField(
+                      readOnly: true,
+                      //enabled: false,
+                      controller: txtGoodName,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        // floatingLabelBehavior: FloatingLabelBehavior.always,
+                        labelText: "ชื่อสินค้า",
+                      ),
                     ),
-                  ),
-                )),
-                ElevatedButton(
+                  )),
+              Flexible(
+                child: ElevatedButton(
                     onPressed: () {},
                     child: Text(
                       'เช็คสต๊อค',
@@ -185,217 +221,248 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     ),
                     style:
                         ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
-              ],
-            ),
+              ),
+            ],
+          ),
 
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('รหัสสินค้า',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 4,
-                  child: ListTile(
-                    //
-                    title: TextFormField(
-                      readOnly: true,
-                      controller: txtGoodCode,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "รหัสสินค้า",
-                      ),
-                    ),
-                  ),
-                ),
-                Flexible(
-                    flex: 2,
-                    child: CheckboxListTile(
-                      value: _isFreeProduct,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isFreeProduct = value;
-                        });
-                      },
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: Text('สินค้าแถม ?'),
-                    ))
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('จำนวน',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  child: ListTile(
-                    //
-                    title: TextFormField(
-                      controller: txtQty,
-                      onChanged: (value) {
-                        //txtQty..text = value..selection = TextSelection.collapsed(offset: 0);
-                        calculatedPrice(double.parse(value));
-                      },
-                      // onEditingComplete: (value){
-                      //   setState(() {
-                      //     calculatedPrice(double.parse(value));
-                      //   });
-                      // },
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        //floatingLabelBehavior: FloatingLabelBehavior.always,
-                        labelText: "จำนวน",
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('ราคา / หน่วย',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    title: TextFormField(
-                      controller: txtPrice,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ราคา / หน่วย",
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('ราคา',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    //
-                    title: TextFormField(
-                      readOnly: true,
-                      controller: txtTotal,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ราคา",
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('รวมราคา',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    //
-                    title: TextFormField(
-                      readOnly: true,
-                      controller: txtTotal,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "รวมราคา",
-                      ),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      'THB',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style:
-                        ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
-              ],
-            ),
-
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('ส่วนลด',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    //
-                    title: TextFormField(
-                      controller: txtDiscount,
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('รหัสสินค้า',
                       textAlign: TextAlign.right,
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "ส่วนลด",
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _discount = double.parse(value);
-                          calculatedPrice(_goodQty);
-                        });
-                      },
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 4,
+                child: ListTile(
+                  //
+                  title: TextFormField(
+                    readOnly: true,
+                    controller: txtGoodCode,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "รหัสสินค้า",
                     ),
                   ),
                 ),
-                ElevatedButton(
+              ),
+              Flexible(
+                  flex: 2,
+                  child: CheckboxListTile(
+                    value: _isFreeProduct,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isFreeProduct = value;
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text('สินค้าแถม ?'),
+                  ))
+            ],
+          ),
+
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('จำนวน',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 2,
+                child: ListTile(
+                  title: TextFormField(
+                    textAlign: TextAlign.right,
+                    controller: txtQty,
+                    focusNode: focusQty,
+                    onTap: () {
+                      txtQty.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: txtQty.value.text.length);
+                    },
+                    // onChanged: (value) {
+                    //   //txtQty..text = value..selection = TextSelection.collapsed(offset: 0);
+                    //   if(double.tryParse(value) != null){
+                    //     calculatedPrice(double.parse(value));
+                    //   }
+                    // },
+                    onEditingComplete: () {
+                      setState(() {
+                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text));
+                        FocusScope.of(context).unfocus();
+                      });
+                    },
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      //floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelText: "จำนวน",
+                    ),
+                  ),
+                ),
+              ),
+              Spacer()
+            ],
+          ),
+
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('ราคา / หน่วย',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 2,
+                child: ListTile(
+                  title: TextFormField(
+                    controller: txtPrice,
+                    textAlign: TextAlign.right,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "ราคา / หน่วย",
+                    ),
+                  ),
+                ),
+              ),
+              Spacer()
+            ],
+          ),
+
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('ราคา',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 2,
+                child: ListTile(
+                  //
+                  title: TextFormField(
+                    readOnly: true,
+                    controller: txtTotal,
+                    textAlign: TextAlign.right,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "ราคา",
+                    ),
+                  ),
+                ),
+              ),
+              Spacer()
+            ],
+          ),
+
+          // SizedBox(
+          //   height: 10,
+          // ),
+          // Row(
+          //   children: [
+          //     SizedBox(
+          //         width: 130,
+          //         child: Text('รวมราคา',
+          //             textAlign: TextAlign.right,
+          //             style: TextStyle(fontSize: 18))),
+          //     Flexible(
+          //       flex: 4,
+          //       child: ListTile(
+          //         //
+          //         title: TextFormField(
+          //           readOnly: true,
+          //           controller: txtTotal,
+          //           textAlign: TextAlign.right,
+          //           decoration: InputDecoration(
+          //             border: OutlineInputBorder(),
+          //             contentPadding:
+          //                 EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          //             labelText: "รวมราคา",
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //     Flexible(
+          //       child: ElevatedButton(
+          //           onPressed: () {},
+          //           child: Text(
+          //             'บาท',
+          //             style: TextStyle(fontSize: 18),
+          //           ),
+          //           style:
+          //               ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+          //     ),
+          //   ],
+          // ),
+
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('ส่วนลด',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 2,
+                child: ListTile(
+                  //
+                  title: TextFormField(
+                    controller: txtDiscount,
+                    textAlign: TextAlign.right,
+                    onTap: (){
+                      txtDiscount.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: txtDiscount.value.text.length);
+                    },
+                    onEditingComplete: () {
+                      setState(() {
+                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text));
+                        FocusScope.of(context).unfocus();
+                      });
+                    },
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "ส่วนลด",
+                    ),
+                    // onChanged: (value) {
+                    //   setState(() {
+                    //     _discount = double.parse(value);
+                    //     calculatedPrice(_goodQty);
+                    //   });
+                    // },
+                  ),
+                ),
+              ),
+              Flexible(
+                child: ElevatedButton(
                     onPressed: () {},
                     child: Text(
                       '%',
@@ -403,63 +470,73 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     ),
                     style:
                         ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
-              ],
-            ),
+              ),
+            ],
+          ),
 
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('รวมสุทธิ',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    title: TextFormField(
-                      readOnly: true,
-                      controller: txtTotalNet,
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('รวมสุทธิ',
                       textAlign: TextAlign.right,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "รวมสุทธิ",
-                      ),
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 2,
+                child: ListTile(
+                  title: TextFormField(
+                    readOnly: true,
+                    controller: txtTotalNet,
+                    textAlign: TextAlign.right,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "รวมสุทธิ",
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+              Flexible(
+                child: Text(
+                  'บาท',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20),
+                ),
+              ),
+            ],
+          ),
 
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('Promotion Code',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    title: TextFormField(
-                      initialValue: '',
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "Promotion Code",
-                      ),
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('Promotion   Code',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 2,
+                child: ListTile(
+                  title: TextFormField(
+                    initialValue: '',
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "Promotion Code",
                     ),
                   ),
                 ),
-                ElevatedButton(
+              ),
+              Flexible(
+                flex: 1,
+                child: ElevatedButton(
                     onPressed: () {},
                     //icon: Icon(Icons.),
                     child: Text(
@@ -469,79 +546,73 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.all(12),
                         primary: Colors.deepOrangeAccent)),
-              ],
-            ),
+              ),
+            ],
+          ),
 
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: Text('หมายเหตุสินค้า',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontSize: 18))),
-                Flexible(
-                  flex: 6,
-                  child: ListTile(
-                    title: TextFormField(
-                      initialValue: '',
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: "หมายเหตุสินค้า",
-                      ),
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                  width: 130,
+                  child: Text('หมายเหตุ     สินค้า',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 18))),
+              Flexible(
+                flex: 6,
+                child: ListTile(
+                  title: TextFormField(
+                    initialValue: '',
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: "หมายเหตุสินค้า",
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
 
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 20,
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: ElevatedButton.icon(
+                      onPressed: () {
+                        addProductToCart();
+                      },
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.green,
+                          padding: EdgeInsets.only(top: 15, bottom: 15)),
+                      label: Text(
+                        widget.product == null ? 'เพิ่มรายการสินค้า' : 'บันทึกการแก้ไข',
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      icon: Icon(
+                        widget.product == null ? Icons.add_circle_outline : Icons.edit,
+                        size: 30,
+                      )
+                  ),
                 ),
-                Expanded(
-                    flex: 6,
-                    child: ElevatedButton.icon(
-                        onPressed: () {
-                          addProductToCart();
-                        },
-                        style: ElevatedButton.styleFrom(
-                            primary: Colors.green,
-                            padding: EdgeInsets.only(top: 15, bottom: 15)),
-                        label: Text(
-                          'เพิ่มรายการสั่ง',
-                          style: TextStyle(fontSize: 22),
-                        ),
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          size: 30,
-                        ))),
-              ],
-            ),
+              ),
+            ],
+          ),
 
-            SizedBox(
-              height: 10,
-            ),
-
-            // Text(
-            //   item?.title ?? 'No item selected!',
-            //   style: textTheme.headline,
-            // ),
-            // Text(
-            //   item?.subtitle ?? 'Please select one on the left.',
-            //   style: textTheme.subhead,
-            // ),
-          ],
-        )
-      ,
+          // Text(
+          //   item?.title ?? 'No item selected!',
+          //   style: textTheme.headline,
+          // ),
+          // Text(
+          //   item?.subtitle ?? 'Please select one on the left.',
+          //   style: textTheme.subhead,
+          // ),
+        ],
+      ),
     );
 
     if (widget.isInTabletLayout) {

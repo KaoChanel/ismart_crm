@@ -22,8 +22,9 @@ import 'item_product_detail.dart';
 
 class ContainerProduct extends StatefulWidget {
   //const ContainerProduct({ Key key }) : super(key: key);
-  const ContainerProduct(this.editing_product);
+  const ContainerProduct(this.title, this.editing_product);
 
+  final String title;
   final ProductCart editing_product;
 
   @override
@@ -48,25 +49,28 @@ class _ContainerProductState extends State<ContainerProduct> {
     setEditingSelected();
   }
 
-  void setEditingSelected(){
-    if(widget.editing_product != null ) {
+  void setEditingSelected() {
+    if (widget.editing_product != null) {
       setState(() {
         globals.editingProductCart = widget.editing_product;
-        _selectedItem = allProduct.firstWhere((element) => element.goodCode ==
-            widget.editing_product.goodCode);
+        _selectedItem = allProduct.firstWhere(
+            (element) => element.goodCode == widget.editing_product.goodCode);
         _goodQty = globals.editingProductCart.goodQty;
         _goodPrice = globals.editingProductCart.goodPrice;
         _discount = globals.editingProductCart.discount;
         _total = globals.editingProductCart.goodAmount;
 
         print(widget.editing_product.goodCode);
-        print(widget.editing_product.goodQty);
+        print('Editing Qty: ${globals.editingProductCart.goodQty}');
+        print('Editing GoodQty: $_goodQty');
         print(widget.editing_product.goodAmount);
       });
     }
   }
+
   Future<void> getPrice() async {
-    var response = await http.get('${globals.publicAddress}/api/product/${_selectedItem?.goodCode}/1');
+    var response = await http.get(
+        '${globals.publicAddress}/api/product/${_selectedItem?.goodCode}/1');
     Map values = json.decode(response.body);
 
     setState(() {
@@ -74,7 +78,10 @@ class _ContainerProductState extends State<ContainerProduct> {
       _goodPrice = double.parse(values['price'].toString());
       _total = double.parse(values['total'].toString());
 
-      print('Price / Unit: '+_goodPrice.toString()+' Total: '+values['total'].toString());
+      print('Price / Unit: ' +
+          _goodPrice.toString() +
+          ' Total: ' +
+          values['total'].toString());
     });
   }
 
@@ -84,7 +91,7 @@ class _ContainerProductState extends State<ContainerProduct> {
     //setEditingSelected();
     return Row(
       children: [
-        Flexible(
+        Expanded(
           flex: 2,
           child: Container(
             decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -95,69 +102,57 @@ class _ContainerProductState extends State<ContainerProduct> {
                 offset: Offset(0, 3), // changes position of shadow
               ),
             ]),
-            child: Stack(children: [
-              Column(children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: ListView(
-                    children: [ TextFormField(
-                            controller: txtKeyword,
-                            decoration: InputDecoration(
-                              hintStyle: TextStyle(fontStyle: FontStyle.italic),
-                              hintText: 'ชื่อสินค้า, รหัสสินค้า...',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        SizedBox(
-                          height: 2,
-                        ),
-                        ElevatedButton.icon(
-                            onPressed: () {
-                              String query = txtKeyword.text;
-                              setState(() {
-                                allProduct = globals.allProduct
-                                    .where((x) =>
-                                x.goodName1
-                                    .toLowerCase()
-                                    .contains(query) ||
-                                    x.goodCode
-                                        .toLowerCase()
-                                        .contains(query))
-                                    .toList();
-                              });
-                            },
-                            //style: ButtonStyle(padding:),
-                            icon: Icon(Icons.search),
-                            label: Text(
-                              'ค้นหาสินค้า',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
+            child: Column(children: <Widget>[
+              TextFormField(
+                controller: txtKeyword,
+                decoration: InputDecoration(
+                  hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                  hintText: 'ชื่อสินค้า, รหัสสินค้า...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
 
-                        //Expanded(flex: 2, child: SizedBox(),),
-                      ],
-                    //color: Colors.transparent,
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    String query = txtKeyword.text;
+                    setState(() {
+                      allProduct = globals.allProduct
+                          .where((x) =>
+                              x.goodName1.toLowerCase().contains(query) ||
+                              x.goodCode.toLowerCase().contains(query))
+                          .toList();
+                    });
+                  },
+                  //style: ButtonStyle(padding:),
+                  icon: Icon(Icons.search),
+                  label: Text(
+                    'ค้นหาสินค้า',
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
-                Expanded(
-                  flex: 5,
-                  child: ItemProduct(
-                    // Instead of pushing a new route here, we update
-                    // the currently selected item, which is a part of
-                    // our state now.
-                    allProduct: allProduct,
-                    selectedItem: _selectedItem,
-                    itemSelectedCallback: (item) {
-                      setState(() {
-                          _selectedItem = item;
-                          getPrice();
-                        // globals.customer = item;
-                        print('Item selected: ${item.goodName1}');
-                      });
-                    },
-                  ),
+              ),
+
+              Expanded(
+                flex: 5,
+                child: ItemProduct(
+                  // Instead of pushing a new route here, we update
+                  // the currently selected item, which is a part of
+                  // our state now.
+                  allProduct: allProduct,
+                  selectedItem: _selectedItem,
+                  itemSelectedCallback: (item) {
+                    setState(() {
+                      _selectedItem = item;
+                      getPrice();
+                      // globals.customer = item;
+                      print('Item selected: ${item.goodName1}');
+                    });
+                  },
                 ),
-              ]),
+              ),
             ]),
           ),
         ),
@@ -190,9 +185,13 @@ class _ContainerProductState extends State<ContainerProduct> {
     }
 
     return Scaffold(
-      //resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Center(child: Text('สั่งสินค้ารายการที่ ', style: GoogleFonts.sarabun(fontSize: 20),)),
+        title: Center(
+            child: Text(
+          '${widget.title} ${widget.editing_product?.rowIndex ?? globals.productCart.length + 1}',
+          style: GoogleFonts.sarabun(fontSize: 20),
+        )),
       ),
       body: content,
     );

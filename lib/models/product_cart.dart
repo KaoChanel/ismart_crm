@@ -54,4 +54,25 @@ class ProductCart {
   String discountType;
   bool isFree;
 
+  Map<String, dynamic> toJson() => {
+    "rowIndex": rowIndex == null ? null : rowIndex,
+    "goodId": goodId == null ? null : goodId,
+    "goodCode": goodCode == null ? null : goodCode,
+    "goodName1": goodName1 == null ? null : goodName1,
+    "goodName2": goodName2 == null ? null : goodName2,
+    "goodNameEng1": goodNameEng1 == null ? null : goodNameEng1,
+    "goodNameEng2": goodNameEng2 == null ? null : goodNameEng2,
+    "goodBillName": goodBillName == null ? null : goodBillName,
+    "mainGoodUnitId": mainGoodUnitId == null ? null : mainGoodUnitId,
+    "saleGoodUnitId": saleGoodUnitId,
+    "subGoodUnitId": subGoodUnitId,
+    "buyGoodUnitId": buyGoodUnitId == null ? null : buyGoodUnitId,
+    "vatType": vatType == null ? null : vatType,
+    "goodTypeFlag": goodTypeFlag == null ? null : goodTypeFlag,
+    "goodCateId": goodCateId == null ? null : goodCateId,
+    "inactive": inactive == null ? null : inactive,
+    "goodGroupId": goodGroupId == null ? null : goodGroupId,
+    "goodTypeId": goodTypeId == null ? null : goodTypeId,
+  };
+
 }
