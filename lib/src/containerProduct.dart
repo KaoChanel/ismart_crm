@@ -70,7 +70,7 @@ class _ContainerProductState extends State<ContainerProduct> {
 
   Future<void> getPrice() async {
     var response = await http.get(
-        '${globals.publicAddress}/api/product/${_selectedItem?.goodCode}/1');
+        '${globals.publicAddress}/api/product/${globals.company}/${_selectedItem?.goodCode}/1');
     Map values = json.decode(response.body);
 
     setState(() {

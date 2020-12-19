@@ -36,6 +36,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   double _discount = 0;
   String _discountType = 'THB';
   double _totalNet = 0;
+  String _unitName;
   FocusNode focusQty = FocusNode();
   TextEditingController txtGoodName = TextEditingController();
   TextEditingController txtGoodCode = TextEditingController();
@@ -87,6 +88,10 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         }
       }
 
+      if(widget.product?.mainGoodUnitId != null){
+        _unitName = globals.allGoodsUnit.firstWhere((element) => element.goodUnitId == widget.product.mainGoodUnitId).goodUnitName;
+      }
+
       txtGoodCode.text = widget.product?.goodCode;
       txtGoodName.text = widget.product?.goodName1;
       // txtQty.text = currency.format(_goodQty) ?? '0.00';
@@ -117,7 +122,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
       _totalNet = _totalAmount - _discount;
       txtQty.text = currency.format(_goodQty) ?? '0';
-      txtPrice.text = currency.format(widget.price) ?? '0';
+      txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
       txtTotal.text = currency.format(_totalAmount) ?? '0';
       txtDiscount.text = currency.format(_discount) ?? '0';
       txtTotalNet.text = currency.format(_totalNet) ?? '0';
@@ -130,11 +135,15 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void addProductToCart() {
-    int row;
+    int row = 1;
+    
     if (globals.productCart.length > 0) {
       print('Product Cart not equal null. ${globals.productCart.length}');
-      row = globals.productCart.length + 1;
+      row = globals.productCart.last.rowIndex + 1;
     }
+
+    print('Product Cart Length = ${globals.productCart.length}');
+    print('Row Index = $row');
 
     if (globals.editingProductCart != null) {
       print('globals.editingProductCart != null');
@@ -296,7 +305,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     // },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text));
+                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')));
                         FocusScope.of(context).unfocus();
                       });
                     },
@@ -341,7 +350,13 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                   ),
                 ),
               ),
-              Spacer()
+              Flexible(
+                child: Text(
+                  _unitName ?? '',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
             ],
           ),
 
@@ -590,11 +605,11 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                           primary: Colors.green,
                           padding: EdgeInsets.only(top: 15, bottom: 15)),
                       label: Text(
-                        widget.product == null ? 'เพิ่มรายการสินค้า' : 'บันทึกการแก้ไข',
+                        globals.editingProductCart == null ? 'เพิ่มรายการสินค้า' : 'บันทึกการแก้ไข',
                         style: TextStyle(fontSize: 22),
                       ),
                       icon: Icon(
-                        widget.product == null ? Icons.add_circle_outline : Icons.edit,
+                        globals.editingProductCart == null ? Icons.add_circle_outline : Icons.edit,
                         size: 30,
                       )
                   ),

@@ -40,16 +40,14 @@ class _LoginPageState extends State<LoginPage> {
     print(response.body);
     var decode = jsonDecode(response.body);
 
-    if (decode['empId'] > 0 || decode['empId'] != '0') {
-      setState(() {
-        _user = userFromJson(response.body);
-      });
+    if (decode['empId'] != 0) {
+      _user = userFromJson(response.body);
 
-      String strUrl = '${globals.publicAddress}/api/employees/${_user.empId}';
+      String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
       response = await http.get(strUrl);
-      setState(() {
-        globals.employee = employeeFromJson(response.body);
-      });
+
+      globals.employee = employeeFromJson(response.body);
+      globals.company = company;
 
       Navigator.pushReplacement(
           context,
@@ -180,9 +178,7 @@ Widget _submitButton() {
   return InkWell(
     onTap: () {
       getUser(compValue.compCode, txtUsername.text, txtPassword.text);
-      print(
-          "Username: " + txtUsername?.text + " Password: " + txtPassword?.text);
-      print('After getUser() : $_loginSuccess');
+      print("Username: " + txtUsername?.text + " Password: " + txtPassword?.text);
     },
     child: Container(
       width: MediaQuery
@@ -205,7 +201,7 @@ Widget _submitButton() {
               end: Alignment.centerRight,
               colors: [Color(0xfffbb448), Color(0xfff7892b)])),
       child: Text(
-        'Login',
+        'เข้าสู่ระบบ',
         style: TextStyle(fontSize: 20, color: Colors.white),
       ),
     ),
@@ -318,8 +314,8 @@ Widget _emailPasswordWidget() {
         .width / 2,
     child: Column(
       children: <Widget>[
-        _entryField("Username", txtUsername),
-        _entryField("Password", txtPassword, isPassword: true),
+        _entryField("Username:", txtUsername),
+        _entryField("Password:", txtPassword, isPassword: true),
       ],
     ),
   );
@@ -335,7 +331,7 @@ Widget _companySelect() {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Company',
+              'Company:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
             SizedBox(

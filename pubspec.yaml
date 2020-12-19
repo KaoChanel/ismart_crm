@@ -66,7 +66,7 @@ flutter:
     - assets/business_marketing.jpg
     - assets/business_support.jpg
     - assets/business_inventory.jpg
-    - assets/bisgroup_logo.jpg
+    #- assets/bisgroup_logo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

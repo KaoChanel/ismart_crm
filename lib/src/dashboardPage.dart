@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
+import 'package:ismart_crm/models/goods_unit.dart';
 import 'saleOrder.dart';
 import 'containerCustomer.dart';
 import 'package:flutter/cupertino.dart';
@@ -96,41 +97,63 @@ class DashboardPageState extends State<DashboardPage> {
 
   Future<void> getCustomer() async{
     String strUrl =
-        '${globals.publicAddress}/api/customers/${globals.employee.empId}';
+        '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
     var response = await http.get(strUrl);
 
-    setState(() {
-      globals.allCustomer = customerFromJson(response.body);
-    });
+    globals.allCustomer = customerFromJson(response.body);
   }
 
   Future<void> getProduct() async{
-    String strUrl =
-        '${globals.publicAddress}/api/product';
-    var response = await http.get(strUrl);
-
-    setState(() {
-      globals.allProduct = productFromJson(response.body);
-    });
-  }
-
-  Future<void> getShipto() async{
+    String strUrl;
     try {
-      String strUrl =
-          '${globals.publicAddress}/api/shipto';
-
+      strUrl = '${globals.publicAddress}/api/product/${globals.company}';
       var response = await http.get(strUrl);
 
-      setState(() {
-        globals.allShipto = shiptoFromJson(response.body);
-      });
+      globals.allProduct = productFromJson(response.body);
     }
     on FormatException{
       showAboutDialog(context: context,
-          applicationName: 'Exception',
+          applicationName: 'Get Product Exception',
           applicationIcon: Icon(Icons.error_outline),
           children:[
-            Text('Format Exception')
+            Text('Format Exception: $strUrl')
+          ]);
+    }
+  }
+
+  Future<void> getUnit() async{
+    String strUrl;
+    try {
+      strUrl = '${globals.publicAddress}/api/goodsunit/${globals.company}';
+      var response = await http.get(strUrl);
+
+      globals.allGoodsUnit = goodsUnitFromJson(response.body);
+    }
+    on FormatException{
+      showAboutDialog(context: context,
+          applicationName: 'Get Unit Exception',
+          applicationIcon: Icon(Icons.error_outline),
+          children:[
+            Text('Format Exception: $strUrl')
+          ]);
+    }
+  }
+
+  Future<void> getShipto() async{
+    String strUrl;
+    try {
+      strUrl = '${globals.publicAddress}/api/shipto/${globals.company}';
+      var response = await http.get(strUrl);
+
+      globals.allShipto = shiptoFromJson(response.body);
+    }
+    on FormatException
+    {
+      showAboutDialog(context: context,
+          applicationName: 'Shipto Exception',
+          applicationIcon: Icon(Icons.error_outline),
+          children:[
+            Text('Format Exception: $strUrl')
           ]);
     }
   }
@@ -139,10 +162,12 @@ class DashboardPageState extends State<DashboardPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getCustomer();
-    getProduct();
-    getShipto();
-    print('initState !!');
+    if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null){
+      getCustomer();
+      getProduct();
+      getUnit();
+      getShipto();
+    }
   }
 
   @override

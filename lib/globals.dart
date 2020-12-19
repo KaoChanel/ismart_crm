@@ -4,10 +4,12 @@ import 'package:ismart_crm/models/customer.dart';
 import 'package:ismart_crm/models/product.dart';
 import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/models/shipto.dart';
+import 'models/goods_unit.dart';
 
 enum DiscountType{ THB, PER }
 
 String publicAddress = 'http://103.225.27.252';
+String company;
 bool enableEditPrice = false;
 DiscountType discountType = DiscountType.THB;
 double discountBill = 0;
@@ -20,5 +22,6 @@ Product selectedProduct;
 List<Product> allProduct;
 ProductCart editingProductCart;
 List<ProductCart> productCart = new List<ProductCart>();
+List<GoodsUnit> allGoodsUnit = new List<GoodsUnit>();
 
 

@@ -8,7 +8,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/models/shipto.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'containerProduct.dart';
+import 'package:http/http.dart' as http;
+import 'package:ismart_crm/api_service.dart';
 import 'package:ismart_crm/globals.dart' as globals;
+import 'package:ismart_crm/models/saleOrder_header.dart';
+import 'package:ismart_crm/models/saleOrder_detail.dart';
 
 dynamic _selectDate(BuildContext context, DateTime _selectedDate,
     TextEditingController _textEditController) async {
@@ -104,6 +108,7 @@ class SaleOrder extends StatefulWidget {
 }
 
 class _SaleOrderState extends State<SaleOrder> {
+  ApiService _apiService = new ApiService();
   final currency = new NumberFormat("#,##0.00", "en_US");
   double vat = 0.7;
   double priceTotal = 0;
@@ -174,7 +179,7 @@ class _SaleOrderState extends State<SaleOrder> {
   }
 
   void calculateSummary(){
-    print(globals.productCart.length.toString());
+    //print(globals.productCart.length.toString());
     if(globals.productCart.length > 0){
       discountTotal = 0; priceTotal = 0;
       globals.productCart.forEach((element) {discountTotal += element.discount;});
@@ -207,9 +212,12 @@ class _SaleOrderState extends State<SaleOrder> {
   void setSelectedShipto() {
     setState(() {
       txtShiptoProvince.text = globals.selectedShipto.province ?? '';
-      txtShiptoAddress.text = globals.selectedShipto.shiptoAddr1 ??
-          '' + ' ' + globals.selectedShipto?.shiptoAddr2 ??
-          '';
+      txtShiptoAddress.text = '${globals.selectedShipto.shiptoAddr1 ?? ''} '
+          '${globals.selectedShipto?.shiptoAddr2 ?? ''} '
+          '${globals.selectedShipto?.district ?? ''} '
+          '${globals.selectedShipto?.amphur ?? ''} '
+          '${globals.selectedShipto?.province ?? ''} '
+          '${globals.selectedShipto?.postcode ?? ''}';
       txtShiptoRemark.text = globals.selectedShipto.remark ?? '';
     });
   }
@@ -220,7 +228,7 @@ class _SaleOrderState extends State<SaleOrder> {
         .toList();
     print(shiptoList);
     List<Widget> list = new List<Widget>();
-    for (var i = 0; i < shiptoList.length; i++) {
+    for (var i = 0; i < shiptoList?.length; i++) {
       list.add(ListTile(
         title: Text(shiptoList[i].shiptoAddr1),
         //subtitle: Text(item?.custCode),
@@ -236,6 +244,77 @@ class _SaleOrderState extends State<SaleOrder> {
       ));
     }
     return ListView(children: list);
+  }
+
+  Future<void> postSaleOrder() async {
+    try
+    {
+      SaleOrderHeader header = new SaleOrderHeader();
+      List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
+
+      /// document header.
+      header.soid = 0;
+      header.docuNo = txtDocuNo?.text ?? '';
+      header.docuType = 104;
+      header.docuDate = _docuDate;
+      header.goodType = '1';
+      header.docuStatus = 'Y';
+      header.isTransfer = 'N';
+      header.remark = txtRemark?.text ?? '';
+      /// employee information.
+      header.empId = globals.employee.empId;
+      header.deptId = globals.employee.deptId;
+      /// customer information.
+      header.custId = globals.customer.custId;
+      header.custName = globals.customer.custName;
+      header.creditDays = globals.customer.creditDays;
+      /// cost summary.
+      header.sumGoodAmnt = netTotal;
+      header.billAftrDiscAmnt = netTotal;
+      header.netAmnt = netTotal;
+      header.billDiscAmnt = discountBill;
+      /// shipment to customer.
+      header.shipToCode = globals.selectedShipto.shiptoCode;
+      header.transpId = globals.selectedShipto.transpId;
+      header.transpAreaId = globals.selectedShipto.transpAreaId;
+      header.shipToAddr1 = globals.selectedShipto.shiptoAddr1;
+      header.shipToAddr2 = globals.selectedShipto.shiptoAddr2;
+      header.district = globals.selectedShipto.district;
+      header.amphur = globals.selectedShipto.amphur;
+      header.province = globals.selectedShipto.province;
+      header.postCode = globals.selectedShipto.postcode;
+
+      bool isSuccess = false;
+      _apiService.addSaleOrderHeader(header).then((value) {
+        isSuccess = value;
+      });
+      print('Add result: $isSuccess');
+      if(isSuccess) {
+        globals.productCart.map((e) {
+          SaleOrderDetail obj = new SaleOrderDetail();
+          obj.soid = header.soid;
+          obj.listNo = e.rowIndex;
+          obj.docuType = 104;
+          obj.goodId = e.goodId;
+          obj.goodCode = e.goodCode;
+          obj.goodUnitId2 = e.mainGoodUnitId;
+          obj.goodQty2 = e.goodQty;
+          obj.goodPrice2 = e.goodPrice;
+          obj.goodAmnt = e.goodAmount;
+          obj.goodDiscAmnt = e.discount;
+          detail.add(obj);
+        });
+      }
+    }
+    catch(e){
+      showAboutDialog(
+          context: context,
+          applicationName: 'Post Sale Order Exception',
+          applicationIcon: Icon(Icons.error_outline),
+          children:[
+            Text(e),
+          ]);
+    }
   }
 
 // Show Dialog function
@@ -410,7 +489,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                   (element) => element.rowIndex == e.rowIndex);
                               globals.productCart.forEach((element) {element.rowIndex = index++;});
                               globals.editingProductCart = null;
-                              print(globals.productCart.length.toString());
+                              print(globals.productCart?.length.toString());
                               setState(() {});
                             },
                             child: Icon(Icons.delete_forever),
@@ -446,9 +525,10 @@ class _SaleOrderState extends State<SaleOrder> {
   }
 
   Widget build(BuildContext context) {
-    //final key = new GlobalKey<ScaffoldState>();
+
     setSelectedShipto();
     calculateSummary();
+
     return Scaffold(
         appBar: AppBar(
           title: Center(
@@ -944,14 +1024,17 @@ class _SaleOrderState extends State<SaleOrder> {
                   Container(
                       margin: EdgeInsets.only(top: 13, left: 30),
                       child: RaisedButton.icon(
-                        onPressed: () => {
+                        onPressed: ()  {
+                          globals.editingProductCart = null;
                           Navigator.push(
                               context,
                               CupertinoPageRoute(
                                   builder: (context) =>
-                                      ContainerProduct('สั่งรายการสินค้า ลำดับที่ ', null))).then((value) {
+                                      ContainerProduct('สั่งรายการสินค้า ลำดับที่ ', null))).then((value)
+                          {
+                            globals.editingProductCart = null;
                             setState(() {});
-                          })
+                          });
                         },
                         icon: Icon(Icons.add_circle_outline_outlined,
                             color: Colors.white),
@@ -967,11 +1050,14 @@ class _SaleOrderState extends State<SaleOrder> {
                   Container(
                       margin: EdgeInsets.only(top: 13, left: 20),
                       child: RaisedButton.icon(
-                        onPressed: () => {
+                        onPressed: () {
+                        globals.editingProductCart = null;
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ContainerProduct('สั่งรายการสินค้า ลำดับที่ ', null)))
+                                  builder: (context) =>
+                                    ContainerProduct('สั่งรายการสินค้า ลำดับที่ ', null)
+                              ));
                         },
                         icon: Icon(Icons.local_fire_department,
                             color: Colors.white),
@@ -986,11 +1072,12 @@ class _SaleOrderState extends State<SaleOrder> {
                   Container(
                       margin: EdgeInsets.only(top: 13, left: 20),
                       child: RaisedButton.icon(
-                        onPressed: () => {
+                        onPressed: () {
+                          globals.editingProductCart = null;
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ContainerProduct('สั่งรายการสินค้า ลำดับที่ ', null)))
+                                  builder: (context) => ContainerProduct('สั่งรายการสินค้า ลำดับที่ ', null)));
                         },
                         icon: Icon(Icons.list, color: Colors.white),
                         color: Colors.blueAccent,
@@ -1164,7 +1251,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                         onEditingComplete: (){
                                           setState(() {
-                                            globals.discountBill = double.tryParse(txtDiscountBill.text);
+                                            globals.discountBill = double.tryParse(txtDiscountBill.text.replaceAll(',', ''));
                                           });
                                           FocusScope.of(context).unfocus();
                                         },
@@ -1332,7 +1419,8 @@ class _SaleOrderState extends State<SaleOrder> {
                       padding: const EdgeInsets.only(top: 30.0),
                       child: ElevatedButton(
                           onPressed: (){
-                            print(jsonEncode(globals.productCart));
+                            postSaleOrder();
+                            //print(jsonEncode(globals.productCart));
                           },
                           child: Text('ยืนยันคำสั่งสินค้า', style: TextStyle(fontSize: 20),)
                       ),

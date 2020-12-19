@@ -42,7 +42,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
       //globals.customer = widget.customer;
       txtCustCode.text = widget.customer?.custCode;
       txtCustName.text = widget.customer?.custName;
-      txtAddress.text = '${widget.customer?.custAddr1 ?? ''} ${widget.customer?.custAddr2 ?? ''}';
+      txtAddress.text = '${widget.customer?.custAddr1 ?? ''} ${widget.customer?.custAddr2 ?? ''} ${widget.customer?.district ?? ''} ${widget.customer?.amphur ?? ''} ${widget.customer?.province ?? ''} ${widget.customer?.postCode ?? ''}';
       //txtTel.text = widget.customer?;
       txtCustType.text = widget.customer?.custTypeName;
       txtBranch.text = widget.customer?.brchName;

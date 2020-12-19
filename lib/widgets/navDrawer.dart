@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/src/loginPage.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 class NavDrawer extends StatelessWidget {
   @override
@@ -47,7 +49,18 @@ class NavDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()))},
+            onTap: () {
+              globals.customer = null;
+              globals.allCustomer = null;
+              globals.selectedShipto = null;
+              globals.allShipto = null;
+              globals.selectedProduct = null;
+              globals.productCart = new List<ProductCart>();
+              globals.allProduct = null;
+              globals.editingProductCart = null;
+
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            },
           ),
         ],
       ),

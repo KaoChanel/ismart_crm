@@ -87,7 +87,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
     // and item details on the right.
     return Row(
       children: [
-        Flexible(
+        Expanded(
           flex: 2,
           child: Container(
             decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -98,81 +98,61 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
                 offset: Offset(0, 3), // changes position of shadow
               ),
             ]),
-            child: Stack(children: [
-              Column(children: <Widget>[
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: txtKeyword,
-                            decoration: InputDecoration(
-                              hintStyle: TextStyle(fontStyle: FontStyle.italic),
-                              hintText: 'ชื่อลูกค้า, รหัสลูกค้า, ที่อยู่',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 2,
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: ElevatedButton.icon(
-                              onPressed: () {
-                                String query = txtKeyword.text;
-                                setState(() {
-                                  allCustomer = globals.allCustomer
-                                      .where((x) =>
-                                          x.custName
-                                              .toLowerCase()
-                                              .contains(query) ||
-                                          x.custCode
-                                              .toLowerCase()
-                                              .contains(query) ||
-                                          x.custAddr1
-                                              .toLowerCase()
-                                              .contains(query))
-                                      .toList();
-                                });
-                              },
-                              //style: ButtonStyle(padding:),
-                              icon: Icon(Icons.search),
-                              label: Text(
-                                'ค้นหาลูกค้า',
-                                style: TextStyle(fontSize: 18),
-                              ),
-                            ),
-                        ),
-                        Expanded(flex: 2, child: SizedBox(),),
-                      ],
-                    ),
-                    color: Colors.transparent,
+            child: Column(children: <Widget>[
+              TextFormField(
+                controller: txtKeyword,
+                decoration: InputDecoration(
+                  hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                  hintText: 'ชื่อลูกค้า, รหัสลูกค้า, ที่อยู่',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    String query = txtKeyword.text;
+                    setState(() {
+                      allCustomer = globals.allCustomer
+                          .where((x) =>
+                              x.custName
+                                  .toLowerCase()
+                                  .contains(query) ||
+                              x.custCode
+                                  .toLowerCase()
+                                  .contains(query) ||
+                              x.custAddr1
+                                  .toLowerCase()
+                                  .contains(query))
+                          .toList();
+                    });
+                  },
+                  //style: ButtonStyle(padding:),
+                  icon: Icon(Icons.search),
+                  label: Text(
+                    'ค้นหาลูกค้า',
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
-                Expanded(
-                  flex: 6,
-                  child: ItemCustomer(
-                    // Instead of pushing a new route here, we update
-                    // the currently selected item, which is a part of
-                    // our state now.
-                    allCustomer: allCustomer,
-                    selectedItem: _selectedItem,
-                    itemSelectedCallback: (item) {
-                      setState(() {
-                        _selectedItem = item;
-                        // globals.customer = item;
-                        print('Item selected: ${item.custName}');
-                      });
-                    },
-                  ),
+              ),
+              Expanded(
+                flex: 6,
+                child: ItemCustomer(
+                  // Instead of pushing a new route here, we update
+                  // the currently selected item, which is a part of
+                  // our state now.
+                  allCustomer: allCustomer,
+                  selectedItem: _selectedItem,
+                  itemSelectedCallback: (item) {
+                    setState(() {
+                      _selectedItem = item;
+                      // globals.customer = item;
+                      print('Item selected: ${item.custName}');
+                    });
+                  },
                 ),
-              ]),
+              ),
             ]),
           ),
         ),
@@ -201,11 +181,11 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
         ),
         ElevatedButton.icon(
             onPressed: () {
-              setState(() {
-                globals.customer = _selectedItem;
-                globals.selectedShipto = globals.allShipto.firstWhere((element) => element.custId == globals.customer?.custId);
-                print(globals.selectedShipto.shiptoAddr1);
-              });
+              globals.customer = _selectedItem;
+              globals.selectedShipto = globals.allShipto?.firstWhere(
+                  (element) => element.custId == globals.customer?.custId) ?? null;
+
+              print(globals.selectedShipto.shiptoAddr1);
 
               Navigator.pop(context);
             },

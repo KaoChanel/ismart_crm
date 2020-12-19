@@ -14,6 +14,8 @@ class Employee {
   Employee({
     this.rowId,
     this.empId,
+    this.deptId,
+    this.postId,
     this.empCode,
     this.namePrefix,
     this.empName,
@@ -34,6 +36,8 @@ class Employee {
 
   int rowId;
   int empId;
+  int deptId;
+  int postId;
   String empCode;
   dynamic namePrefix;
   String empName;
@@ -54,6 +58,8 @@ class Employee {
   factory Employee.fromJson(Map<String, dynamic> json) => Employee(
     rowId: json["rowId"] == null ? null : json["rowId"],
     empId: json["empId"] == null ? null : json["empId"],
+    deptId: json["deptId"] == null ? null : json["deptId"],
+    postId: json["postId"] == null ? null : json["postId"],
     empCode: json["empCode"] == null ? null : json["empCode"],
     namePrefix: json["namePrefix"],
     empName: json["empName"] == null ? null : json["empName"],
@@ -75,6 +81,8 @@ class Employee {
   Map<String, dynamic> toJson() => {
     "rowId": rowId == null ? null : rowId,
     "empId": empId == null ? null : empId,
+    "deptId": deptId == null ? null : deptId,
+    "postId": postId == null ? null : postId,
     "empCode": empCode == null ? null : empCode,
     "namePrefix": namePrefix,
     "empName": empName == null ? null : empName,

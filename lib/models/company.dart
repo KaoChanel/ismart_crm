@@ -13,14 +13,26 @@ class Company{
 final companys = <Company>[
   Company(
     compCode: 'BIO',
-    compName: 'BioScience Animal Health Co., Ltd.',
+    compName: 'BIO SCIENCE',
   ),
   Company(
     compCode: 'NIC',
-    compName: 'Nutrition',
+    compName: 'NUTRITION IMPROVEMENT',
+  ),
+  Company(
+    compCode: 'SIS',
+    compName: 'SPECIAL INGREDIENT SERVICE',
+  ),
+  Company(
+    compCode: 'FAITH',
+    compName: 'FAITH',
   ),
   Company(
     compCode: 'PEDEX',
-    compName: 'Pet',
+    compName: 'PEDEX',
+  ),
+  Company(
+    compCode: 'PTK',
+    compName: 'PROTESTKIT',
   ),
 ];

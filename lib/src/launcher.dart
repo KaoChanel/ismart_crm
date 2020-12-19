@@ -6,6 +6,7 @@ import 'dashboardPage.dart';
 import 'reportPage.dart';
 import 'newsPage.dart';
 import 'employee_profile.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 class Launcher extends StatefulWidget {
   @override
@@ -50,7 +51,7 @@ class _LauncherState extends State<Launcher> {
     return Scaffold(
       drawer: NavDrawer(),
       appBar: AppBar(
-        title: Text('Sale CRM'),
+        title: Center(child: Text('Sale CRM (${globals.company})')),
       ),
       body: DoubleBackToCloseApp(
           snackBar: const SnackBar(
