@@ -13,6 +13,7 @@ import 'package:ismart_crm/api_service.dart';
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/models/saleOrder_header.dart';
 import 'package:ismart_crm/models/saleOrder_detail.dart';
+import 'package:rich_alert/rich_alert.dart';
 
 dynamic _selectDate(BuildContext context, DateTime _selectedDate,
     TextEditingController _textEditController) async {
@@ -195,7 +196,14 @@ class _SaleOrderState extends State<SaleOrder> {
     }
 
     priceTotal = priceTotal - discountTotal;
-    priceAfterDiscount = priceTotal - globals.discountBill;
+    if(globals.discountType == globals.DiscountType.PER){
+      double percentDiscount = globals.discountBill / 100;
+      priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
+    }
+    else{
+      priceAfterDiscount = priceTotal - globals.discountBill;
+    }
+
     vatTotal = (priceAfterDiscount * vat) / 100;
     netTotal = priceAfterDiscount + vatTotal;
 
@@ -287,24 +295,26 @@ class _SaleOrderState extends State<SaleOrder> {
       bool isSuccess = false;
       _apiService.addSaleOrderHeader(header).then((value) {
         isSuccess = value;
+        print('Add result: $isSuccess');
+        if(isSuccess) {
+          globals.productCart.map((e) {
+            SaleOrderDetail obj = new SaleOrderDetail();
+            obj.soid = header.soid;
+            obj.listNo = e.rowIndex;
+            obj.docuType = 104;
+            obj.goodId = e.goodId;
+            obj.goodCode = e.goodCode;
+            obj.goodUnitId2 = e.mainGoodUnitId;
+            obj.goodQty2 = e.goodQty;
+            obj.goodPrice2 = e.goodPrice;
+            obj.goodAmnt = e.goodAmount;
+            obj.goodDiscAmnt = e.discount;
+            detail.add(obj);
+          });
+
+          _apiService.addSaleOrderDetail(detail);
+        }
       });
-      print('Add result: $isSuccess');
-      if(isSuccess) {
-        globals.productCart.map((e) {
-          SaleOrderDetail obj = new SaleOrderDetail();
-          obj.soid = header.soid;
-          obj.listNo = e.rowIndex;
-          obj.docuType = 104;
-          obj.goodId = e.goodId;
-          obj.goodCode = e.goodCode;
-          obj.goodUnitId2 = e.mainGoodUnitId;
-          obj.goodQty2 = e.goodQty;
-          obj.goodPrice2 = e.goodPrice;
-          obj.goodAmnt = e.goodAmount;
-          obj.goodDiscAmnt = e.discount;
-          detail.add(obj);
-        });
-      }
     }
     catch(e){
       showAboutDialog(
@@ -528,6 +538,7 @@ class _SaleOrderState extends State<SaleOrder> {
 
     setSelectedShipto();
     calculateSummary();
+    print('Build Sale Order');
 
     return Scaffold(
         appBar: AppBar(
@@ -1236,7 +1247,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                   child: ElevatedButton(
                                       onPressed: (){
                                         showDiscountTypeDialog();
-                                        focusDiscount.requestFocus();
+                                        //focusDiscount.requestFocus();
                                       },
                                       child: setDiscountType()),
                                 ),
@@ -1249,11 +1260,40 @@ class _SaleOrderState extends State<SaleOrder> {
                                         focusNode: focusDiscount,
                                         textAlign: TextAlign.right,
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                        onTap: (){
+                                          txtDiscountBill.selection = TextSelection(
+                                              baseOffset: 0,
+                                              extentOffset: txtDiscountBill.value.text.length);
+                                        },
                                         onEditingComplete: (){
                                           setState(() {
-                                            globals.discountBill = double.tryParse(txtDiscountBill.text.replaceAll(',', ''));
+                                            if(globals.discountType == globals.DiscountType.PER && double.tryParse(txtDiscountBill.text.replaceAll(',', '')) > 100)
+                                            {
+                                              // showDialog(
+                                              //     context: context,
+                                              //   builder: (BuildContext context){
+                                              //       return AlertDialog(
+                                              //         title: Text('แจ้งเตือน'),
+                                              //         content: Text('ใส่ค่าไม่เกิน 100')
+                                              //       );
+                                              //   },
+                                              // );
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return RichAlertDialog( //uses the custom alert dialog
+                                                      alertTitle: richTitle("กรอกตัวเลขได้ไม่เกิน 100"),
+                                                      alertSubtitle: richSubtitle("ส่วนลดเปอร์เซ็นกรอกได้ไม่เกินหนึ่งร้อย"),
+                                                      alertType: RichAlertType.WARNING,
+                                                    );
+                                                  }
+                                              );
+                                            }
+                                            else{
+                                              globals.discountBill = double.tryParse(txtDiscountBill.text.replaceAll(',', ''));
+                                              FocusScope.of(context).unfocus();
+                                            }
                                           });
-                                          FocusScope.of(context).unfocus();
                                         },
                                         decoration: InputDecoration(
                                           border: OutlineInputBorder(),

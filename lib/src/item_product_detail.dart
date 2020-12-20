@@ -292,6 +292,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     textAlign: TextAlign.right,
                     controller: txtQty,
                     focusNode: focusQty,
+                    keyboardType:
+                    TextInputType.numberWithOptions(decimal: true),
                     onTap: () {
                       txtQty.selection = TextSelection(
                           baseOffset: 0,
@@ -309,8 +311,6 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                         FocusScope.of(context).unfocus();
                       });
                     },
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding:

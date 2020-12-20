@@ -12,6 +12,7 @@ import 'package:ismart_crm/models/product.dart';
 import 'package:ismart_crm/models/shipto.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
+import 'package:ismart_crm/api_service.dart';
 
 Widget _menuCard(String _path) {
   return Card(
@@ -93,80 +94,18 @@ class DashboardPage extends StatefulWidget {
 }
 
 class DashboardPageState extends State<DashboardPage> {
+  ApiService _apiService = new ApiService();
   TextEditingController txtCustomer = new TextEditingController();
-
-  Future<void> getCustomer() async{
-    String strUrl =
-        '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
-    var response = await http.get(strUrl);
-
-    globals.allCustomer = customerFromJson(response.body);
-  }
-
-  Future<void> getProduct() async{
-    String strUrl;
-    try {
-      strUrl = '${globals.publicAddress}/api/product/${globals.company}';
-      var response = await http.get(strUrl);
-
-      globals.allProduct = productFromJson(response.body);
-    }
-    on FormatException{
-      showAboutDialog(context: context,
-          applicationName: 'Get Product Exception',
-          applicationIcon: Icon(Icons.error_outline),
-          children:[
-            Text('Format Exception: $strUrl')
-          ]);
-    }
-  }
-
-  Future<void> getUnit() async{
-    String strUrl;
-    try {
-      strUrl = '${globals.publicAddress}/api/goodsunit/${globals.company}';
-      var response = await http.get(strUrl);
-
-      globals.allGoodsUnit = goodsUnitFromJson(response.body);
-    }
-    on FormatException{
-      showAboutDialog(context: context,
-          applicationName: 'Get Unit Exception',
-          applicationIcon: Icon(Icons.error_outline),
-          children:[
-            Text('Format Exception: $strUrl')
-          ]);
-    }
-  }
-
-  Future<void> getShipto() async{
-    String strUrl;
-    try {
-      strUrl = '${globals.publicAddress}/api/shipto/${globals.company}';
-      var response = await http.get(strUrl);
-
-      globals.allShipto = shiptoFromJson(response.body);
-    }
-    on FormatException
-    {
-      showAboutDialog(context: context,
-          applicationName: 'Shipto Exception',
-          applicationIcon: Icon(Icons.error_outline),
-          children:[
-            Text('Format Exception: $strUrl')
-          ]);
-    }
-  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null){
-      getCustomer();
-      getProduct();
-      getUnit();
-      getShipto();
+      _apiService.getCustomer();
+      _apiService.getProduct();
+      _apiService.getUnit();
+      _apiService.getShipto();
     }
   }
 

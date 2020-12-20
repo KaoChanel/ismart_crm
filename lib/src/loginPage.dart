@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> getUser(String company, String username, String password) async {
+    showLoaderDialog(context);
     http.Response response = await http.get(
         '${globals.publicAddress}/login/userloginauthor?_company=$company&username=$username&password=$password');
     print(response.body);
@@ -56,9 +57,25 @@ class _LoginPageState extends State<LoginPage> {
     else {
       showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
     }
-
+    // Navigator.pop(context);
     print(_user);
 }
+
+  showLoaderDialog(BuildContext context){
+    AlertDialog alert=AlertDialog(
+      content: new Row(
+        children: [
+          CircularProgressIndicator(),
+          Container(margin: EdgeInsets.only(left: 7),child:Text("Loading..." )),
+        ],),
+    );
+    showDialog(barrierDismissible: false,
+      context:context,
+      builder:(BuildContext context){
+        return alert;
+      },
+    );
+  }
 
 @override
 Widget build(BuildContext context) {
@@ -177,7 +194,9 @@ showAlertDialog(BuildContext context, String _message) {
 Widget _submitButton() {
   return InkWell(
     onTap: () {
+      // showLoaderDialog(context);
       getUser(compValue.compCode, txtUsername.text, txtPassword.text);
+      Navigator.pop(context);
       print("Username: " + txtUsername?.text + " Password: " + txtPassword?.text);
     },
     child: Container(

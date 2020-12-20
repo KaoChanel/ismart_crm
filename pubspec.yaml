@@ -32,11 +32,12 @@ dependencies:
   http: ^0.12.2
 
   # UI
-  cupertino_icons: ^1.0.0
+  #cupertino_icons: ^1.0.0
   google_fonts: ^1.1.1
   font_awesome_flutter: ^8.10.0
   double_back_to_close_app: ^1.2.0
   fluttertoast: ^7.1.2
+  rich_alert: ^0.1.32
 
 dev_dependencies:
   flutter_test:
