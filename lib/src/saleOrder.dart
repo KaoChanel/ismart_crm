@@ -354,7 +354,7 @@ class _SaleOrderState extends State<SaleOrder> {
                   obj.docuType = 104;
                   obj.goodType = '1';
                   obj.goodId = e.goodId;
-                  obj.goodCode = e.goodCode;
+                  obj.goodName = e.goodName2;
                   obj.goodUnitId2 = e.mainGoodUnitId;
                   obj.goodQty2 = e.goodQty;
                   obj.goodPrice2 = e.goodPrice;

@@ -17,7 +17,6 @@ class SaleOrderDetail {
     this.jobId,
     this.vatgroupId,
     this.goodId,
-    this.goodCode,
     this.goodName,
     this.inveId,
     this.locaId,
@@ -99,7 +98,6 @@ class SaleOrderDetail {
   dynamic jobId;
   dynamic vatgroupId;
   int goodId;
-  dynamic goodCode;
   String goodName;
   int inveId;
   int locaId;
@@ -181,7 +179,6 @@ class SaleOrderDetail {
     jobId: json["jobId"],
     vatgroupId: json["vatgroupId"],
     goodId: json["goodId"] == null ? null : json["goodId"],
-    goodCode: json["goodCode"],
     goodName: json["goodName"] == null ? null : json["goodName"],
     inveId: json["inveId"] == null ? null : json["inveId"],
     locaId: json["locaId"] == null ? null : json["locaId"],
@@ -264,7 +261,6 @@ class SaleOrderDetail {
     "jobId": jobId,
     "vatgroupId": vatgroupId,
     "goodId": goodId == null ? null : goodId,
-    "goodCode": goodCode,
     "goodName": goodName == null ? null : goodName,
     "inveId": inveId == null ? null : inveId,
     "locaId": locaId == null ? null : locaId,
