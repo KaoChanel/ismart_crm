@@ -24,4 +24,11 @@ ProductCart editingProductCart;
 List<ProductCart> productCart = new List<ProductCart>();
 List<GoodsUnit> allGoodsUnit = new List<GoodsUnit>();
 
+void clearOrder(){
+  productCart = new List<ProductCart>();
+  editingProductCart = null;
+  selectedProduct = null;
+  discountBill = 0;
+}
+
 

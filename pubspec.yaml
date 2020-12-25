@@ -31,6 +31,9 @@ dependencies:
   # CONNECTIVITY
   http: ^0.12.2
 
+  # Identification
+  uuid: 2.2.2
+
   # UI
   #cupertino_icons: ^1.0.0
   google_fonts: ^1.1.1
@@ -38,6 +41,7 @@ dependencies:
   double_back_to_close_app: ^1.2.0
   fluttertoast: ^7.1.2
   rich_alert: ^0.1.32
+  awesome_dialog: ^1.2.1
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +71,7 @@ flutter:
     - assets/business_marketing.jpg
     - assets/business_support.jpg
     - assets/business_inventory.jpg
+    - assets/bg_nic.jpg
     #- assets/bisgroup_logo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -16,7 +16,6 @@ class ApiService {
   final String baseUrl = "http://103.225.27.252/api";
   Client client = Client();
 
-// Get All sohd
   Future<void> getCustomer() async {
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
@@ -78,6 +77,7 @@ class ApiService {
       return null;
     }
   }
+
   Future<List<SaleOrderHeader>> getSaleOrderHeaderById(int id) async {
     final response =
     await client.get("$baseUrl/SaleOrderHeader/${globals.company}/$id");
@@ -87,6 +87,45 @@ class ApiService {
       return data;
     } else {
       return null;
+    }
+  }
+
+  // Future<String> getDocNo() async {
+  //   String strUrl =
+  //       '${globals.publicAddress}/api/SaleOrderHeader/GenerateDocNo/${globals.company}';
+  //   var response = await client.get(strUrl);
+  //   print(response.statusCode);
+  //   print(response.body);
+  //   if (response.statusCode == 200) {
+  //     return response.body;
+  //   } else {
+  //     return '';
+  //   }
+  // }
+
+  Future<String> getDocNo() async {
+    String strUrl =
+        '${globals.publicAddress}/api/SaleOrderHeader/GenerateDocNo/${globals.company}';
+    var response = await client.get(strUrl);
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      return '';
+    }
+  }
+
+  Future<String> getRefNo() async {
+    String strUrl =
+        '${globals.publicAddress}/api/SaleOrderHeader/GenerateRefNo/${globals.company}';
+    var response = await client.get(strUrl);
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      return '';
     }
   }
 
@@ -105,7 +144,7 @@ class ApiService {
   }
 
 // Create a new sohd
-  Future<bool> addSaleOrderHeader(SaleOrderHeader data) async {
+  Future<SaleOrderHeader> addSaleOrderHeader(SaleOrderHeader data) async {
     final response = await client.post(
       "$baseUrl/SaleOrderHeader/${globals.company}/",
       headers: {"content-type": "application/json"},
@@ -119,9 +158,9 @@ class ApiService {
     print('Status Code: ${response.statusCode}');
 
     if (response.statusCode == 201) {
-      return true;
+      return SaleOrderHeader.fromJson(json.decode(response.body));
     } else {
-      return false;
+      return null;
     }
   }
 
@@ -133,11 +172,10 @@ class ApiService {
     );
 
     var str = saleOrderDetailToJson(data);
-    print(str);
     print(response.headers);
     print(response.body);
-    print(json.encode(saleOrderDetailToJson(data)));
     print('Status Code: ${response.statusCode}');
+    print('$str');
 
     if (response.statusCode == 201) {
       return true;
