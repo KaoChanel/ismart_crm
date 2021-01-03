@@ -180,14 +180,14 @@ class _SaleOrderState extends State<SaleOrder> {
   {
     _apiService.getRefNo().then((value){
       runningNo = value;
-      refNo = '${globals.company}${globals.employee?.empCode}-${runningNo ?? ''}';
+      refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
       txtRunningNo.text = runningNo ?? '';
       txtRefNo.text = refNo ?? '';
     });
     _apiService.getDocNo().then((value) {
       docuNo = value;
       txtDocuNo.text = docuNo ?? '';
-      txtEmpCode.text = '${globals.company}${globals.employee?.empCode}';
+      txtEmpCode.text = '${globals.employee?.empCode}';
     });
 
     setState(() {
@@ -221,7 +221,8 @@ class _SaleOrderState extends State<SaleOrder> {
       globals.productCart.forEach((element) {
         priceTotal += element.goodAmount;
       });
-    } else {
+    }
+    else {
       discountTotal = 0;
       priceTotal = 0;
       priceAfterDiscount = 0;
@@ -238,7 +239,10 @@ class _SaleOrderState extends State<SaleOrder> {
       priceAfterDiscount = priceTotal - globals.discountBill;
     }
 
-    vatTotal = (priceAfterDiscount * vat) / 100;
+    double sumPriceIncludeVat = 0;
+    globals.productCart.where((element) => element.vatRate > 0).forEach((element) {sumPriceIncludeVat += element.goodPrice;});
+    // vatTotal = (priceAfterDiscount * vat) / 100;
+    vatTotal = (sumPriceIncludeVat * vat) / 100;
     netTotal = priceAfterDiscount + vatTotal;
 
     setState(() {
@@ -1013,35 +1017,53 @@ class _SaleOrderState extends State<SaleOrder> {
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // Flexible(
+                      //   flex: 2,
+                      //   child: ListTile(
+                      //     title: TextFormField(
+                      //       readOnly: true,
+                      //       initialValue: globals.customer?.custName,
+                      //       decoration: InputDecoration(
+                      //         border: OutlineInputBorder(),
+                      //         contentPadding: EdgeInsets.symmetric(
+                      //             horizontal: 10, vertical: 0),
+                      //         floatingLabelBehavior:
+                      //             FloatingLabelBehavior.always,
+                      //         labelText: "ชื่อสถานที่ส่งจริง",
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                      // Flexible(
+                      //   flex: 2,
+                      //   child: ListTile(
+                      //     title: TextFormField(
+                      //       readOnly: true,
+                      //       decoration: InputDecoration(
+                      //         border: OutlineInputBorder(),
+                      //         contentPadding: EdgeInsets.symmetric(
+                      //             horizontal: 10, vertical: 0),
+                      //         floatingLabelBehavior:
+                      //             FloatingLabelBehavior.always,
+                      //         labelText: 'สถานที่ส่ง',
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       Flexible(
-                        flex: 2,
+                        flex: 6,
                         child: ListTile(
                           title: TextFormField(
                             readOnly: true,
-                            initialValue: globals.customer?.custName,
+                            //initialValue: globals.customer?.,
+                            controller: txtShiptoAddress,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 0),
                               floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              labelText: "ชื่อสถานที่ส่งจริง",
-                            ),
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        flex: 2,
-                        child: ListTile(
-                          title: TextFormField(
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 0),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              labelText: 'สถานที่ส่ง',
+                              FloatingLabelBehavior.always,
+                              labelText: "สถานที่ส่งจริง",
                             ),
                           ),
                         ),
@@ -1066,30 +1088,48 @@ class _SaleOrderState extends State<SaleOrder> {
                       ),
                     ]),
                 Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(height: 80),
+                      // Flexible(
+                      //   flex: 6,
+                      //   child: ListTile(
+                      //     title: TextFormField(
+                      //       readOnly: true,
+                      //       //initialValue: globals.customer?.,
+                      //       controller: txtShiptoAddress,
+                      //       decoration: InputDecoration(
+                      //         border: OutlineInputBorder(),
+                      //         contentPadding: EdgeInsets.symmetric(
+                      //             horizontal: 10, vertical: 0),
+                      //         floatingLabelBehavior:
+                      //             FloatingLabelBehavior.always,
+                      //         labelText: "สถานที่ส่งจริง",
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       Flexible(
                         flex: 6,
                         child: ListTile(
                           title: TextFormField(
                             readOnly: true,
-                            //initialValue: globals.customer?.,
-                            controller: txtShiptoAddress,
+                            controller: txtShiptoRemark,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 0),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              labelText: "สถานที่ส่งจริง",
+                              contentPadding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              labelText: "หมายเหตุ",
                             ),
                           ),
                         ),
                       ),
                       Flexible(
-                          child: SizedBox(
+                        flex: 1,
+                          child: Container(
                         height: 47,
+                        padding: EdgeInsets.only(right: 10),
                         child: ElevatedButton.icon(
                             onPressed: () {
                               //_showShiptoDialog(context);
@@ -1099,6 +1139,7 @@ class _SaleOrderState extends State<SaleOrder> {
                             label: Text('สถานที่ส่ง')),
                       )),
                       Flexible(
+                        flex: 1,
                           child: SizedBox(
                         height: 47,
                         child: ElevatedButton.icon(
@@ -1123,25 +1164,7 @@ class _SaleOrderState extends State<SaleOrder> {
                             label: Text('ค่าเริ่มต้น')),
                       )),
                     ]),
-                Row(children: [
-                  SizedBox(height: 60),
-                  Flexible(
-                    flex: 6,
-                    child: ListTile(
-                      title: TextFormField(
-                        readOnly: true,
-                        controller: txtShiptoRemark,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          labelText: "หมายเหตุ",
-                        ),
-                      ),
-                    ),
-                  ),
-                ]),
+
                 Row(
                   children: [
                     SizedBox(height: 80),

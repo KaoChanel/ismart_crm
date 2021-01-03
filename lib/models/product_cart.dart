@@ -15,6 +15,9 @@ class ProductCart {
     this.saleGoodUnitId,
     this.subGoodUnitId,
     this.buyGoodUnitId,
+    this.vatGroupId,
+    this.vatRate,
+    this.vatGroupCode,
     this.vatType,
     this.goodTypeFlag,
     this.goodCateId,
@@ -41,6 +44,9 @@ class ProductCart {
   dynamic saleGoodUnitId;
   dynamic subGoodUnitId;
   int buyGoodUnitId;
+  int vatGroupId;
+  int vatRate;
+  String vatGroupCode;
   int vatType;
   String goodTypeFlag;
   int goodCateId;
@@ -67,6 +73,9 @@ class ProductCart {
     "saleGoodUnitId": saleGoodUnitId,
     "subGoodUnitId": subGoodUnitId,
     "buyGoodUnitId": buyGoodUnitId == null ? null : buyGoodUnitId,
+    "vatgroupId": vatGroupId == null ? null : vatGroupId,
+    "vatRate": vatRate == null ? null : vatRate,
+    "vatgroupCode": vatGroupCode == null ? null : vatGroupCode,
     "vatType": vatType == null ? null : vatType,
     "goodTypeFlag": goodTypeFlag == null ? null : goodTypeFlag,
     "goodCateId": goodCateId == null ? null : goodCateId,
