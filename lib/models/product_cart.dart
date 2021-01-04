@@ -25,6 +25,7 @@ class ProductCart {
     this.goodGroupId,
     this.goodTypeId,
     this.goodPrice,
+    this.goodPriceEdited,
     this.goodQty,
     this.goodAmount,
     this.discount,
@@ -54,6 +55,7 @@ class ProductCart {
   int goodGroupId;
   int goodTypeId;
   double goodPrice;
+  double goodPriceEdited;
   double goodQty;
   double goodAmount;
   double discount;

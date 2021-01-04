@@ -15,6 +15,7 @@ class ItemProductDetail extends StatefulWidget {
       {@required this.isInTabletLayout,
       @required this.product,
       @required this.price,
+        this.editedPrice,
       this.quantity,
       this.total});
 
@@ -23,6 +24,7 @@ class ItemProductDetail extends StatefulWidget {
   final double price;
   final double quantity;
   final double total;
+  double editedPrice;
 
   @override
   _ItemProductDetailState createState() => _ItemProductDetailState();
@@ -31,6 +33,7 @@ class ItemProductDetail extends StatefulWidget {
 class _ItemProductDetailState extends State<ItemProductDetail> {
   final currency = new NumberFormat("#,##0.00", "en_US");
   bool _isFreeProduct = false;
+  //double _editedPrice = 0;
   double _goodQty;
   double _totalAmount;
   double _discount = 0;
@@ -38,6 +41,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   double _totalNet = 0;
   String _unitName;
   FocusNode focusQty = FocusNode();
+  FocusNode focusPrice = FocusNode();
   TextEditingController txtGoodName = TextEditingController();
   TextEditingController txtGoodCode = TextEditingController();
   TextEditingController txtQty = TextEditingController();
@@ -52,8 +56,9 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     // TODO: implement initState
     super.initState();
     _isFreeProduct = globals.editingProductCart?.isFree ?? false;
-    txtQty = TextEditingController(text: _goodQty.toString());
-    txtQty.selection = new TextSelection(baseOffset: 0, extentOffset: _goodQty.toString().length,);
+    //calculatedPrice(1, 0, widget.editedPrice);
+    // txtQty = TextEditingController(text: _goodQty.toString());
+    // txtQty.selection = new TextSelection(baseOffset: 0, extentOffset: _goodQty.toString().length,);
   }
 
   @override
@@ -61,6 +66,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     // TODO: implement dispose
     super.dispose();
     focusQty.dispose();
+    focusPrice.dispose();
     txtGoodName.dispose();
     txtGoodCode.dispose();
     txtQty.dispose();
@@ -102,7 +108,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     });
   }
 
-  void calculatedPrice(double _quantity, double _discountValue) {
+  void calculatedPrice(double _quantity, double _discountValue, double _price) {
     setState(() {
       _goodQty = _quantity;
       _discount = _discountValue;
@@ -111,7 +117,24 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         _totalNet = 0;
         _discount = 0;
       } else {
-        _totalAmount = widget.price * _goodQty;
+        if(_price != null){
+          widget.editedPrice = _price;
+          _totalAmount = widget.editedPrice * _goodQty;
+          txtPrice.text = currency.format(widget.editedPrice) ?? 'รอราคา...';
+          print('Edited Price / Unit: ' +
+              widget.editedPrice.toString() +
+              ' Total: ' +
+              _totalNet.toString());
+        }
+        else{
+          //widget.editedPrice = 0;
+          _totalAmount = widget.price * _goodQty;
+          txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
+          print('Price / Unit: ' +
+              widget.price.toString() +
+              ' Total: ' +
+              _totalNet.toString());
+        }
 
         if (_discountType == 'PER') {
           //_discount = _total - (_total * _discount / 100);
@@ -122,14 +145,11 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
       _totalNet = _totalAmount - _discount;
       txtQty.text = currency.format(_goodQty) ?? '0';
-      txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
+      // txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
       txtTotal.text = currency.format(_totalAmount) ?? '0';
       txtDiscount.text = currency.format(_discount) ?? '0';
       txtTotalNet.text = currency.format(_totalNet) ?? '0';
-      print('Price / Unit: ' +
-          widget.price.toString() +
-          ' Total: ' +
-          _totalNet.toString());
+
       print('Quantity: ' + _goodQty.toString());
     });
   }
@@ -153,11 +173,20 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
       globals.productCart[startIndex].goodCode = widget.product.goodCode;
       globals.productCart[startIndex].goodName1 = widget.product.goodName1;
       globals.productCart[startIndex].goodQty = _goodQty;
-      globals.productCart[startIndex].goodPrice = widget.price;
+      if(widget.editedPrice > 0){
+        globals.productCart[startIndex].goodPrice = widget.editedPrice;
+      }
+      else{
+        globals.productCart[startIndex].goodPrice = widget.price;
+      }
       globals.productCart[startIndex].discountType = _discountType;
       globals.productCart[startIndex].discount = _discount;
       globals.productCart[startIndex].goodAmount = _totalNet;
       globals.productCart[startIndex].isFree = _isFreeProduct;
+      globals.productCart[startIndex].vatGroupId = widget.product.vatGroupId;
+      globals.productCart[startIndex].vatGroupCode = widget.product.vatGroupCode;
+      globals.productCart[startIndex].vatType = widget.product.vatType;
+      globals.productCart[startIndex].vatRate = widget.product.vatRate;
       globals.editingProductCart = null;
       // List<ProductCart> temp = globals.productCart.where((element) => element.rowIndex == globals.editingProductCart.rowIndex).toList();
       // print('Index: $startIndex');
@@ -175,7 +204,15 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         ..goodPrice = widget.price
         ..discount = _discount
         ..goodAmount = _totalNet
-        ..isFree = _isFreeProduct;
+        ..isFree = _isFreeProduct
+        ..vatGroupId = widget.product.vatGroupId
+        ..vatGroupCode = widget.product.vatGroupCode
+        ..vatType = widget.product.vatType
+        ..vatRate = widget.product.vatRate;
+
+      if(widget.editedPrice > 0){
+        order.goodPrice = widget.editedPrice;
+      }
 
       print('Add: ' + order.goodName1);
       globals.productCart.add(order);
@@ -187,7 +224,16 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   @override
   Widget build(BuildContext context) {
     setSelectedItem();
-    calculatedPrice(_goodQty, _discount);
+    print('Edited: ' + widget.editedPrice.toString());
+    if(widget.editedPrice > 0){
+      calculatedPrice(_goodQty, _discount, widget.editedPrice);
+    }
+    else{
+      calculatedPrice(_goodQty, _discount, null);
+    }
+    //calculatedPrice(_goodQty, _discount, null);
+    //calculatedPrice(_goodQty, _discount, widget.editedPrice);
+
     print('Qty: ' + _goodQty.toString());
 
     final TextTheme textTheme = Theme.of(context).textTheme;
@@ -307,7 +353,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     // },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')));
+                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), widget.editedPrice);
                         FocusScope.of(context).unfocus();
                       });
                     },
@@ -340,6 +386,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                 child: ListTile(
                   title: TextFormField(
                     controller: txtPrice,
+                    focusNode: focusPrice,
+                    keyboardType:
+                    TextInputType.numberWithOptions(decimal: true),
+                    onTap: () {
+                      txtPrice.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: txtPrice.value.text.length);
+                    },
+                    onEditingComplete: () {
+                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), double.parse(txtPrice.text.replaceAll(',', '')));
+                        FocusScope.of(context).unfocus();
+                    },
                     textAlign: TextAlign.right,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -455,7 +513,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text));
+                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text), null);
                         FocusScope.of(context).unfocus();
                       });
                     },

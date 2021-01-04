@@ -35,6 +35,7 @@ class _ContainerProductState extends State<ContainerProduct> {
   static const int kTabletBreakpoint = 400;
   double _goodQty = 0;
   double _goodPrice = 0;
+  double editedPrice = 0;
   double _total = 0;
   double _discount = 0;
   String _discountType;
@@ -164,6 +165,7 @@ class _ContainerProductState extends State<ContainerProduct> {
             product: _selectedItem,
             quantity: _goodQty,
             price: _goodPrice,
+            editedPrice: 0,
             total: _total,
             isInTabletLayout: true,
           ),

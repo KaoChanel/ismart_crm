@@ -240,7 +240,10 @@ class _SaleOrderState extends State<SaleOrder> {
     }
 
     double sumPriceIncludeVat = 0;
-    globals.productCart.where((element) => element.vatRate > 0).forEach((element) {sumPriceIncludeVat += element.goodPrice;});
+    if(globals.productCart != null){
+      globals.productCart.where((element) => element.vatRate > 0).toList().forEach((element) {sumPriceIncludeVat += element.goodPrice;});
+    }
+
     // vatTotal = (priceAfterDiscount * vat) / 100;
     vatTotal = (sumPriceIncludeVat * vat) / 100;
     netTotal = priceAfterDiscount + vatTotal;
