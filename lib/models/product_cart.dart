@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:ismart_crm/globals.dart' as globals;
 
 class ProductCart {
   ProductCart({
@@ -29,6 +30,8 @@ class ProductCart {
     this.goodQty,
     this.goodAmount,
     this.discount,
+    this.discountBase,
+    this.discountType,
     this.isFree,
   });
 
@@ -59,6 +62,7 @@ class ProductCart {
   double goodQty;
   double goodAmount;
   double discount;
+  double discountBase;
   String discountType;
   bool isFree;
 

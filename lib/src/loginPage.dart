@@ -37,15 +37,16 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> getUser(String company, String username, String password) async {
     showLoaderDialog(context);
     http.Response response = await http.get(
-        '${globals.publicAddress}/login/userloginauthor?_company=$company&username=$username&password=$password');
+        // '${globals.publicAddress}/login/LoginByEmpCode?_company=$company&_empcode=$username&password=$password'
+        '${globals.publicAddress}/api/login/LoginByEmpCode/$company/$username/$password');
     print(response.body);
     var decode = jsonDecode(response.body);
 
     if (decode['empId'] != 0) {
-      _user = userFromJson(response.body);
-
-      String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
-      response = await http.get(strUrl);
+      // _user = userFromJson(response.body);
+      //
+      // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
+      // response = await http.get(strUrl);
 
       globals.employee = employeeFromJson(response.body);
       globals.company = company;
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
   showLoaderDialog(BuildContext context){
-    AlertDialog alert=AlertDialog(
+    AlertDialog alert = AlertDialog(
       content: new Row(
         children: [
           CircularProgressIndicator(),
@@ -154,6 +155,7 @@ Widget _entryField(String title, TextEditingController controller,
             controller: controller,
             obscureText: isPassword,
             textInputAction: TextInputAction.next,
+            textCapitalization: TextCapitalization.characters,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 fillColor: Color(0xfff3f3f4),

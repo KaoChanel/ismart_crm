@@ -7,6 +7,7 @@ import 'models/goods_unit.dart';
 import 'models/shipto.dart';
 import 'models/saleOrder_header.dart';
 import 'models/saleOrder_detail.dart';
+import 'models/stock.dart';
 import 'package:ismart_crm/src/saleOrder.dart';
 import 'globals.dart' as globals;
 import 'package:http/http.dart' show Client;
@@ -52,6 +53,19 @@ class ApiService {
     } else {
       globals.allGoodsUnit = null;
     }
+  }
+
+  Future<void> getStock() async {
+    String strUrl;
+
+    strUrl = '${globals.publicAddress}/api/stock/${globals.company}';
+    var response = await client.get(strUrl).then((value) => {
+    if (value.statusCode == 200) {
+        globals.allStock = stockFromJson(value.body)
+    } else {
+      globals.allStock = null
+      }
+    });
   }
 
   Future<void> getShipto() async {

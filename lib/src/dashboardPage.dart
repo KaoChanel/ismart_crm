@@ -101,11 +101,12 @@ class DashboardPageState extends State<DashboardPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null){
+    if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null || globals.allStock == null){
       _apiService.getCustomer();
       _apiService.getProduct();
       _apiService.getUnit();
       _apiService.getShipto();
+      _apiService.getStock();
     }
   }
 

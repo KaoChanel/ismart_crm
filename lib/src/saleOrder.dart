@@ -483,7 +483,9 @@ class _SaleOrderState extends State<SaleOrder> {
                     selectedTileColor: Colors.black12,
                     title: Text('%'),
                   )
-                ])));
+                ])
+            )
+        );
       },
     );
   }
@@ -568,7 +570,7 @@ class _SaleOrderState extends State<SaleOrder> {
                       DataCell(Text('${e.goodName1}')),
                       DataCell(Text('${currency.format(e.goodQty)}')),
                       DataCell(Text('${currency.format(e.goodPrice)}')),
-                      DataCell(Text('${currency.format(e.discount)}')),
+                      DataCell(Text('${currency.format(e.discountBase)}')),
                       DataCell(Text('${currency.format(e.goodAmount)}')),
                       DataCell(Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

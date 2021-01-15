@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ismart_crm/models/product.dart';
 import 'package:meta/meta.dart';
@@ -16,15 +17,17 @@ class ItemProductDetail extends StatefulWidget {
       @required this.product,
       @required this.price,
         this.editedPrice,
+        this.newPrice,
       this.quantity,
       this.total});
 
   final bool isInTabletLayout;
   final Product product;
-  final double price;
+  double price;
   final double quantity;
   final double total;
-  double editedPrice;
+  double editedPrice = 0;
+  double newPrice = 0;
 
   @override
   _ItemProductDetailState createState() => _ItemProductDetailState();
@@ -33,13 +36,14 @@ class ItemProductDetail extends StatefulWidget {
 class _ItemProductDetailState extends State<ItemProductDetail> {
   final currency = new NumberFormat("#,##0.00", "en_US");
   bool _isFreeProduct = false;
-  //double _editedPrice = 0;
+  double _editedPrice = 0;
   double _goodQty;
   double _totalAmount;
   double _discount = 0;
   String _discountType = 'THB';
   double _totalNet = 0;
   String _unitName;
+  globals.DiscountType discType;
   FocusNode focusQty = FocusNode();
   FocusNode focusPrice = FocusNode();
   TextEditingController txtGoodName = TextEditingController();
@@ -54,8 +58,9 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
+    globals.newPrice = widget.price;
     _isFreeProduct = globals.editingProductCart?.isFree ?? false;
+    super.initState();
     //calculatedPrice(1, 0, widget.editedPrice);
     // txtQty = TextEditingController(text: _goodQty.toString());
     // txtQty.selection = new TextSelection(baseOffset: 0, extentOffset: _goodQty.toString().length,);
@@ -78,19 +83,25 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void setSelectedItem() {
+    print('set Selected');
     setState(() {
       if (widget.product?.goodCode == null) {
         _goodQty = 0;
-      } else {
+      }
+      else {
         if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
           print('Compare < / Qty = $_goodQty');
           if (_goodQty == null) {
             _goodQty = widget.quantity;
             _discount = globals.editingProductCart?.discount;
+            _discountType = globals.editingProductCart?.discountType;
           }
           //_isFreeProduct = globals.editingProductCart.isFree;
         } else if (txtGoodCode.text != widget.product?.goodCode) {
           _goodQty = 1;
+          //globals.newPrice = 0;
+          globals.newPrice = widget.price;
+          print('txtGoodCode.text != widget.product?.goodCode');
         }
       }
 
@@ -118,16 +129,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         _discount = 0;
       } else {
         if(_price != null){
-          widget.editedPrice = _price;
-          _totalAmount = widget.editedPrice * _goodQty;
-          txtPrice.text = currency.format(widget.editedPrice) ?? 'รอราคา...';
+          widget.editedPrice = 1;
+          globals.newPrice = _price;
+          _totalAmount = globals.newPrice * _goodQty;
+          txtPrice.text = currency.format(globals.newPrice) ?? 'รอราคา...';
           print('Edited Price / Unit: ' +
-              widget.editedPrice.toString() +
+              globals.newPrice.toString() +
               ' Total: ' +
               _totalNet.toString());
         }
         else{
-          //widget.editedPrice = 0;
+          widget.editedPrice = 0;
+          globals.newPrice = 0;
           _totalAmount = widget.price * _goodQty;
           txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
           print('Price / Unit: ' +
@@ -143,7 +156,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         }
       }
 
-      _totalNet = _totalAmount - _discount;
+      _totalNet = _discountType == 'PER' ? _totalAmount - (_totalAmount * _discount / 100) : _totalAmount - _discount;
       txtQty.text = currency.format(_goodQty) ?? '0';
       // txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
       txtTotal.text = currency.format(_totalAmount) ?? '0';
@@ -174,13 +187,15 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
       globals.productCart[startIndex].goodName1 = widget.product.goodName1;
       globals.productCart[startIndex].goodQty = _goodQty;
       if(widget.editedPrice > 0){
-        globals.productCart[startIndex].goodPrice = widget.editedPrice;
+        globals.productCart[startIndex].goodPrice = globals.newPrice;
       }
       else{
         globals.productCart[startIndex].goodPrice = widget.price;
       }
-      globals.productCart[startIndex].discountType = _discountType;
+
       globals.productCart[startIndex].discount = _discount;
+      globals.productCart[startIndex].discountType = _discountType;
+      globals.productCart[startIndex].discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
       globals.productCart[startIndex].goodAmount = _totalNet;
       globals.productCart[startIndex].isFree = _isFreeProduct;
       globals.productCart[startIndex].vatGroupId = widget.product.vatGroupId;
@@ -203,6 +218,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         ..goodQty = _goodQty
         ..goodPrice = widget.price
         ..discount = _discount
+        ..discountType = _discountType
+        ..discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
         ..goodAmount = _totalNet
         ..isFree = _isFreeProduct
         ..vatGroupId = widget.product.vatGroupId
@@ -211,7 +228,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         ..vatRate = widget.product.vatRate;
 
       if(widget.editedPrice > 0){
-        order.goodPrice = widget.editedPrice;
+        order.goodPrice = globals.newPrice;
       }
 
       print('Add: ' + order.goodName1);
@@ -221,20 +238,102 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     Navigator.pop(context);
   }
 
+  void _showStockDialog(context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return alert dialog object
+        return AlertDialog(
+          title: new Text('สต๊อคสินค้า'),
+          content: Container(
+            height: 150.0,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget setDiscountType() {
+    print('set Discount type');
+    if (_discountType == 'THB') {
+      return Text('THB', style: TextStyle(fontSize: 18));
+    } else {
+      return Text('%', style: TextStyle(fontSize: 18));
+    }
+  }
+
+  void showDiscountDialog(context){
+    showDialog(
+        context: context,
+      builder: (BuildContext context){
+       return AlertDialog(
+            elevation: 0,
+            title: new Text('ประเภทส่วนลด'),
+            content: Container(
+                width: 250,
+                height: 180,
+                child: ListView(children: [
+                  ListTile(
+                      onTap: () {
+                        //discountType = globals.DiscountType.THB;
+                        _discountType = 'THB';
+                        Navigator.pop(context);
+                        setState(() {});
+                      },
+                      selected: _discountType == 'THB',
+                      selectedTileColor: Colors.black12,
+                      title: Text('THB')),
+                  ListTile(
+                    onTap: () {
+                      //discountType = globals.DiscountType.PER;
+                      //globals.discountType = globals.DiscountType.PER;
+                      _discountType = 'PER';
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                    selected: _discountType == 'PER',
+                    selectedTileColor: Colors.black12,
+                    title: Text('%'),
+                  )
+                ])
+            )
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     setSelectedItem();
-    print('Edited: ' + widget.editedPrice.toString());
-    if(widget.editedPrice > 0){
-      calculatedPrice(_goodQty, _discount, widget.editedPrice);
+
+    if(globals.newPrice == 0){
+      globals.newPrice = widget.price;
     }
+
+      if(globals.newPrice != widget.price){
+        calculatedPrice(_goodQty, _discount, globals.newPrice);
+      }
     else{
+        print('globals.newPrice == widget.price');
       calculatedPrice(_goodQty, _discount, null);
     }
+
+
     //calculatedPrice(_goodQty, _discount, null);
     //calculatedPrice(_goodQty, _discount, widget.editedPrice);
 
     print('Qty: ' + _goodQty.toString());
+    print('Edited: ' + _editedPrice.toString());
+    print('Widget newPrice: ' + globals.newPrice.toString());
+    print('Widget Price: ' + widget.price.toString());
 
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Widget content = SingleChildScrollView(
@@ -269,7 +368,9 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                   )),
               Flexible(
                 child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _showStockDialog(context);
+                    },
                     child: Text(
                       'เช็คสต๊อค',
                       style: TextStyle(fontSize: 18),
@@ -353,7 +454,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     // },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), widget.editedPrice);
+                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), globals.newPrice);
                         FocusScope.of(context).unfocus();
                       });
                     },
@@ -536,11 +637,10 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
               ),
               Flexible(
                 child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      '%',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    onPressed: () {
+                      showDiscountDialog(context);
+                    },
+                    child: setDiscountType(),
                     style:
                         ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
               ),
