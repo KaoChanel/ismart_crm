@@ -3,12 +3,13 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ismart_crm/models/product.dart';
 import 'package:meta/meta.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/models/product_cart.dart';
+import 'package:ismart_crm/models/product.dart';
+import 'package:ismart_crm/models/stock.dart';
 
 class ItemProductDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
@@ -35,6 +36,7 @@ class ItemProductDetail extends StatefulWidget {
 
 class _ItemProductDetailState extends State<ItemProductDetail> {
   final currency = new NumberFormat("#,##0.00", "en_US");
+  final DateFormat dateFormat = DateFormat('dd MMM yyyy');
   bool _isFreeProduct = false;
   double _editedPrice = 0;
   double _goodQty;
@@ -239,21 +241,33 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void _showStockDialog(context) {
+    List<Stock> StockByProd = globals.allStock.where((element) => element.goodid == widget.product.goodId).toList();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         // return alert dialog object
         return AlertDialog(
-          title: new Text('สต๊อคสินค้า'),
+          title: new Text('สินค้าคงเหลือ ' + widget.product.goodName1 + ' (' + widget.product.goodCode + ')'),
           content: Container(
-            height: 150.0,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-
-                ],
-              ),
+            height: 350.0,
+            width: 500,
+            child: ListView(
+              children:
+                StockByProd.map((e) =>
+                    ListTile(
+                        title: Text('Lot No. ' + e.lotNo + '               คงเหลือ:  ' + currency.format(e.remaqty)),
+                        subtitle: Text('Expire: ' + dateFormat.format(e.expiredate) + '                        ' + e.goodUnitCode),
+                      onTap: (){},
+                    )
+                ).toList() ?? Text('ไม่มีข้อมูลสินค้าคงเหลือ'),
+              // Column(
+              //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //   children: [
+              //   new List.generate(StockByProd.length, (index) => new ListTile(
+              //   title: Text({StockByProd[index].goodName1}),
+              //     //StockByProd.map((element) => ListTile(),),
+              //   ],
+              // ),
             ),
           ),
         );
