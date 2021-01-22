@@ -84,7 +84,7 @@ class _ItemStockDetailState extends State<ItemStockDetail> {
         ((element) =>  DataRow(
           cells: <DataCell>[
             DataCell(Container(alignment: AlignmentDirectional.center, child: Text(element.orderNumber.toString()))), //Extracting from Map element the value
-            DataCell(Container(width: 60, child: Text(element.goodCode))),
+            DataCell(Container(child: Text(element.goodCode))),
             //DataCell(Text(element.goodName1)),
             DataCell(Container(width:90, child: Text(element.lotNo))),
             DataCell(Text(formatter.format(element.expiredate))),

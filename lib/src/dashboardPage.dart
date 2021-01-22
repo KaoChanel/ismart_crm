@@ -13,6 +13,7 @@ import 'package:ismart_crm/models/shipto.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/api_service.dart';
+import 'package:ismart_crm/widgets/menuCard.dart';
 
 Widget _menuCard(String _path) {
   return Card(
@@ -25,51 +26,6 @@ Widget _menuCard(String _path) {
     elevation: 5,
     margin: EdgeInsets.all(10),
   );
-}
-
-Card dashboardCard(String title, String path) {
-  return Card(
-      elevation: 8.0,
-      margin: new EdgeInsets.all(8.0),
-      semanticContainer: true,
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Column(
-        // decoration: BoxDecoration(color: Color.fromRGBO(220, 220, 220, 1.0)),
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        verticalDirection: VerticalDirection.down,
-        children: <Widget>[
-          Container(
-            // decoration: BoxDecoration(color: Colors.blueAccent),
-            child: Center(
-                child: Image(
-              image: AssetImage(path),
-              fit: BoxFit.contain,
-            )),
-            // Center(
-            //     child: Icon(
-            //       icon,
-            //       size: 40.0,
-            //       color: Colors.black,
-            //     )),
-          ),
-          //SizedBox(height: 5.0),
-          Container(
-              color: Colors.lightGreen,
-              padding: EdgeInsets.only(bottom: 6, top: 3),
-              child: Center(
-                child: new Text(title,
-                    style: new TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        height: 1.5,
-                        color: Colors.white)),
-              ))
-        ],
-      ));
 }
 
 // void main() => runApp(MyApp());
@@ -169,8 +125,7 @@ class DashboardPageState extends State<DashboardPage> {
                           child: Stack(
                               //height: 200,
                               children: [
-                        dashboardCard(
-                            'ใบเสนอราคา', 'assets/business_drawing.jpg'),
+                                MenuCard(title:'ใบเสนอราคา', path:'assets/business_drawing.jpg'),
                         new Positioned.fill(
                             child: new Material(
                                 color: Colors.transparent,
@@ -181,45 +136,14 @@ class DashboardPageState extends State<DashboardPage> {
                       ]))),
                   Expanded(
                       child: Container(
-                          child: Stack(
-                              //height: 200,
-                              children: [
-                        dashboardCard(
-                            'สั่งสินค้า', 'assets/business_click.jpg'),
-                        new Positioned.fill(
-                            child: new Material(
-                                color: Colors.transparent,
-                                child: new InkWell(
-                                  borderRadius: BorderRadius.circular(10),
-                                  onTap: () {
-                                    if(globals.customer == null){
-                                      return showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) => new CupertinoAlertDialog(
-                                          title: new Text("แจ้งเตือน"),
-                                          content: new Text("กรุณาเลือกลูกค้าของคุณ", style: TextStyle(fontSize: 18),),
-                                          actions: [
-                                            CupertinoDialogAction(
-                                                isDefaultAction: true, onPressed: () => Navigator.pop(context), child: Text("ปิดหน้าต่าง"))
-                                          ],
-                                        ),
-                                      );
-                                    }
-
-                                    Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                          builder: (context) => SaleOrder()));
-                                  },
-                                )))
-                      ]))),
+                          child: MenuCard(title:'ตารางงาน', path:'assets/work_schedule_03.jpg'))
+                  ),
                   Expanded(
                       child: Container(
                           child: Stack(
                               //height: 200,
                               children: [
-                        dashboardCard(
-                            'เข้าเยี่ยม', 'assets/business_marketing.jpg'),
+                                MenuCard(title:'เข้าเยี่ยม', path:'assets/shakehand_03.jpg'),
                         new Positioned.fill(
                             child: new Material(
                                 color: Colors.transparent,
@@ -230,23 +154,80 @@ class DashboardPageState extends State<DashboardPage> {
                       ]))),
                   Expanded(
                       child: Container(
-                          child: dashboardCard(
-                              'เช็คสต๊อค', 'assets/business_inventory.jpg'))),
+                          child: MenuCard(title:'บันทึกการเข้าเยี่ยม', path:'assets/shakehand_01.jpg'))),
                 ],
               ),
               Row(
                 children: [
-                  Container(
-                      height: 152.5,
-                      width: 190,
-                      child: dashboardCard(
-                          'บริการ', 'assets/business_support.jpg'))
+                  Expanded(
+                    child: Container(
+                        child: Stack(
+                          //height: 200,
+                            children: [
+                              MenuCard(title:'สั่งสินค้า', path:'assets/order_01.jpg'),
+                              new Positioned.fill(
+                                  child: new Material(
+                                      color: Colors.transparent,
+                                      child: new InkWell(
+                                        borderRadius: BorderRadius.circular(10),
+                                        onTap: () {
+                                          if(globals.customer == null){
+                                            return showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) => new CupertinoAlertDialog(
+                                                title: new Text("แจ้งเตือน"),
+                                                content: new Text("กรุณาเลือกลูกค้าของคุณ", style: TextStyle(fontSize: 18),),
+                                                actions: [
+                                                  CupertinoDialogAction(
+                                                      isDefaultAction: true, onPressed: () => Navigator.pop(context), child: Text("ปิดหน้าต่าง"))
+                                                ],
+                                              ),
+                                            );
+                                          }
+
+                                          Navigator.push(
+                                              context,
+                                              CupertinoPageRoute(
+                                                  builder: (context) => SaleOrder()));
+                                        },
+                                      )))
+                            ])),
+                  ),
+
+                  Expanded(
+                    child: Container(
+                        child: MenuCard(title:'แจ้งคืนสินค้า', path:'assets/goods_return.jpg')),
+                  ),
+                  Expanded(
+                    child: Container(
+                        child: MenuCard(title:'แบบสอบถาม', path:'assets/business_support.jpg')),
+                  ),
+                  Expanded(
+                    child: Visibility(
+                      visible: false,
+                      child: Container(
+                        // child: MenuCard(
+                        //     title:'บริการ', path:'assets/business_support.jpg')
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
-
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.refresh),
+        onPressed: (){
+          setState(() {
+            _apiService.getCustomer();
+            _apiService.getProduct();
+            _apiService.getUnit();
+            _apiService.getShipto();
+            _apiService.getStock();
+          });
+        },
+      ),
     );
   }
 }

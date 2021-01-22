@@ -15,6 +15,7 @@ class Launcher extends StatefulWidget {
 
 class _LauncherState extends State<Launcher> {
   int _selectedIndex = 0;
+  PageController _pageController = new PageController();
   List<Widget> _pageWidget = <Widget>[
     DashboardPage(),
     ReportPage(),
@@ -39,10 +40,16 @@ class _LauncherState extends State<Launcher> {
       title: Text('Profile'),
     ),
   ];
-
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _pageController.dispose();
+    super.dispose();
+  }
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.animateToPage(index, duration: Duration(milliseconds: 1000), curve: Curves.bounceOut);
     });
   }
 
@@ -51,15 +58,24 @@ class _LauncherState extends State<Launcher> {
     return Scaffold(
       drawer: NavDrawer(),
       appBar: AppBar(
-        title: Center(child: Text('Sale CRM (${globals.company})')),
+        title: Center(child: Text('BIS Group (${globals.company})')),
       ),
-      body: DoubleBackToCloseApp(
-          snackBar: const SnackBar(
-              content: Text(
-            'Tap back again to exit',
-            textAlign: TextAlign.center,
-          )),
-          child: _pageWidget.elementAt(_selectedIndex)),
+      body: SizedBox.expand(
+        child: PageView(
+          controller: _pageController,
+            onPageChanged: (index) {
+              setState(() => _selectedIndex = index);
+            },
+          children: [
+            DoubleBackToCloseApp(
+              snackBar: const SnackBar(
+                  content: Text(
+                'Tap back again to exit',
+                textAlign: TextAlign.center,
+              )),
+              child: _pageWidget.elementAt(_selectedIndex)),
+        ]),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: _menuBar,

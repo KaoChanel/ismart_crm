@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/src/loginPage.dart';
 import 'package:ismart_crm/globals.dart' as globals;
+import 'package:ismart_crm/api_service.dart';
 
 class NavDrawer extends StatelessWidget {
+  ApiService _apiService = new ApiService();
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -21,6 +23,12 @@ class NavDrawer extends StatelessWidget {
                     fit: BoxFit.fill,
                     image: AssetImage('assets/images/cover.jpg'))),
           ),
+          // ListTile(
+          //   leading: Icon(Icons.refresh),
+          //   title: Text('Refresh'),
+          //   onTap: () {
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.shopping_basket),
             title: Text('Sale Order'),

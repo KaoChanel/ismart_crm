@@ -37,46 +37,46 @@ class Customer {
   String custCode;
   String custName;
   dynamic custStartDate;
-  dynamic inactive;
+  String inactive;
   int creditDays;
   String taxId;
-  dynamic custAddr1;
+  String custAddr1;
   dynamic custAddr2;
   String district;
   String amphur;
-  Province province;
+  String province;
   String postCode;
   dynamic custTypeName;
-  String brchName;
-  dynamic saleAreaId;
+  dynamic brchName;
+  int saleAreaId;
   dynamic saleAreaName;
-  String custMapFullPath;
+  dynamic custMapFullPath;
   int empId;
-  EmpCode empCode;
-  EmpName empName;
+  String empCode;
+  String empName;
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
     custId: json["custId"] == null ? null : json["custId"],
     custCode: json["custCode"] == null ? null : json["custCode"],
     custName: json["custName"] == null ? null : json["custName"],
     custStartDate: json["custStartDate"],
-    inactive: json["inactive"],
+    inactive: json["inactive"] == null ? null : json["inactive"],
     creditDays: json["creditDays"] == null ? null : json["creditDays"],
     taxId: json["taxId"] == null ? null : json["taxId"],
-    custAddr1: json["custAddr1"],
+    custAddr1: json["custAddr1"] == null ? null : json["custAddr1"],
     custAddr2: json["custAddr2"],
     district: json["district"] == null ? null : json["district"],
     amphur: json["amphur"] == null ? null : json["amphur"],
-    province: json["province"] == null ? null : provinceValues.map[json["province"]],
+    province: json["province"] == null ? null : json["province"],
     postCode: json["postCode"] == null ? null : json["postCode"],
     custTypeName: json["custTypeName"],
-    brchName: json["brchName"] == null ? null : json["brchName"],
-    saleAreaId: json["saleAreaId"],
+    brchName: json["brchName"],
+    saleAreaId: json["saleAreaId"] == null ? null : json["saleAreaId"],
     saleAreaName: json["saleAreaName"],
-    custMapFullPath: json["custMapFullPath"] == null ? null : json["custMapFullPath"],
+    custMapFullPath: json["custMapFullPath"],
     empId: json["empId"] == null ? null : json["empId"],
-    empCode: json["empCode"] == null ? null : empCodeValues.map[json["empCode"]],
-    empName: json["empName"] == null ? null : empNameValues.map[json["empName"]],
+    empCode: json["empCode"] == null ? null : json["empCode"],
+    empName: json["empName"] == null ? null : json["empName"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -84,60 +84,22 @@ class Customer {
     "custCode": custCode == null ? null : custCode,
     "custName": custName == null ? null : custName,
     "custStartDate": custStartDate,
-    "inactive": inactive,
+    "inactive": inactive == null ? null : inactive,
     "creditDays": creditDays == null ? null : creditDays,
     "taxId": taxId == null ? null : taxId,
-    "custAddr1": custAddr1,
+    "custAddr1": custAddr1 == null ? null : custAddr1,
     "custAddr2": custAddr2,
     "district": district == null ? null : district,
     "amphur": amphur == null ? null : amphur,
-    "province": province == null ? null : provinceValues.reverse[province],
+    "province": province == null ? null : province,
     "postCode": postCode == null ? null : postCode,
     "custTypeName": custTypeName,
-    "brchName": brchName == null ? null : brchName,
-    "saleAreaId": saleAreaId,
+    "brchName": brchName,
+    "saleAreaId": saleAreaId == null ? null : saleAreaId,
     "saleAreaName": saleAreaName,
-    "custMapFullPath": custMapFullPath == null ? null : custMapFullPath,
+    "custMapFullPath": custMapFullPath,
     "empId": empId == null ? null : empId,
-    "empCode": empCode == null ? null : empCodeValues.reverse[empCode],
-    "empName": empName == null ? null : empNameValues.reverse[empName],
+    "empCode": empCode == null ? null : empCode,
+    "empName": empName == null ? null : empName,
   };
-}
-
-enum EmpCode { EMS_0045 }
-
-final empCodeValues = EnumValues({
-  "EMS-0045": EmpCode.EMS_0045
-});
-
-enum EmpName { EMPTY }
-
-final empNameValues = EnumValues({
-  "สโรชาพัชร์ บุณยะโสรัจจ์": EmpName.EMPTY
-});
-
-enum Province { EMPTY, PROVINCE, PURPLE, FLUFFY, SAMUTPRAKARN, TENTACLED, STICKY }
-
-final provinceValues = EnumValues({
-  "กทม.": Province.EMPTY,
-  "จ.สมุทรปราการ": Province.FLUFFY,
-  "จ.สมุทรปราการ ": Province.PROVINCE,
-  "กรุงเทพมหานคร": Province.PURPLE,
-  "Samutprakarn": Province.SAMUTPRAKARN,
-  "จ.นนทบุรี": Province.STICKY,
-  "จ.ปทุมธานี": Province.TENTACLED
-});
-
-class EnumValues<T> {
-  Map<String, T> map;
-  Map<T, String> reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    if (reverseMap == null) {
-      reverseMap = map.map((k, v) => new MapEntry(v, k));
-    }
-    return reverseMap;
-  }
 }

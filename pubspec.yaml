@@ -72,6 +72,20 @@ flutter:
     - assets/business_support.jpg
     - assets/business_inventory.jpg
     - assets/bg_nic.jpg
+    - assets/work_schedule.jpg
+    - assets/work_schedule_02.jpg
+    - assets/work_schedule_03.jpg
+    - assets/shakehand_01.jpg
+    - assets/shakehand_02.jpg
+    - assets/shakehand_03.jpg
+    - assets/order_01.jpg
+    - assets/order_02.jpg
+    - assets/goods_return.jpg
+    - assets/analysis_01.jpg
+    - assets/analysis_02.jpg
+    - assets/analysis_03.jpg
+    - assets/analysis_04.jpg
+    - assets/analysis_05.jpg
     #- assets/bisgroup_logo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see

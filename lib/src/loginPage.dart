@@ -155,7 +155,7 @@ Widget _entryField(String title, TextEditingController controller,
             controller: controller,
             obscureText: isPassword,
             textInputAction: TextInputAction.next,
-            textCapitalization: TextCapitalization.characters,
+            textCapitalization: isPassword == true ? TextCapitalization.none : TextCapitalization.characters,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 fillColor: Color(0xfff3f3f4),

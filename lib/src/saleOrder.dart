@@ -190,12 +190,12 @@ class _SaleOrderState extends State<SaleOrder> {
       txtEmpCode.text = '${globals.employee?.empCode}';
     });
 
-    setState(() {
-      // txtRunningNo.text = runningNo ?? '';
-      // txtRefNo.text = refNo ?? '';
-      // txtDocuNo.text = docuNo ?? '';
-      // txtEmpCode.text = '${globals.company}${globals.employee?.empCode}';
-    });
+    // setState(() {
+    //   txtRunningNo.text = runningNo ?? '';
+    //   txtRefNo.text = refNo ?? '';
+    //   txtDocuNo.text = docuNo ?? '';
+    //   txtEmpCode.text = '${globals.company}${globals.employee?.empCode}';
+    // });
 
     print('Set Header.');
     print('Doc No: $docuNo');
@@ -211,56 +211,72 @@ class _SaleOrderState extends State<SaleOrder> {
   }
 
   void calculateSummary() {
-    //print(globals.productCart.length.toString());
-    if (globals.productCart.length > 0) {
-      discountTotal = 0;
-      priceTotal = 0;
-      globals.productCart.forEach((element) {
-        discountTotal += element.discount;
+    try {
+      print('Calculate globals.productCart : ' +
+          globals.productCart.length.toString());
+      if (globals.productCart.length > 0) {
+        discountTotal = 0;
+        priceTotal = 0;
+        globals.productCart.forEach((element) {
+          discountTotal += element.discountBase;
+        });
+        globals.productCart.forEach((element) {
+          priceTotal += element.goodAmount;
+        });
+      }
+      else {
+        discountTotal = 0;
+        priceTotal = 0;
+        priceAfterDiscount = 0;
+        globals.discountBill = 0;
+        vatTotal = 0;
+        netTotal = 0;
+      }
+
+      priceTotal = priceTotal - discountTotal;
+      if (globals.discountType == globals.DiscountType.PER) {
+        double percentDiscount = globals.discountBill / 100;
+        priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
+      } else {
+        priceAfterDiscount = priceTotal - globals.discountBill;
+      }
+
+      double sumPriceIncludeVat = 0;
+      if (globals.productCart != null) {
+        globals.productCart.where((element) => element?.vatRate != null)
+            .toList()
+            .forEach((element) {
+          sumPriceIncludeVat += element.goodPrice;
+        });
+      }
+
+      // vatTotal = (priceAfterDiscount * vat) / 100;
+      vatTotal = (sumPriceIncludeVat * vat) / 100;
+      netTotal = priceAfterDiscount + vatTotal;
+
+      setState(() {
+        txtDiscountTotal.text = currency.format(discountTotal);
+        txtPriceTotal.text = currency.format(priceTotal);
+        txtDiscountBill.text = currency.format(globals.discountBill);
+        txtPriceAfterDiscount.text = currency.format(priceAfterDiscount);
+        txtVatTotal.text = currency.format(vatTotal);
+        txtNetTotal.text = currency.format(netTotal);
       });
-      globals.productCart.forEach((element) {
-        priceTotal += element.goodAmount;
-      });
     }
-    else {
-      discountTotal = 0;
-      priceTotal = 0;
-      priceAfterDiscount = 0;
-      globals.discountBill = 0;
-      vatTotal = 0;
-      netTotal = 0;
+    catch(e) {
+      showDialog(
+          context: context,
+        child: AlertDialog(
+          title: Text('Exception'),
+          content: Text(e.toString()),
+        )
+      );
     }
-
-    priceTotal = priceTotal - discountTotal;
-    if (globals.discountType == globals.DiscountType.PER) {
-      double percentDiscount = globals.discountBill / 100;
-      priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
-    } else {
-      priceAfterDiscount = priceTotal - globals.discountBill;
-    }
-
-    double sumPriceIncludeVat = 0;
-    if(globals.productCart != null){
-      globals.productCart.where((element) => element.vatRate > 0).toList().forEach((element) {sumPriceIncludeVat += element.goodPrice;});
-    }
-
-    // vatTotal = (priceAfterDiscount * vat) / 100;
-    vatTotal = (sumPriceIncludeVat * vat) / 100;
-    netTotal = priceAfterDiscount + vatTotal;
-
-    setState(() {
-      txtDiscountTotal.text = currency.format(discountTotal);
-      txtPriceTotal.text = currency.format(priceTotal);
-      txtDiscountBill.text = currency.format(globals.discountBill);
-      txtPriceAfterDiscount.text = currency.format(priceAfterDiscount);
-      txtVatTotal.text = currency.format(vatTotal);
-      txtNetTotal.text = currency.format(netTotal);
-    });
   }
 
   void setSelectedShipto() {
     setState(() {
-      txtShiptoProvince.text = globals.selectedShipto.province ?? '';
+      txtShiptoProvince.text = globals.selectedShipto?.province ?? '';
       txtShiptoAddress.text = '${globals.selectedShipto.shiptoAddr1 ?? ''} '
           '${globals.selectedShipto?.shiptoAddr2 ?? ''} '
           '${globals.selectedShipto?.district ?? ''} '
@@ -279,7 +295,7 @@ class _SaleOrderState extends State<SaleOrder> {
     List<Widget> list = new List<Widget>();
     for (var i = 0; i < shiptoList?.length; i++) {
       list.add(ListTile(
-        title: Text('${shiptoList[i].shiptoAddr1} ${shiptoList[i].district} ${shiptoList[i].amphur} ${shiptoList[i].province} ${shiptoList[i].postcode}'),
+        title: Text('${shiptoList[i]?.shiptoAddr1 ?? ''} ${shiptoList[i]?.district ?? ''} ${shiptoList[i]?.amphur ?? ''} ${shiptoList[i]?.province ?? ''} ${shiptoList[i]?.postcode ?? ''}'),
         //subtitle: Text(item?.custCode),
         onTap: () {
           globals.selectedShipto = shiptoList[i];
@@ -287,7 +303,7 @@ class _SaleOrderState extends State<SaleOrder> {
           setState(() {});
         },
         selected:
-            globals.selectedShipto.shiptoAddr1 == shiptoList[i].shiptoAddr1,
+            globals.selectedShipto.shiptoAddr1 == shiptoList[i]?.shiptoAddr1 ?? '',
         selectedTileColor: Colors.grey[200],
         hoverColor: Colors.grey,
       ));
@@ -366,7 +382,7 @@ class _SaleOrderState extends State<SaleOrder> {
                   obj.goodQty2 = e.goodQty;
                   obj.goodPrice2 = e.goodPrice;
                   obj.goodAmnt = e.goodAmount;
-                  obj.goodDiscAmnt = e.discount;
+                  obj.goodDiscAmnt = e.discountBase;
                   detail.add(obj);
                 });
 

@@ -185,7 +185,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
               globals.selectedShipto = globals.allShipto?.firstWhere(
                   (element) => element.custId == globals.customer?.custId) ?? null;
 
-              print(globals.selectedShipto.shiptoAddr1);
+              print(globals.selectedShipto?.shiptoAddr1 ?? '');
 
               Navigator.pop(context);
             },

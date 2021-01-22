@@ -56,6 +56,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   TextEditingController txtDiscount = TextEditingController();
   TextEditingController txtTotal = TextEditingController();
   TextEditingController txtTotalNet = TextEditingController();
+  List<Stock> StockByProd = new List<Stock>();
 
   @override
   void initState() {
@@ -86,11 +87,11 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
   void setSelectedItem() {
     print('set Selected');
-    setState(() {
       if (widget.product?.goodCode == null) {
         _goodQty = 0;
       }
       else {
+        StockByProd = globals.allStock.where((element) => element.goodid == widget.product.goodId).toList();
         if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
           print('Compare < / Qty = $_goodQty');
           if (_goodQty == null) {
@@ -118,7 +119,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
       // txtTotal.text = currency.format(_totalAmount) ?? '0.00';
       // txtDiscount.text = currency.format(_discount) ?? '0.00';
       // txtTotalNet.text = currency.format(_totalNet) ?? '0.00';
-    });
+
   }
 
   void calculatedPrice(double _quantity, double _discountValue, double _price) {
@@ -171,8 +172,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
   void addProductToCart() {
     int row = 1;
-    
-    if (globals.productCart.length > 0) {
+    print('editedPrice : ' + widget.editedPrice.toString());
+    if (globals.productCart.length> 0) {
       print('Product Cart not equal null. ${globals.productCart.length}');
       row = globals.productCart.last.rowIndex + 1;
     }
@@ -241,7 +242,6 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void _showStockDialog(context) {
-    List<Stock> StockByProd = globals.allStock.where((element) => element.goodid == widget.product.goodId).toList();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -253,21 +253,13 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
             width: 500,
             child: ListView(
               children:
-                StockByProd.map((e) =>
-                    ListTile(
-                        title: Text('Lot No. ' + e.lotNo + '               คงเหลือ:  ' + currency.format(e.remaqty)),
-                        subtitle: Text('Expire: ' + dateFormat.format(e.expiredate) + '                        ' + e.goodUnitCode),
-                      onTap: (){},
-                    )
-                ).toList() ?? Text('ไม่มีข้อมูลสินค้าคงเหลือ'),
-              // Column(
-              //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-              //   children: [
-              //   new List.generate(StockByProd.length, (index) => new ListTile(
-              //   title: Text({StockByProd[index].goodName1}),
-              //     //StockByProd.map((element) => ListTile(),),
-              //   ],
-              // ),
+              StockByProd.map((e) =>
+                ListTile(
+                  title: Text('Lot No. ' + e.lotNo + '               คงเหลือ:  ' + currency.format(e.remaqty)),
+                  subtitle: Text('Expire: ' + dateFormat.format(e.expiredate) + '                        ' + e.goodUnitCode),
+                  onTap: (){},
+                )
+              ).toList(),
             ),
           ),
         );
@@ -282,6 +274,10 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     } else {
       return Text('%', style: TextStyle(fontSize: 18));
     }
+  }
+
+  Widget createEmptyWidget() {
+    return ListTile(title: Text('ไม่มีข้อมูลสต๊อค'),);
   }
 
   void showDiscountDialog(context){
@@ -381,16 +377,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     ),
                   )),
               Flexible(
-                child: ElevatedButton(
-                    onPressed: () {
-                      _showStockDialog(context);
-                    },
-                    child: Text(
-                      'เช็คสต๊อค',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style:
-                        ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                child: Container(
+                  child: ElevatedButton(
+                      onPressed: () {
+                        _showStockDialog(context);
+                      },
+                      child: Text(
+                        'เช็คสต๊อค',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      style:
+                          ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                ),
               ),
             ],
           ),

@@ -14,19 +14,19 @@ import 'package:http/http.dart' show Client;
 
 class ApiService {
   // Replace this with your computer's IP Address
-  final String baseUrl = "http://103.225.27.252/api";
+  final String baseUrl = "https://smartsalesbis.com/api";
   Client client = Client();
 
   Future<void> getCustomer() async {
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
-    var response = await client.get(strUrl);
-
-    if (response.statusCode == 200) {
-      globals.allCustomer = customerFromJson(response.body);
-    } else {
-      globals.allCustomer = null;
-    }
+    var response = await client.get(strUrl).then((value) {
+      if (value.statusCode == 200) {
+        globals.allCustomer = customerFromJson(value.body);
+      } else {
+        globals.allCustomer = null;
+      }
+    });
   }
 
   Future<void> getProduct() async {

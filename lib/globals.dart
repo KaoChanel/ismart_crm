@@ -9,7 +9,7 @@ import 'models/goods_unit.dart';
 
 enum DiscountType{ THB, PER }
 
-String publicAddress = 'http://103.225.27.252';
+String publicAddress = 'https://smartsalesbis.com';
 String company;
 bool enableEditPrice = false;
 DiscountType discountType = DiscountType.THB;
