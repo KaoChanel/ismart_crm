@@ -56,20 +56,25 @@ class _ItemStockState extends State<ItemStock> {
   @override
   Widget build(BuildContext context) {
     return
-      ListView(
+      Scrollbar(
         controller: _scroll,
-        children: widget.allStock?.map((item) {
-          return ListTile(
-            title: Text(item?.goodName1),
-            subtitle: Text(item?.goodCode),
-            onTap: () {
-              widget.itemSelectedCallback(item);
-            },
-            selected: widget.selectedItem?.goodCode == item?.goodCode,
-            selectedTileColor: Colors.grey[200],
-            hoverColor: Colors.grey,
-          );
-        })?.toList() ?? [],
+        radius: Radius.circular(5.0),
+        thickness: 4.0,
+        child: ListView(
+          controller: _scroll,
+          children: widget.allStock?.map((item) {
+            return ListTile(
+              title: Text(item?.goodName1),
+              subtitle: Text(item?.goodCode),
+              onTap: () {
+                widget.itemSelectedCallback(item);
+              },
+              selected: widget.selectedItem?.goodCode == item?.goodCode,
+              selectedTileColor: Colors.grey[200],
+              hoverColor: Colors.grey,
+            );
+          })?.toList() ?? [],
+        ),
       );
   }
 }

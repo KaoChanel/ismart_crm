@@ -86,6 +86,14 @@ flutter:
     - assets/analysis_03.jpg
     - assets/analysis_04.jpg
     - assets/analysis_05.jpg
+    - assets/cloud_01.jpg
+    - assets/cloud_02.jpg
+    - assets/avatar_01.png
+    - assets/bg_01.jpg
+    - assets/bg_02.jpg
+    - assets/bg_03.jpg
+    - assets/bg_04.jpg
+    - assets/bg_05.jpg
     #- assets/bisgroup_logo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see

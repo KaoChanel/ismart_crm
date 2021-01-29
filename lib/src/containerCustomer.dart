@@ -181,13 +181,39 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
         ),
         ElevatedButton.icon(
             onPressed: () {
-              globals.customer = _selectedItem;
-              globals.selectedShipto = globals.allShipto?.firstWhere(
-                  (element) => element.custId == globals.customer?.custId) ?? null;
+              if(_selectedItem == null){
+                return showDialog(
+                    context: context,
+                    child: AlertDialog(
+                      title: Text('แจ้งเตือน'),
+                      content: Text('กรุณาเลือกลูกค้า'),
+                      actions: [
+                        ElevatedButton(onPressed: (){Navigator.pop(context);}, child: Text('ตกลง'))
+                      ],
+                    ));
+              }
+              var _allShipto = globals.allShipto?.firstWhere(
+                  (element) => element.custId == _selectedItem?.custId, orElse: () => null);
 
-              print(globals.selectedShipto?.shiptoAddr1 ?? '');
+              if(_allShipto == null)
+                {
+                  return showDialog(
+                      context: context,
+                      child: AlertDialog(
+                        title: Text('แจ้งเตือน'),
+                        content: Text('ลูกค้ารายนี้ยังไม่มีข้อมูลการจัดส่งในระบบ WinSpeed ERP'),
+                        actions: [
+                          FlatButton(onPressed: (){Navigator.pop(context);}, child: Text('ตกลง'))
+                        ],
+                      ));
+                }
+              else{
+                globals.customer = _selectedItem;
+                globals.selectedShipto = _allShipto;
+                Navigator.pop(context);
+              }
 
-              Navigator.pop(context);
+              // print(globals.selectedShipto?.shiptoAddr1 ?? '');
             },
             icon: Icon(Icons.check_circle_sharp),
             label: Text(

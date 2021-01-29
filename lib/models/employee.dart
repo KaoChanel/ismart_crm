@@ -1,103 +1,101 @@
-import 'package:meta/meta.dart';
-
 // To parse this JSON data, do
 //
-//     final employees = employeesFromJson(jsonString);
+//     final employee = employeeFromJson(jsonString);
 
 import 'dart:convert';
 
 Employee employeeFromJson(String str) => Employee.fromJson(json.decode(str));
 
-String employeeToJson(List<Employee> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String employeeToJson(Employee data) => json.encode(data.toJson());
 
 class Employee {
   Employee({
-    this.rowId,
-    this.empId,
     this.deptId,
+    this.deptName,
+    this.deptCode,
+    this.sideId,
     this.postId,
+    this.postCode,
+    this.postName,
+    this.empId,
     this.empCode,
-    this.namePrefix,
+    this.empTitle,
+    this.empTitleEng,
     this.empName,
-    this.nickname,
-    this.createBy,
-    this.createDate,
-    this.updateBy,
-    this.updateDate,
-    this.address,
-    this.contact,
+    this.empNameEng,
     this.email,
-    this.leaderId,
     this.teamId,
     this.dummyCode,
     this.remark,
     this.username,
+    this.empStatus,
+    this.isLock
   });
 
-  int rowId;
-  int empId;
   int deptId;
-  int postId;
+  String deptName;
+  String deptCode;
+  int sideId;
+  dynamic postId;
+  dynamic postCode;
+  dynamic postName;
+  int empId;
   String empCode;
-  dynamic namePrefix;
+  String empTitle;
+  String empTitleEng;
   String empName;
-  dynamic nickname;
-  dynamic createBy;
-  dynamic createDate;
-  dynamic updateBy;
-  dynamic updateDate;
-  dynamic address;
-  dynamic contact;
+  String empNameEng;
   dynamic email;
-  dynamic leaderId;
   dynamic teamId;
   dynamic dummyCode;
-  String remark;
-  String username;
+  dynamic remark;
+  dynamic username;
+  String empStatus;
+  String isLock;
 
   factory Employee.fromJson(Map<String, dynamic> json) => Employee(
-    rowId: json["rowId"] == null ? null : json["rowId"],
-    empId: json["empId"] == null ? null : json["empId"],
     deptId: json["deptId"] == null ? null : json["deptId"],
-    postId: json["postId"] == null ? null : json["postId"],
+    deptName: json["deptName"] == null ? null : json["deptName"],
+    deptCode: json["deptCode"] == null ? null : json["deptCode"],
+    sideId: json["sideId"] == null ? null : json["sideId"],
+    postId: json["postId"],
+    postCode: json["postCode"],
+    postName: json["postName"],
+    empId: json["empId"] == null ? null : json["empId"],
     empCode: json["empCode"] == null ? null : json["empCode"],
-    namePrefix: json["namePrefix"],
+    empTitle: json["empTitle"] == null ? null : json["empTitle"],
+    empTitleEng: json["empTitleEng"] == null ? null : json["empTitleEng"],
     empName: json["empName"] == null ? null : json["empName"],
-    nickname: json["nickname"],
-    createBy: json["createBy"],
-    createDate: json["createDate"],
-    updateBy: json["updateBy"],
-    updateDate: json["updateDate"],
-    address: json["address"],
-    contact: json["contact"],
+    empNameEng: json["empNameEng"] == null ? null : json["empNameEng"],
     email: json["email"],
-    leaderId: json["leaderId"],
     teamId: json["teamId"],
     dummyCode: json["dummyCode"],
-    remark: json["remark"] == null ? null : json["remark"],
-    username: json["username"] == null ? null : json["username"],
+    remark: json["remark"],
+    username: json["username"],
+    empStatus: json["empStatus"],
+    isLock: json["isLock"]
   );
 
   Map<String, dynamic> toJson() => {
-    "rowId": rowId == null ? null : rowId,
-    "empId": empId == null ? null : empId,
     "deptId": deptId == null ? null : deptId,
-    "postId": postId == null ? null : postId,
+    "deptName": deptName == null ? null : deptName,
+    "deptCode": deptCode == null ? null : deptCode,
+    "sideId": sideId == null ? null : sideId,
+    "postId": postId,
+    "postCode": postCode,
+    "postName": postName,
+    "empId": empId == null ? null : empId,
     "empCode": empCode == null ? null : empCode,
-    "namePrefix": namePrefix,
+    "empTitle": empTitle == null ? null : empTitle,
+    "empTitleEng": empTitleEng == null ? null : empTitleEng,
     "empName": empName == null ? null : empName,
-    "nickname": nickname,
-    "createBy": createBy,
-    "createDate": createDate,
-    "updateBy": updateBy,
-    "updateDate": updateDate,
-    "address": address,
-    "contact": contact,
+    "empNameEng": empNameEng == null ? null : empNameEng,
     "email": email,
-    "leaderId": leaderId,
     "teamId": teamId,
     "dummyCode": dummyCode,
-    "remark": remark == null ? null : remark,
-    "username": username == null ? null : username,
+    "remark": remark,
+    "username": username,
+    "empStatus": empStatus,
+    "isLock": isLock
   };
 }

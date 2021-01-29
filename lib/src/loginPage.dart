@@ -9,6 +9,7 @@ import 'package:ismart_crm/models/company.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/models/user.dart';
 import 'package:ismart_crm/globals.dart' as globals;
+import 'package:ismart_crm/api_service.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key, this.title}) : super(key: key);
@@ -20,12 +21,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   User _user;
   Company compValue;
   TextEditingController txtUsername = new TextEditingController();
   TextEditingController txtPassword = new TextEditingController();
   bool _loginSuccess = false;
+  ApiService _apiService = new ApiService();
 
   @override
   void dispose() {
@@ -34,32 +35,71 @@ class _LoginPageState extends State<LoginPage> {
     txtPassword.dispose();
   }
 
-  Future<void> getUser(String company, String username, String password) async {
-    showLoaderDialog(context);
-    http.Response response = await http.get(
-        // '${globals.publicAddress}/login/LoginByEmpCode?_company=$company&_empcode=$username&password=$password'
-        '${globals.publicAddress}/api/login/LoginByEmpCode/$company/$username/$password');
-    print(response.body);
-    var decode = jsonDecode(response.body);
+  Future<Employee> getUser(String company, String username, String password) async {
+    //showLoaderDialog(context);
+    try {
+      String strUrl = '${globals.publicAddress}/api/login/LoginByEmpCode/$company/$username/$password';
+      http.Response response = await http.get(strUrl);
+      print(response.body);
+      var decode = jsonDecode(response.body);
 
-    if (decode['empId'] != 0) {
-      // _user = userFromJson(response.body);
+      if (decode['empId'] != 0) {
+        // _user = userFromJson(response.body);
+        //
+        // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
+        // response = await http.get(strUrl);
+
+        globals.employee = employeeFromJson(response.body);
+        globals.company = company;
+        _apiService.getCompany().then((value) =>
+            Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Launcher()))
+        );
+        // _apiService.getCustomer();
+        // _apiService.getProduct();
+        // _apiService.getUnit();
+        // _apiService.getShipto();
+        // _apiService.getStock();
+      }
+      else {
+        showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+      }
+      // Navigator.pop(context);
+      print(_user);
+      //     .then((value) {
+      //   if(value.statusCode == 200){
+      //     print(value.body);
+      //     var decode = jsonDecode(value.body);
       //
-      // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
-      // response = await http.get(strUrl);
+      //     if (decode['empId'] != 0) {
+      //       // _user = userFromJson(response.body);
+      //       //
+      //       // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
+      //       // response = await http.get(strUrl);
+      //
+      //       globals.employee = employeeFromJson(value.body);
+      //       globals.company = company;
+      //
+      //       Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(builder: (context) => Launcher()));
+      //     }
+      //     else {
+      //       showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+      //     }
+      //     // Navigator.pop(context);
+      //     print(_user);
+      //   }
+      //   else{
+      //     showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+      //   }
+      // });
 
-      globals.employee = employeeFromJson(response.body);
-      globals.company = company;
-
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Launcher()));
     }
-    else {
-      showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+    catch(e){
+      showAlertDialog(context, e.toString());
     }
-    // Navigator.pop(context);
-    print(_user);
 }
 
   showLoaderDialog(BuildContext context){
@@ -198,7 +238,7 @@ Widget _submitButton() {
     onTap: () {
       // showLoaderDialog(context);
       getUser(compValue.compCode, txtUsername.text, txtPassword.text);
-      Navigator.pop(context);
+      //Navigator.pop(context);
       print("Username: " + txtUsername?.text + " Password: " + txtPassword?.text);
     },
     child: Container(

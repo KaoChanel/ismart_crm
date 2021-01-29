@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 // Import the client from the Http Packages
+import 'models/companies.dart';
 import 'models/customer.dart';
 import 'models/product.dart';
 import 'models/goods_unit.dart';
@@ -17,10 +18,20 @@ class ApiService {
   final String baseUrl = "https://smartsalesbis.com/api";
   Client client = Client();
 
-  Future<void> getCustomer() async {
+  Future<void> getCompany() async {
+    String strUrl = '${globals.publicAddress}/api/company/${globals.company}';
+    var response = await client.get(strUrl);
+      if (response.statusCode == 200) {
+        globals.allCompany = companyFromJson(response.body);
+      } else {
+        globals.allCompany = null;
+      }
+  }
+
+  Future<void> getCustomer() {
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
-    var response = await client.get(strUrl).then((value) {
+    var response = client.get(strUrl).then((value) {
       if (value.statusCode == 200) {
         globals.allCustomer = customerFromJson(value.body);
       } else {
@@ -80,9 +91,9 @@ class ApiService {
     }
   }
 
-  Future<List<SaleOrderHeader>> getSaleOrderHeader() async {
+  Future<List<SaleOrderHeader>> getSOHD() async {
     final response =
-        await client.get("$baseUrl/SaleOrderHeader/${globals.company}");
+        await client.get("${globals.publicAddress}/api/SaleOrderHeader/${globals.company}");
     var data = saleOrderHeaderFromJson(response.body);
 
     if (response.statusCode == 200) {
@@ -92,16 +103,28 @@ class ApiService {
     }
   }
 
-  Future<List<SaleOrderHeader>> getSaleOrderHeaderById(int id) async {
-    final response =
-    await client.get("$baseUrl/SaleOrderHeader/${globals.company}/$id");
-    var data = saleOrderHeaderFromJson(response.body);
+  List<SaleOrderHeader> getSOHDByEmp(int id) {
+    final response = client.get('${globals.publicAddress}/api/SaleOrderHeader/GetTempSohdByEmp/${globals.company}/$id')
+        .then((value) {
+      if (value.statusCode == 200) {
+        List<SaleOrderHeader> data = saleOrderHeaderFromJson(value.body);
+        return data;
+      } else {
+        return null;
+      }
+    });
+  }
 
-    if (response.statusCode == 200) {
-      return data;
-    } else {
-      return null;
-    }
+  List<SaleOrderDetail> getSODTByEmp(int id) {
+    final response = client.get('${globals.publicAddress}/api/SaleOrderDetail/GetTempSodtByEmp/${globals.company}/$id')
+        .then((value) {
+      if (value.statusCode == 200) {
+        List<SaleOrderDetail> data = saleOrderDetailFromJson(value.body);
+        return data;
+      } else {
+        return null;
+      }
+    });
   }
 
   // Future<String> getDocNo() async {

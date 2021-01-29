@@ -14,7 +14,7 @@ class Launcher extends StatefulWidget {
 }
 
 class _LauncherState extends State<Launcher> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 3;
   PageController _pageController = new PageController();
   List<Widget> _pageWidget = <Widget>[
     DashboardPage(),
@@ -41,6 +41,11 @@ class _LauncherState extends State<Launcher> {
     ),
   ];
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+  @override
   void dispose() {
     // TODO: implement dispose
     _pageController.dispose();
@@ -49,7 +54,7 @@ class _LauncherState extends State<Launcher> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      _pageController.animateToPage(index, duration: Duration(milliseconds: 1000), curve: Curves.bounceOut);
+      _pageController.animateToPage(index, duration: Duration(seconds: 1), curve: Curves.easeIn);
     });
   }
 
@@ -58,9 +63,9 @@ class _LauncherState extends State<Launcher> {
     return Scaffold(
       drawer: NavDrawer(),
       appBar: AppBar(
-        title: Center(child: Text('BIS Group (${globals.company})')),
+        title: Center(child: Text('BIS Group (${globals.allCompany?.first?.compNameEng ?? ''})')),
       ),
-      body: SizedBox.expand(
+      body: SizedBox(
         child: PageView(
           controller: _pageController,
             onPageChanged: (index) {

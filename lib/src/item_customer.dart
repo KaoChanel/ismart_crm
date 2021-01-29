@@ -19,7 +19,7 @@ class ItemCustomer extends StatefulWidget {
 }
 
 class _ItemCustomerState extends State<ItemCustomer> {
-  ScrollController _scroll = ScrollController();
+  final ScrollController _scroll = ScrollController();
 
   @override
   void initState() {
@@ -78,18 +78,22 @@ class _ItemCustomerState extends State<ItemCustomer> {
   @override
   Widget build(BuildContext context) {
     return
-        ListView(
+        Scrollbar(
           controller: _scroll,
-          children: widget.allCustomer.map((item) {
-            return ListTile(
-                title: Text(item?.custName),
-                subtitle: Text(item?.custCode),
-                onTap: () => widget.itemSelectedCallback(item),
-                selected: widget.selectedItem?.custCode == item?.custCode,
-                selectedTileColor: Colors.grey[200],
-                hoverColor: Colors.grey,
-              );
-          }).toList(),
-    );
+          isAlwaysShown: false,
+          child: ListView(
+            controller: _scroll,
+            children: widget.allCustomer?.map((item) {
+              return ListTile(
+                  title: Text(item?.custName),
+                  subtitle: Text(item?.custCode),
+                  onTap: () => widget.itemSelectedCallback(item),
+                  selected: widget.selectedItem?.custCode == item?.custCode,
+                  selectedTileColor: Colors.grey[200],
+                  hoverColor: Colors.grey,
+                );
+            })?.toList() ?? [],
+    ),
+        );
   }
 }

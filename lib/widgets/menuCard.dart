@@ -28,7 +28,7 @@ class MenuCard extends StatelessWidget {
               // decoration: BoxDecoration(color: Colors.blueAccent),
               child: Image(
                     image: AssetImage(path),
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fitWidth,
                   ),
               // Center(
               //     child: Icon(

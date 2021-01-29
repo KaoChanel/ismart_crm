@@ -14,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/api_service.dart';
 import 'package:ismart_crm/widgets/menuCard.dart';
+import 'statusTransferDoc.dart';
 
 Widget _menuCard(String _path) {
   return Card(
@@ -58,6 +59,7 @@ class DashboardPageState extends State<DashboardPage> {
     // TODO: implement initState
     super.initState();
     if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null || globals.allStock == null){
+      //_apiService.getCompany();
       _apiService.getCustomer();
       _apiService.getProduct();
       _apiService.getUnit();
@@ -112,8 +114,9 @@ class DashboardPageState extends State<DashboardPage> {
                               context,
                               CupertinoPageRoute(
                                   builder: (context) => ContainerCustomer())
-                          ).then((value) {setState(() {});
-                          });
+                          ).then((value) {setState(() {
+                            
+                          });});
                         },
                       )),
                     ],
@@ -195,20 +198,40 @@ class DashboardPageState extends State<DashboardPage> {
                   ),
 
                   Expanded(
-                    child: Container(
-                        child: MenuCard(title:'แจ้งคืนสินค้า', path:'assets/goods_return.jpg')),
+                    child: Visibility(
+                      visible: true,
+                      child: Container(
+                          child: MenuCard(title:'แจ้งคืนสินค้า', path:'assets/goods_return.jpg')),
+                    ),
                   ),
                   Expanded(
-                    child: Container(
-                        child: MenuCard(title:'แบบสอบถาม', path:'assets/business_support.jpg')),
+                    child: Visibility(
+                      visible: true,
+                      child: Container(
+                          child: Stack(children: [
+                            MenuCard(title:'สถานะ โอนรายการ', path:'assets/cloud_02.jpg',),
+                            Positioned.fill(
+                                child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(10),
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            CupertinoPageRoute(
+                                                builder: (context) => StatusTransferDoc()));
+                                      },
+                                    )))
+                          ]
+                          )),
+
+                    ),
                   ),
                   Expanded(
                     child: Visibility(
                       visible: false,
                       child: Container(
-                        // child: MenuCard(
-                        //     title:'บริการ', path:'assets/business_support.jpg')
-                      ),
+                          child: MenuCard(title:'แบบสอบถาม', path:'assets/business_support.jpg')),
                     ),
                   ),
                 ],
