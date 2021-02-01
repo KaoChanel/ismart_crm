@@ -55,17 +55,16 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
     'ชื่อลูกค้า (A-Z)',
   ];
 
-  Future<void> getSOHDByEmp(int id) {
+  Future<void> getSOHDByEmp(int id) async {
     try {
       String strUrl =
           '${globals.publicAddress}/api/SaleOrderHeader/GetTempSohdByEmp/${globals.company}/$id';
-      final response = http.get(strUrl).then((value) {
-        if (value.statusCode == 200) {
-          globals.tempSOHD = saleOrderHeaderFromJson(value.body);
+      final response = await http.get(strUrl);
+        if (response.statusCode == 200) {
+          globals.tempSOHD = saleOrderHeaderFromJson(response.body);
         } else {
           globals.tempSOHD = null;
         }
-      });
     } catch (e) {
       showDialog(
           context: context,
@@ -83,8 +82,8 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
   @override
   void initState() {
     // TODO: implement initState
-    getSOHDByEmp(globals.employee.empId);
     super.initState();
+    getSOHDByEmp(globals.employee.empId);
   }
 
   onSort(int columnIndex, bool ascending) {
@@ -194,7 +193,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                         onSelectChanged: (isSelect) {
                           selectedItem = element;
                           onSelectedRow(isSelect, element);
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SaleOrderEdit()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => SaleOrderEdit(saleOrderHD: element,)));
                           },
                         cells: <DataCell>[
                           DataCell(

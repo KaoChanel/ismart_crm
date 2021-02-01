@@ -105,10 +105,9 @@ void _showShiptoDialog(context) {
 }
 
 class SaleOrderEdit extends StatefulWidget {
-  SaleOrderEdit({@required this.saleOrderHD, @required this.saleOrderDT});
+  SaleOrderEdit({@required this.saleOrderHD});
 
-  final List<SaleOrderHeader> saleOrderHD;
-  final List<SaleOrderDetail> saleOrderDT;
+  final SaleOrderHeader saleOrderHD;
 
   @override
   _SaleOrderEditState createState() => _SaleOrderEditState();
@@ -116,7 +115,7 @@ class SaleOrderEdit extends StatefulWidget {
 
 class _SaleOrderEditState extends State<SaleOrderEdit> {
   ApiService _apiService = new ApiService();
-  List<SaleOrderHeader> SOHD = new List<SaleOrderHeader>();
+  SaleOrderHeader SOHD = new SaleOrderHeader();
   List<SaleOrderDetail> SODT = new List<SaleOrderDetail>();
   final currency = new NumberFormat("#,##0.00", "en_US");
   String runningNo;
@@ -173,6 +172,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   void initState() {
     // TODO: implement initState
     setSelectedShipto();
+    SOHD = widget.saleOrderHD;
     super.initState();
   }
 
@@ -184,17 +184,23 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   }
 
   void setHeader() {
-    _apiService.getRefNo().then((value) {
-      runningNo = value;
-      refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
-      txtRunningNo.text = runningNo ?? '';
-      txtRefNo.text = refNo ?? '';
-    });
-    _apiService.getDocNo().then((value) {
-      docuNo = value;
-      txtDocuNo.text = docuNo ?? '';
-      txtEmpCode.text = '${globals.employee?.empCode}';
-    });
+
+    runningNo = widget.saleOrderHD.docuNo ?? '';
+    refNo = widget.saleOrderHD.refNo ?? '';
+    txtRunningNo.text = runningNo;
+    txtRefNo.text = refNo;
+    txtDocuNo.text = widget.saleOrderHD.docuNo;
+    // _apiService.getRefNo().then((value) {
+    //   runningNo = value;
+    //   refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
+    //   txtRunningNo.text = runningNo ?? '';
+    //   txtRefNo.text = refNo ?? '';
+    // });
+    // _apiService.getDocNo().then((value) {
+    //   docuNo = value;
+    //   txtDocuNo.text = docuNo ?? '';
+    //   txtEmpCode.text = '${globals.employee?.empCode}';
+    // });
 
     // setState(() {
     //   txtRunningNo.text = runningNo ?? '';
@@ -280,14 +286,22 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
 
   void setSelectedShipto() {
     setState(() {
-      txtShiptoProvince.text = globals.selectedShipto?.province ?? '';
-      txtShiptoAddress.text = '${globals.selectedShipto.shiptoAddr1 ?? ''} '
-          '${globals.selectedShipto?.shiptoAddr2 ?? ''} '
-          '${globals.selectedShipto?.district ?? ''} '
-          '${globals.selectedShipto?.amphur ?? ''} '
-          '${globals.selectedShipto?.province ?? ''} '
-          '${globals.selectedShipto?.postcode ?? ''}';
-      txtShiptoRemark.text = globals.selectedShipto.remark ?? '';
+      // txtShiptoProvince.text = globals.selectedShipto?.province ?? '';
+      // txtShiptoAddress.text = '${globals.selectedShipto.shiptoAddr1 ?? ''} '
+      //     '${globals.selectedShipto?.shiptoAddr2 ?? ''} '
+      //     '${globals.selectedShipto?.district ?? ''} '
+      //     '${globals.selectedShipto?.amphur ?? ''} '
+      //     '${globals.selectedShipto?.province ?? ''} '
+      //     '${globals.selectedShipto?.postcode ?? ''}';
+      // txtShiptoRemark.text = globals.selectedShipto.remark ?? '';
+      txtShiptoProvince.text = widget.saleOrderHD.province ?? '';
+      txtShiptoAddress.text = '${widget.saleOrderHD.shipToAddr1 ?? ''} '
+          '${widget.saleOrderHD.shipToAddr2 ?? ''} '
+          '${widget.saleOrderHD.district ?? ''} '
+          '${widget.saleOrderHD.amphur ?? ''} '
+          '${widget.saleOrderHD.province ?? ''} '
+          '${widget.saleOrderHD.postCode ?? ''}';
+      txtShiptoRemark.text = widget.saleOrderHD.remark ?? '';
     });
   }
 
