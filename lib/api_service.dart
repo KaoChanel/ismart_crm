@@ -28,16 +28,15 @@ class ApiService {
       }
   }
 
-  Future<void> getCustomer() {
+  Future<void> getCustomer() async {
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
-    var response = client.get(strUrl).then((value) {
-      if (value.statusCode == 200) {
-        globals.allCustomer = customerFromJson(value.body);
+    var response = await client.get(strUrl);
+      if (response.statusCode == 200) {
+        globals.allCustomer = customerFromJson(response.body);
       } else {
         globals.allCustomer = null;
       }
-    });
   }
 
   Future<void> getProduct() async {
@@ -115,16 +114,16 @@ class ApiService {
     });
   }
 
-  List<SaleOrderDetail> getSODTByEmp(int id) {
-    final response = client.get('${globals.publicAddress}/api/SaleOrderDetail/GetTempSodtByEmp/${globals.company}/$id')
-        .then((value) {
-      if (value.statusCode == 200) {
-        List<SaleOrderDetail> data = saleOrderDetailFromJson(value.body);
+  Future<List<SaleOrderDetail>> getSODT(int soID) async {
+    //'${globals.publicAddress}/api/SaleOrderDetail/GetTempSodtByEmp/${globals.company}/$id'
+    String strUrl = '${globals.publicAddress}/api/SaleOrderDetail/${globals.company}/$soID';
+    final response = await client.get(strUrl);
+      if (response.statusCode == 200) {
+        var data = saleOrderDetailFromJson(response.body);
         return data;
       } else {
         return null;
       }
-    });
   }
 
   // Future<String> getDocNo() async {
@@ -166,21 +165,7 @@ class ApiService {
     }
   }
 
-// Update an existing sohd
-  Future<bool> updateSaleOrderHeader(SaleOrderHeader data) async {
-    final response = await client.put(
-      "$baseUrl/SaleOrderHeader/${globals.company}/${data.soid}",
-      headers: {"content-type": "application/json"},
-      body: json.encode(data.toJson()),
-    );
-    if (response.statusCode == 204) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-// Create a new sohd
+  // Create a new sohd
   Future<SaleOrderHeader> addSaleOrderHeader(SaleOrderHeader data) async {
     final response = await client.post(
       "$baseUrl/SaleOrderHeader/${globals.company}/",
@@ -215,6 +200,32 @@ class ApiService {
     print('$str');
 
     if (response.statusCode == 201) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> updateSaleOrderHeader(SaleOrderHeader data) async {
+    final response = await client.put(
+      "$baseUrl/SaleOrderHeader/${globals.company}/${data.soid}",
+      headers: {"content-type": "application/json"},
+      body: json.encode(data.toJson()),
+    );
+    if (response.statusCode == 204) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> updateSaleOrderDetail(List<SaleOrderDetail> data) async {
+    final response = await client.put(
+      "$baseUrl/SaleOrderDetail/${globals.company}",
+      headers: {"content-type": "application/json"},
+      body: saleOrderDetailToJson(data),
+    );
+    if (response.statusCode == 204) {
       return true;
     } else {
       return false;

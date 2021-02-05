@@ -59,19 +59,27 @@ class _ItemStockState extends State<ItemStock> {
       Scrollbar(
         controller: _scroll,
         radius: Radius.circular(5.0),
-        thickness: 4.0,
+        thickness: 3.0,
         child: ListView(
           controller: _scroll,
           children: widget.allStock?.map((item) {
-            return ListTile(
-              title: Text(item?.goodName1),
-              subtitle: Text(item?.goodCode),
-              onTap: () {
-                widget.itemSelectedCallback(item);
-              },
-              selected: widget.selectedItem?.goodCode == item?.goodCode,
-              selectedTileColor: Colors.grey[200],
-              hoverColor: Colors.grey,
+            return Container(
+              decoration:
+              new BoxDecoration(
+                  border: new Border(
+                      bottom: new BorderSide(width: 0.5, color: Colors.black26)
+                  )
+              ),
+              child: ListTile(
+                title: Text(item?.goodName1),
+                subtitle: Text(item?.goodCode),
+                onTap: () {
+                  widget.itemSelectedCallback(item);
+                },
+                selected: widget.selectedItem?.goodCode == item?.goodCode,
+                selectedTileColor: Colors.grey[200],
+                hoverColor: Colors.grey,
+              ),
             );
           })?.toList() ?? [],
         ),

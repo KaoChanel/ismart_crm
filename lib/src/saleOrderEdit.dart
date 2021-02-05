@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/models/shipto.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'containerProduct.dart';
@@ -23,29 +24,11 @@ dynamic _selectDate(BuildContext context, DateTime _selectedDate,
     initialDate: _selectedDate != null ? _selectedDate : DateTime.now(),
     firstDate: DateTime(1995),
     lastDate: DateTime(2030),
-    // builder: (BuildContext context, Widget child) {
-    //   return Theme(
-    //     data: ThemeData.dark().copyWith(
-    //       colorScheme: ColorScheme.dark(
-    //         primary: Colors.deepPurple,
-    //         onPrimary: Colors.white,
-    //         surface: Colors.blueGrey,
-    //         onSurface: Colors.yellow,
-    //       ),
-    //       dialogBackgroundColor: Colors.blue[500],
-    //     ),
-    //     child: child,
-    //   );
-    // }
   );
 
   if (newSelectedDate != null) {
     _selectedDate = newSelectedDate;
     _textEditController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
-
-    // _textEditingController..text = DateFormat.yMMMd().format(_selectedDate)..selection = TextSelection.fromPosition(TextPosition(
-    //       offset: _textEditingController.text.length,
-    //       affinity: TextAffinity.upstream));
   }
 }
 
@@ -61,41 +44,7 @@ void _showShiptoDialog(context) {
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                // new Row(
-                //   children: <Widget>[
-                //     new Icon(Icons.toys),
-                //     Padding(
-                //       padding: const EdgeInsets.only(left: 8.0),
-                //       child: new Text(' First Item'),
-                //     ),
-                //   ],
-                // ),
-                // new SizedBox(
-                //   height: 20.0,
-                // ),
-                // new Row(
-                //   children: <Widget>[
-                //     new Icon(Icons.toys),
-                //     Padding(
-                //       padding: const EdgeInsets.only(left: 8.0),
-                //       child: new Text(' Second Item'),
-                //     ),
-                //   ],
-                // ),
-                // new SizedBox(
-                //   height: 20.0,
-                // ),
-                // new Row(
-                //   children: <Widget>[
-                //     new Icon(Icons.toys),
-                //     Padding(
-                //       padding: const EdgeInsets.only(left: 8.0),
-                //       child: new Text('Third Item'),
-                //     ),
-                //   ],
-                // ),
-              ],
+              children: <Widget>[],
             ),
           ),
         ),
@@ -114,10 +63,11 @@ class SaleOrderEdit extends StatefulWidget {
 }
 
 class _SaleOrderEditState extends State<SaleOrderEdit> {
-  ApiService _apiService = new ApiService();
-  SaleOrderHeader SOHD = new SaleOrderHeader();
-  List<SaleOrderDetail> SODT = new List<SaleOrderDetail>();
-  final currency = new NumberFormat("#,##0.00", "en_US");
+  ApiService _apiService = ApiService();
+  SaleOrderHeader SOHD = SaleOrderHeader();
+  List<SaleOrderDetail> SODT = List<SaleOrderDetail>();
+  Shipto selectedShipTo = Shipto();
+  final currency = NumberFormat("#,##0.00", "en_US");
   String runningNo;
   String docuNo;
   String refNo;
@@ -128,52 +78,50 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   double priceAfterDiscount = 0;
   double vatTotal = 0.0;
   double netTotal = 0.0;
-  DateTime _docuDate = DateTime.now();
-  DateTime _shiptoDate = DateTime.now().add(new Duration(hours: 24));
+  DateTime _docuDate;
+  DateTime _shiptoDate;
   DateTime _orderDate;
+  bool isInitial = false;
+  bool editedDocuDate = false;
+  bool editedShipDate = false;
 
   FocusNode focusDiscount = FocusNode();
-  TextEditingController txtRunningNo = new TextEditingController();
-  TextEditingController txtDocuNo = new TextEditingController();
-  TextEditingController txtRefNo = new TextEditingController();
+  TextEditingController txtRunningNo = TextEditingController();
+  TextEditingController txtDocuNo = TextEditingController();
+  TextEditingController txtRefNo = TextEditingController();
   TextEditingController txtSONo;
   TextEditingController txtDeptCode;
   TextEditingController txtCopyDocuNo;
-  TextEditingController txtEmpCode = new TextEditingController();
-  TextEditingController txtEmpName;
-  TextEditingController txtCustCode;
-  TextEditingController txtCustName;
-  TextEditingController txtCreditType;
-  TextEditingController txtCredit;
-  TextEditingController txtStatus;
-  TextEditingController txtRemark;
+  TextEditingController txtEmpCode = TextEditingController();
+  TextEditingController txtEmpName = TextEditingController();
+  TextEditingController txtCustCode = TextEditingController();
+  TextEditingController txtCustName = TextEditingController();
+  TextEditingController txtCreditType = TextEditingController();
+  TextEditingController txtCredit = TextEditingController();
+  TextEditingController txtStatus = TextEditingController();
+  TextEditingController txtRemark = TextEditingController();
 
   TextEditingController txtShiptoName;
   TextEditingController txtShiptoCode;
-  TextEditingController txtShiptoProvince = new TextEditingController();
-  TextEditingController txtShiptoAddress = new TextEditingController();
-  TextEditingController txtShiptoRemark = new TextEditingController();
-  TextEditingController txtPriceTotal = new TextEditingController();
-  TextEditingController txtDiscountTotal = new TextEditingController();
-  TextEditingController txtDiscountBill = new TextEditingController();
-  TextEditingController txtPriceAfterDiscount = new TextEditingController();
-  TextEditingController txtVatTotal = new TextEditingController();
-  TextEditingController txtNetTotal = new TextEditingController();
+  TextEditingController txtShiptoProvince = TextEditingController();
+  TextEditingController txtShiptoAddress = TextEditingController();
+  TextEditingController txtShiptoRemark = TextEditingController();
+  TextEditingController txtPriceTotal = TextEditingController();
+  TextEditingController txtDiscountTotal = TextEditingController();
+  TextEditingController txtDiscountBill = TextEditingController();
+  TextEditingController txtPriceAfterDiscount = TextEditingController();
+  TextEditingController txtVatTotal = TextEditingController();
+  TextEditingController txtNetTotal = TextEditingController();
 
-  TextEditingController txtDocuDate = TextEditingController(
-      text: DateFormat('dd/MM/yyyy').format(DateTime.now()));
-  TextEditingController txtShiptoDate = TextEditingController(
-      text: DateFormat('dd/MM/yyyy')
-          .format(DateTime.now().add(new Duration(hours: 24))));
-  TextEditingController txtOrderDate = TextEditingController(
-      text: DateFormat('dd/MM/yyyy').format(DateTime.now()));
+  TextEditingController txtDocuDate = TextEditingController();
+  TextEditingController txtShiptoDate = TextEditingController();
+  TextEditingController txtOrderDate = TextEditingController();
 
   @override
   void initState() {
     // TODO: implement initState
-    setSelectedShipto();
-    SOHD = widget.saleOrderHD;
     super.initState();
+    setSelectedShipto();
   }
 
   @override
@@ -184,12 +132,27 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   }
 
   void setHeader() {
-
+    SOHD = widget.saleOrderHD;
     runningNo = widget.saleOrderHD.docuNo ?? '';
     refNo = widget.saleOrderHD.refNo ?? '';
+    _docuDate = editedDocuDate == false ? widget.saleOrderHD.docuDate : _docuDate;
+    _shiptoDate = editedShipDate == false ? widget.saleOrderHD.shipDate : _shiptoDate;
+
     txtRunningNo.text = runningNo;
     txtRefNo.text = refNo;
     txtDocuNo.text = widget.saleOrderHD.docuNo;
+    txtDocuDate.text = DateFormat('dd/MM/yyyy').format(_docuDate);
+    txtShiptoDate.text = _shiptoDate != null ? DateFormat('dd/MM/yyyy').format(_shiptoDate) : '';
+    txtEmpCode.text = '${globals.employee?.empCode}';
+    txtCustCode.text = globals.allCustomer
+            ?.firstWhere(
+                (element) => element.custId == widget.saleOrderHD.custId)
+            ?.custCode ??
+        '';
+    txtCustName.text = widget.saleOrderHD.custName ?? '';
+    txtCredit.text = widget.saleOrderHD.creditDays.toString() ?? '0';
+    txtRemark.text = widget.saleOrderHD.remark ?? '';
+
     // _apiService.getRefNo().then((value) {
     //   runningNo = value;
     //   refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
@@ -222,44 +185,84 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
     }
   }
 
-  void calculateSummary() {
+  void calculateSummary() async {
     try {
-      print('Calculate globals.productCart : ' +
-          globals.productCart.length.toString());
-      if (globals.productCart.length > 0) {
-        discountTotal = 0;
-        priceTotal = 0;
-        globals.productCart.forEach((element) {
-          discountTotal += element.discountBase;
-        });
-        globals.productCart.forEach((element) {
-          priceTotal += element.goodAmount;
-        });
-      } else {
-        discountTotal = 0;
-        priceTotal = 0;
-        priceAfterDiscount = 0;
-        globals.discountBill = 0;
-        vatTotal = 0;
-        netTotal = 0;
-      }
-
-      priceTotal = priceTotal - discountTotal;
-      if (globals.discountType == globals.DiscountType.PER) {
-        double percentDiscount = globals.discountBill / 100;
-        priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
-      } else {
-        priceAfterDiscount = priceTotal - globals.discountBill;
-      }
-
       double sumPriceIncludeVat = 0;
-      if (globals.productCart != null) {
-        globals.productCart
-            .where((element) => element?.vatRate != null)
-            .toList()
-            .forEach((element) {
-          sumPriceIncludeVat += element.goodPrice;
-        });
+      var tempList = List<SaleOrderDetail>();
+
+      if (SODT.length == 0) {
+        tempList = await _apiService.getSODT(SOHD.soid);
+        print('Calculate globals.productCart : ' + tempList?.length.toString());
+        if (tempList.length > 0) {
+          discountTotal = 0;
+          priceTotal = 0;
+          tempList.forEach((element) {
+            discountTotal += element.goodDiscAmnt;
+          });
+          tempList.forEach((element) {
+            priceTotal += element.goodAmnt;
+          });
+        } else {
+          discountTotal = 0;
+          priceTotal = 0;
+          priceAfterDiscount = 0;
+          globals.discountBill = 0;
+          vatTotal = 0;
+          netTotal = 0;
+        }
+
+        priceTotal = priceTotal - discountTotal;
+        if (globals.discountType == globals.DiscountType.PER) {
+          double percentDiscount = globals.discountBill / 100;
+          priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
+        } else {
+          priceAfterDiscount = priceTotal - globals.discountBill;
+        }
+
+        if (tempList != null) {
+          tempList
+              .where((element) => element?.vatrate != null)
+              .toList()
+              .forEach((element) {
+            sumPriceIncludeVat += element.goodPrice2;
+          });
+        }
+      } else {
+        print('Calculate globals.productCart : ' + SODT?.length.toString());
+        if (SODT.length > 0) {
+          discountTotal = 0;
+          priceTotal = 0;
+          SODT.forEach((element) {
+            discountTotal += element.goodDiscAmnt;
+          });
+          SODT.forEach((element) {
+            priceTotal += element.goodAmnt;
+          });
+        } else {
+          discountTotal = 0;
+          priceTotal = 0;
+          priceAfterDiscount = 0;
+          globals.discountBill = 0;
+          vatTotal = 0;
+          netTotal = 0;
+        }
+
+        priceTotal = priceTotal - discountTotal;
+        if (globals.discountType == globals.DiscountType.PER) {
+          double percentDiscount = globals.discountBill / 100;
+          priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
+        } else {
+          priceAfterDiscount = priceTotal - globals.discountBill;
+        }
+
+        if (SODT != null) {
+          SODT
+              .where((element) => element?.vatrate != null)
+              .toList()
+              .forEach((element) {
+            sumPriceIncludeVat += element.goodPrice2;
+          });
+        }
       }
 
       // vatTotal = (priceAfterDiscount * vat) / 100;
@@ -286,44 +289,44 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
 
   void setSelectedShipto() {
     setState(() {
-      // txtShiptoProvince.text = globals.selectedShipto?.province ?? '';
-      // txtShiptoAddress.text = '${globals.selectedShipto.shiptoAddr1 ?? ''} '
-      //     '${globals.selectedShipto?.shiptoAddr2 ?? ''} '
-      //     '${globals.selectedShipto?.district ?? ''} '
-      //     '${globals.selectedShipto?.amphur ?? ''} '
-      //     '${globals.selectedShipto?.province ?? ''} '
-      //     '${globals.selectedShipto?.postcode ?? ''}';
-      // txtShiptoRemark.text = globals.selectedShipto.remark ?? '';
-      txtShiptoProvince.text = widget.saleOrderHD.province ?? '';
-      txtShiptoAddress.text = '${widget.saleOrderHD.shipToAddr1 ?? ''} '
+      selectedShipTo.shiptoAddr1 = widget.saleOrderHD?.shipToAddr1 ?? '';
+      selectedShipTo.shiptoAddr2 = widget.saleOrderHD?.shipToAddr2 ?? '';
+      selectedShipTo.district = widget.saleOrderHD?.district ?? '';
+      selectedShipTo.amphur = widget.saleOrderHD?.amphur ?? '';
+      selectedShipTo.province = widget.saleOrderHD?.province ?? '';
+      selectedShipTo.postcode = widget.saleOrderHD?.postCode ?? '';
+      selectedShipTo.remark = widget.saleOrderHD?.remark ?? '';
+      selectedShipTo.shiptoAddr1 = widget.saleOrderHD?.shipToAddr1 ?? '';
+
+      txtShiptoAddress.text = '${widget.saleOrderHD?.shipToAddr1 ?? ''} '
           '${widget.saleOrderHD.shipToAddr2 ?? ''} '
           '${widget.saleOrderHD.district ?? ''} '
           '${widget.saleOrderHD.amphur ?? ''} '
           '${widget.saleOrderHD.province ?? ''} '
           '${widget.saleOrderHD.postCode ?? ''}';
+      txtShiptoProvince.text = widget.saleOrderHD.province ?? '';
       txtShiptoRemark.text = widget.saleOrderHD.remark ?? '';
     });
   }
 
   Widget getShiptoListWidgets(BuildContext context) {
     List<Shipto> shiptoList = globals.allShipto
-        .where((element) => element.custId == globals.customer.custId)
-        .toList();
-    print(shiptoList);
+            .where((element) => element.custId == widget.saleOrderHD.custId)
+            ?.toList() ??
+        [];
+    print(shiptoList[0].shiptoAddr1);
     List<Widget> list = new List<Widget>();
-    for (var i = 0; i < shiptoList?.length; i++) {
+    for (var i = 0; i < shiptoList.length; i++) {
       list.add(ListTile(
         title: Text(
-            '${shiptoList[i]?.shiptoAddr1 ?? ''} ${shiptoList[i]?.district ?? ''} ${shiptoList[i]?.amphur ?? ''} ${shiptoList[i]?.province ?? ''} ${shiptoList[i]?.postcode ?? ''}'),
+            '${shiptoList[i].shiptoAddr1 ?? ''} ${shiptoList[i]?.district ?? ''} ${shiptoList[i]?.amphur ?? ''} ${shiptoList[i]?.province ?? ''} ${shiptoList[i]?.postcode ?? ''}'),
         //subtitle: Text(item?.custCode),
         onTap: () {
-          globals.selectedShipto = shiptoList[i];
+          selectedShipTo = shiptoList[i];
           Navigator.pop(context);
           setState(() {});
         },
-        selected:
-            globals.selectedShipto.shiptoAddr1 == shiptoList[i]?.shiptoAddr1 ??
-                '',
+        selected: selectedShipTo.shiptoAddr1 == shiptoList[i].shiptoAddr1 ?? '',
         selectedTileColor: Colors.grey[200],
         hoverColor: Colors.grey,
       ));
@@ -335,128 +338,114 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
     try {
       SaleOrderHeader header = new SaleOrderHeader();
       List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
-      _apiService.getRefNo().then((value) {
-        runningNo = value;
-        refNo =
-            '${globals.company}${globals.employee?.empCode}-${runningNo ?? ''}';
 
-        _apiService.getDocNo().then((value) {
-          docuNo = value;
+      /// document header.
+      header.soid = 0;
+      header.saleAreaId = 1004;
+      header.vatgroupId = 1000;
+      header.docuNo = docuNo;
+      header.refNo = refNo;
+      header.docuType = 104;
+      header.docuDate = _docuDate;
+      header.validDays = 0;
+      header.onHold = 'N';
+      header.vatRate = 0;
+      header.vatType = '3';
+      header.goodType = '1';
+      header.docuStatus = 'Y';
+      header.isTransfer = 'N';
+      header.remark = txtRemark?.text ?? '';
 
-          /// document header.
-          header.soid = 0;
-          header.saleAreaId = 1004;
-          header.vatgroupId = 1000;
-          header.docuNo = docuNo;
-          header.refNo = refNo;
-          header.docuType = 104;
-          header.docuDate = _docuDate;
-          header.validDays = 0;
-          header.onHold = 'N';
-          header.vatRate = 0;
-          header.vatType = '3';
-          header.goodType = '1';
-          header.docuStatus = 'Y';
-          header.isTransfer = 'N';
-          header.remark = txtRemark?.text ?? '';
+      /// employee information.
+      header.empId = globals.employee.empId;
+      header.deptId = globals.employee.deptId;
 
-          /// employee information.
-          header.empId = globals.employee.empId;
-          header.deptId = globals.employee.deptId;
+      /// customer information.
+      header.custId = globals.customer.custId;
+      header.custName = globals.customer.custName;
+      header.creditDays = globals.customer.creditDays;
 
-          /// customer information.
-          header.custId = globals.customer.custId;
-          header.custName = globals.customer.custName;
-          header.creditDays = globals.customer.creditDays;
+      /// cost summary.
+      header.sumGoodAmnt = netTotal;
+      header.billAftrDiscAmnt = netTotal;
+      header.netAmnt = netTotal;
+      header.billDiscAmnt = discountBill;
 
-          /// cost summary.
-          header.sumGoodAmnt = netTotal;
-          header.billAftrDiscAmnt = netTotal;
-          header.netAmnt = netTotal;
-          header.billDiscAmnt = discountBill;
+      /// shipment to customer.
+      header.shipToCode = selectedShipTo.shiptoCode;
+      header.transpId = selectedShipTo.transpId;
+      header.transpAreaId = selectedShipTo.transpAreaId;
+      header.shipToAddr1 = selectedShipTo.shiptoAddr1;
+      header.shipToAddr2 = selectedShipTo.shiptoAddr2;
+      header.district = selectedShipTo.district;
+      header.amphur = selectedShipTo.amphur;
+      header.province = selectedShipTo.province;
+      header.postCode = selectedShipTo.postcode;
 
-          /// shipment to customer.
-          header.shipToCode = globals.selectedShipto.shiptoCode;
-          header.transpId = globals.selectedShipto.transpId;
-          header.transpAreaId = globals.selectedShipto.transpAreaId;
-          header.shipToAddr1 = globals.selectedShipto.shiptoAddr1;
-          header.shipToAddr2 = globals.selectedShipto.shiptoAddr2;
-          header.district = globals.selectedShipto.district;
-          header.amphur = globals.selectedShipto.amphur;
-          header.province = globals.selectedShipto.province;
-          header.postCode = globals.selectedShipto.postcode;
-
-          bool isSuccess = false;
-          _apiService.addSaleOrderHeader(header).then((value) {
-            header = value;
-            print('Add result: ${header.soid}');
-            if (header != null) {
-              globals.productCart.forEach((e) {
-                SaleOrderDetail obj = new SaleOrderDetail();
-                obj.soid = header.soid;
-                obj.listNo = e.rowIndex;
-                obj.docuType = 104;
-                obj.goodType = '1';
-                obj.goodId = e.goodId;
-                obj.goodName = e.goodName2;
-                obj.goodUnitId2 = e.mainGoodUnitId;
-                obj.goodQty2 = e.goodQty;
-                obj.goodPrice2 = e.goodPrice;
-                obj.goodAmnt = e.goodAmount;
-                obj.goodDiscAmnt = e.discountBase;
-                detail.add(obj);
-              });
-
-              _apiService.addSaleOrderDetail(detail).then((value) {
-                if (value == true) {
-                  globals.clearOrder();
-                  print('Order Successful.');
-                  setState(() {});
-                  return showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return RichAlertDialog(
-                          //uses the custom alert dialog
-                          alertTitle: richTitle("Transaction Successfully."),
-                          alertSubtitle:
-                              richSubtitle("Your order has created. "),
-                          alertType: RichAlertType.SUCCESS,
-                        );
-                      });
-                  // globals.clearOrder();
-                  // print('Order Successful.');
-                } else {
-                  return showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return RichAlertDialog(
-                          //uses the custom alert dialog
-                          alertTitle:
-                              richTitle("Details of Sales Order was failed."),
-                          alertSubtitle: richSubtitle(
-                              "Something was wrong while creating SO Details."),
-                          alertType: RichAlertType.ERROR,
-                        );
-                      });
-                }
-              });
-            } else {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RichAlertDialog(
-                      //uses the custom alert dialog
-                      alertTitle:
-                          richTitle("Header of Sales Order was failed."),
-                      alertSubtitle: richSubtitle(
-                          "Something was wrong while creating SO Header."),
-                      alertType: RichAlertType.ERROR,
-                    );
-                  });
-            }
-          });
+      bool isSuccess = false;
+      await _apiService.updateSaleOrderHeader(header);
+      //header = value;
+      print('Add result: ${header.soid}');
+      if (header != null) {
+        SODT.forEach((e) {
+          SaleOrderDetail obj = new SaleOrderDetail();
+          obj.soid = header.soid;
+          obj.listNo = e.listNo;
+          obj.docuType = 104;
+          obj.goodType = '1';
+          obj.goodId = e.goodId;
+          obj.goodName = e.goodName;
+          obj.goodUnitId2 = e.goodUnitId2;
+          obj.goodQty2 = e.goodQty2;
+          obj.goodPrice2 = e.goodPrice2;
+          obj.goodAmnt = e.goodAmnt;
+          obj.goodDiscAmnt = e.goodDiscAmnt;
+          detail.add(obj);
         });
-      });
+
+        var dtResponse = await _apiService.updateSaleOrderDetail(detail);
+        if (dtResponse == true) {
+          globals.clearOrder();
+          print('Order Successful.');
+          setState(() {});
+          return showDialog<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return RichAlertDialog(
+                  //uses the custom alert dialog
+                  alertTitle: richTitle("Transaction Successfully."),
+                  alertSubtitle: richSubtitle("Your order has created. "),
+                  alertType: RichAlertType.SUCCESS,
+                );
+              });
+          // globals.clearOrder();
+          // print('Order Successful.');
+        } else {
+          return showDialog<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return RichAlertDialog(
+                  //uses the custom alert dialog
+                  alertTitle: richTitle("Details of Sales Order was failed."),
+                  alertSubtitle: richSubtitle(
+                      "Something was wrong while creating SO Details."),
+                  alertType: RichAlertType.ERROR,
+                );
+              });
+        }
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return RichAlertDialog(
+                //uses the custom alert dialog
+                alertTitle: richTitle("Header of Sales Order was failed."),
+                alertSubtitle: richSubtitle(
+                    "Something was wrong while creating SO Header."),
+                alertType: RichAlertType.ERROR,
+              );
+            });
+      }
     } catch (e) {
       return showAboutDialog(
           context: context,
@@ -524,153 +513,189 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   }
 
   Widget SaleOrderDetails() {
-    return DataTable(
-        showBottomBorder: true,
-        columnSpacing: 26,
-        columns: const <DataColumn>[
-          DataColumn(
-            label: Text(
-              'ลำดับ',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'ประเภท',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'รหัสสินค้า',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'ชื่อสินค้า',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            numeric: true,
-            label: Text(
-              'จำนวน',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            numeric: true,
-            label: Text(
-              'ราคา / หน่วย',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            numeric: true,
-            label: Text(
-              'ส่วนลด',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            numeric: true,
-            label: Text(
-              'ยอดสุทธิ',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              '',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ),
-          // DataColumn(
-          //   label: Text(
-          //     '',
-          //     style: TextStyle(fontStyle: FontStyle.italic),
-          //   ),
-          // ),
-        ],
-        rows: globals.productCart
-                ?.map((e) => DataRow(cells: [
-                      DataCell(Text('${e.rowIndex}')),
-                      DataCell(Text('${e.goodTypeFlag}')),
-                      DataCell(Text('${e.goodCode}')),
-                      DataCell(Text('${e.goodName1}')),
-                      DataCell(Text('${currency.format(e.goodQty)}')),
-                      DataCell(Text('${currency.format(e.goodPrice)}')),
-                      DataCell(Text('${currency.format(e.discountBase)}')),
-                      DataCell(Text('${currency.format(e.goodAmount)}')),
-                      DataCell(Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                      builder: (context) => ContainerProduct(
-                                          'แก้ไขรายการสินค้า ลำดับที่ ',
-                                          e))).then((value) {
-                                setState(() {});
-                              });
-                            },
-                            child: Icon(Icons.edit),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.blueAccent),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              //int removeIndex = globals.productCart.indexWhere((element) => element.rowIndex == e.rowIndex);
-                              int index = 1;
-                              globals.productCart.removeWhere(
-                                  (element) => element.rowIndex == e.rowIndex);
-                              globals.productCart.forEach((element) {
-                                element.rowIndex = index++;
-                              });
-                              globals.editingProductCart = null;
-                              print(globals.productCart?.length.toString());
-                              setState(() {});
-                            },
-                            child: Icon(Icons.delete_forever),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.redAccent),
-                            ),
-                          )
-                        ],
-                      )),
-                      // DataCell(ElevatedButton(
-                      //     onPressed: () {},
-                      //     child: Icon(Icons.delete_forever),
-                      //   style: ButtonStyle(
-                      //     backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
-                      //   ),)),
-                    ]))
-                ?.toList() ??
-            <DataRow>[
-              DataRow(cells: [
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
-              ])
-            ]);
+    return FutureBuilder(
+        future: _apiService.getSODT(SOHD.soid),
+        builder: (BuildContext context, AsyncSnapshot<Object> snapShot) {
+          if (snapShot.hasData) {
+            if (isInitial == false) {
+              SODT = snapShot.data;
+              isInitial = true;
+            }
+          }
+          return DataTable(
+            showBottomBorder: true,
+            columnSpacing: 26,
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text(
+                  'ลำดับ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'ประเภท',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'รหัสสินค้า',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'ชื่อสินค้า',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                numeric: true,
+                label: Text(
+                  'จำนวน',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                numeric: true,
+                label: Text(
+                  'ราคา / หน่วย',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                numeric: true,
+                label: Text(
+                  'ส่วนลด',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              DataColumn(
+                numeric: true,
+                label: Text(
+                  'ยอดสุทธิ',
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+                ),
+              ),
+              // DataColumn(
+              //   label: Text(
+              //     '',
+              //     style: TextStyle(fontStyle: FontStyle.italic),
+              //   ),
+              // ),
+              // DataColumn(
+              //   label: Text(
+              //     '',
+              //     style: TextStyle(fontStyle: FontStyle.italic),
+              //   ),
+              // ),
+            ],
+            rows: SODT
+                    .asMap()
+                    .map((i, e) => MapEntry(
+                        i,
+                        DataRow(cells: [
+                          DataCell(Text('${i + 1}')),
+                          DataCell(Text(
+                              '${globals.allProduct.firstWhere((element) => element.goodId == e.goodId).goodTypeFlag}')),
+                          DataCell(Text(
+                              '${globals.allProduct.firstWhere((element) => element.goodId == e.goodId).goodCode}')),
+                          DataCell(Text(
+                              '${globals.allProduct.firstWhere((element) => element.goodId == e.goodId).goodName1}')),
+                          DataCell(Text('${currency.format(e.goodQty2)}')),
+                          DataCell(Text('${currency.format(e.goodPrice2)}')),
+                          DataCell(
+                              Text('${currency.format(e.goodDiscAmnt)}')),
+                          DataCell(Text('${currency.format(e.goodAmnt)}')),
+                          // DataCell(Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          //   children: [
+                          //     ElevatedButton(
+                          //       onPressed: () {
+                          //         String goodCode = globals.allProduct
+                          //                 .firstWhere((element) =>
+                          //                     element.goodId == e.goodId)
+                          //                 .goodCode ??
+                          //             '';
+                          //         ProductCart editProduct = ProductCart()
+                          //           ..goodId = e.goodId
+                          //           ..goodCode = goodCode
+                          //           ..goodName1 = e.goodName
+                          //           ..goodPrice = e.goodPrice2
+                          //           ..goodQty = e.goodQty2
+                          //           ..mainGoodUnitId = e.goodUnitId2
+                          //           ..discountBase = e.goodDiscAmnt;
+                          //         Navigator.push(
+                          //             context,
+                          //             CupertinoPageRoute(
+                          //                 builder: (context) =>
+                          //                     ContainerProduct(
+                          //                         'แก้ไขรายการสินค้า ลำดับที่ ',
+                          //                         editProduct))).then(
+                          //             (value) {
+                          //           setState(() {});
+                          //         });
+                          //       },
+                          //       child: Icon(Icons.edit),
+                          //       style: ButtonStyle(
+                          //         backgroundColor:
+                          //             MaterialStateProperty.all<Color>(
+                          //                 Colors.blueAccent),
+                          //       ),
+                          //     ),
+                          //     SizedBox(
+                          //       width: 10,
+                          //     ),
+                          //     ElevatedButton(
+                          //       onPressed: () {
+                          //         //int removeIndex = globals.productCart.indexWhere((element) => element.rowIndex == e.rowIndex);
+                          //         int index = 1;
+                          //         SODT.removeWhere((element) =>
+                          //             element.soid == e.soid &&
+                          //             element.listNo == e.listNo);
+                          //         // SODT.forEach((element) {
+                          //         //   element.rowIndex = index++;
+                          //         // });
+                          //         globals.editingProductCart = null;
+                          //         //print(SODT?.length.toString());
+                          //         setState(() {});
+                          //       },
+                          //       child: Icon(Icons.delete_forever),
+                          //       style: ButtonStyle(
+                          //         backgroundColor:
+                          //             MaterialStateProperty.all<Color>(
+                          //                 Colors.redAccent),
+                          //       ),
+                          //     )
+                          //   ],
+                          // )),
+                          // DataCell(ElevatedButton(
+                          //     onPressed: () {},
+                          //     child: Icon(Icons.delete_forever),
+                          //   style: ButtonStyle(
+                          //     backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
+                          //   ),)),
+                        ])))
+                    .values
+                    .toList() ??
+                <DataRow>[
+                  DataRow(cells: [
+                    DataCell(Text('-')),
+                    DataCell(Text('-')),
+                    DataCell(Text('-')),
+                    DataCell(Text('-')),
+                    DataCell(Text('-')),
+                    DataCell(Text('-')),
+                    DataCell(Text('-')),
+                    DataCell(Text('')),
+                    // DataCell(Text('')),
+                    //DataCell(Text('ยังไม่มีรายการคำสั่ง')),
+                  ])
+                ]);
+        });
   }
 
   Widget build(BuildContext context) {
@@ -682,7 +707,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
     return Scaffold(
         appBar: AppBar(
           title: Center(
-            child: Text("แก้ไขรายการ (ยังไม่โอน)"),
+            child: Text("Sale Order"),
           ),
         ),
         body: Container(
@@ -737,7 +762,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
-                          labelText: "เลขที่ใบสั่งสินค้าห",
+                          labelText: "เลขที่ใบสั่งสินค้า",
                         ),
                       ),
                     ),
@@ -749,18 +774,19 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                         controller: txtDocuDate,
                         // initialValue: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                         readOnly: true,
-                        onTap: () {
-                          setState(() async {
-                            _docuDate = await showDatePicker(
-                              context: context,
-                              initialDate: _docuDate != null
-                                  ? _docuDate
-                                  : DateTime.now(),
-                              firstDate: DateTime(1995),
-                              lastDate: DateTime(2030),
-                            );
-                            txtDocuDate.text =
-                                DateFormat('dd/MM/yyyy').format(_docuDate);
+                        onTap: () async {
+                          _docuDate = await showDatePicker(
+                            context: context,
+                            initialDate: _docuDate != null
+                                ? _docuDate
+                                : DateTime.now(),
+                            firstDate: DateTime(1995),
+                            lastDate: DateTime(2030),
+                          );
+
+                          setState(() {
+                            editedDocuDate = true;
+                            txtDocuDate.text = DateFormat('dd/MM/yyyy').format(_docuDate);
                           });
                         },
                         decoration: InputDecoration(
@@ -801,19 +827,19 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                       title: TextFormField(
                         controller: txtShiptoDate,
                         readOnly: true,
-                        onTap: () {
-                          setState(() async {
-                            _shiptoDate = await showDatePicker(
-                              context: context,
-                              initialDate: _shiptoDate != null
-                                  ? _shiptoDate
-                                  : DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate:
-                                  DateTime.now().add(new Duration(hours: 168)),
-                            );
-                            txtShiptoDate.text =
-                                DateFormat('dd/MM/yyyy').format(_shiptoDate);
+                        onTap: () async {
+                          _shiptoDate = await showDatePicker(
+                            context: context,
+                            initialDate: _shiptoDate != null
+                                ? _shiptoDate
+                                : DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate:
+                            DateTime.now().add(new Duration(days: 168)),
+                          );
+                          setState(() {
+                            editedShipDate = true;
+                            txtShiptoDate.text = DateFormat('dd/MM/yyyy').format(_shiptoDate);
                           });
                         },
                         decoration: InputDecoration(
@@ -935,7 +961,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                     child: ListTile(
                       title: TextFormField(
                         enabled: false,
-                        initialValue: globals.customer?.custCode,
+                        controller: txtCustCode,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:
@@ -951,7 +977,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                     child: ListTile(
                       title: TextFormField(
                         enabled: false,
-                        initialValue: globals.customer?.custName,
+                        controller: txtCustName,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:
@@ -986,7 +1012,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                     child: ListTile(
                       title: TextFormField(
                         readOnly: true,
-                        initialValue: globals.customer?.creditDays.toString(),
+                        controller: txtCredit,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:
@@ -1129,44 +1155,44 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                       ),
                     ),
                   ),
-                  Flexible(
-                      flex: 1,
-                      child: Container(
-                        height: 47,
-                        padding: EdgeInsets.only(right: 10),
-                        child: ElevatedButton.icon(
-                            onPressed: () {
-                              //_showShiptoDialog(context);
-                              _showDialog(context);
-                            },
-                            icon: Icon(Icons.airport_shuttle),
-                            label: Text('สถานที่ส่ง')),
-                      )),
-                  Flexible(
-                      flex: 1,
-                      child: SizedBox(
-                        height: 47,
-                        child: ElevatedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                globals.selectedShipto = globals.allShipto
-                                    .firstWhere((element) =>
-                                        element.custId ==
-                                            globals.customer.custId &&
-                                        element.isDefault == 'Y');
-                              });
-                              Fluttertoast.showToast(
-                                  msg: "ใช้ค่าเริ่มต้นเรียบร้อย",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.black54,
-                                  textColor: Colors.white,
-                                  fontSize: 18.0);
-                            },
-                            icon: Icon(Icons.refresh),
-                            label: Text('ค่าเริ่มต้น')),
-                      )),
+                  // Flexible(
+                  //     flex: 1,
+                  //     child: Container(
+                  //       height: 47,
+                  //       padding: EdgeInsets.only(right: 10),
+                  //       child: ElevatedButton.icon(
+                  //           onPressed: () {
+                  //             //_showShiptoDialog(context);
+                  //             _showDialog(context);
+                  //           },
+                  //           icon: Icon(Icons.airport_shuttle),
+                  //           label: Text('สถานที่ส่ง')),
+                  //     )),
+                  // Flexible(
+                  //     flex: 1,
+                  //     child: SizedBox(
+                  //       height: 47,
+                  //       child: ElevatedButton.icon(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               selectedShipTo = globals.allShipto.firstWhere(
+                  //                   (element) =>
+                  //                       element.custId ==
+                  //                           widget.saleOrderHD?.custId &&
+                  //                       element.isDefault == 'Y');
+                  //             });
+                  //             Fluttertoast.showToast(
+                  //                 msg: "ใช้ค่าเริ่มต้นเรียบร้อย",
+                  //                 toastLength: Toast.LENGTH_SHORT,
+                  //                 gravity: ToastGravity.BOTTOM,
+                  //                 timeInSecForIosWeb: 1,
+                  //                 backgroundColor: Colors.black54,
+                  //                 textColor: Colors.white,
+                  //                 fontSize: 18.0);
+                  //           },
+                  //           icon: Icon(Icons.refresh),
+                  //           label: Text('ค่าเริ่มต้น')),
+                  //     )),
                 ]),
 
                 Row(
@@ -1189,80 +1215,79 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    Container(
-                        margin: EdgeInsets.only(top: 13, left: 30),
-                        child: RaisedButton.icon(
-                          onPressed: () {
-                            globals.editingProductCart = null;
-                            Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                    builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ',
-                                        null))).then((value) {
-                              globals.editingProductCart = null;
-                              setState(() {});
-                            });
-                          },
-                          icon: Icon(Icons.add_circle_outline_outlined,
-                              color: Colors.white),
-                          color: Colors.green,
-                          splashColor: Colors.green,
-                          padding: EdgeInsets.all(10),
-                          label: Text(
-                            'เพิ่มรายการสินค้า',
-                            style: GoogleFonts.sarabun(
-                                fontSize: 14, color: Colors.white),
-                          ),
-                        )),
-                    Container(
-                        margin: EdgeInsets.only(top: 13, left: 20),
-                        child: RaisedButton.icon(
-                          onPressed: () {
-                            globals.editingProductCart = null;
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ', null)));
-                          },
-                          icon: Icon(Icons.local_fire_department,
-                              color: Colors.white),
-                          color: Colors.deepOrange[400],
-                          padding: EdgeInsets.all(10),
-                          label: Text(
-                            'เพิ่มรายการด่วน',
-                            style: GoogleFonts.sarabun(
-                                fontSize: 14, color: Colors.white),
-                          ),
-                        )),
-                    Container(
-                        margin: EdgeInsets.only(top: 13, left: 20),
-                        child: RaisedButton.icon(
-                          onPressed: () {
-                            globals.editingProductCart = null;
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ', null)));
-                          },
-                          icon: Icon(Icons.list, color: Colors.white),
-                          color: Colors.blueAccent,
-                          padding: EdgeInsets.all(10),
-                          label: Text(
-                            'เพิ่มรายการโปรโมชั่น',
-                            style: GoogleFonts.sarabun(
-                                fontSize: 14, color: Colors.white),
-                          ),
-                        )),
+                    // Container(
+                    //     margin: EdgeInsets.only(top: 13, left: 30),
+                    //     child: RaisedButton.icon(
+                    //       onPressed: () {
+                    //         globals.editingProductCart = null;
+                    //         Navigator.push(
+                    //             context,
+                    //             CupertinoPageRoute(
+                    //                 builder: (context) => ContainerProduct(
+                    //                     'สั่งรายการสินค้า ลำดับที่ ',
+                    //                     null))).then((value) {
+                    //           globals.editingProductCart = null;
+                    //           setState(() {});
+                    //         });
+                    //       },
+                    //       icon: Icon(Icons.add_circle_outline_outlined,
+                    //           color: Colors.white),
+                    //       color: Colors.green,
+                    //       splashColor: Colors.green,
+                    //       padding: EdgeInsets.all(10),
+                    //       label: Text(
+                    //         'เพิ่มรายการสินค้า',
+                    //         style: GoogleFonts.sarabun(
+                    //             fontSize: 14, color: Colors.white),
+                    //       ),
+                    //     )),
+                    // Container(
+                    //     margin: EdgeInsets.only(top: 13, left: 20),
+                    //     child: RaisedButton.icon(
+                    //       onPressed: () {
+                    //         globals.editingProductCart = null;
+                    //         Navigator.push(
+                    //             context,
+                    //             MaterialPageRoute(
+                    //                 builder: (context) => ContainerProduct(
+                    //                     'สั่งรายการสินค้า ลำดับที่ ', null)));
+                    //       },
+                    //       icon: Icon(Icons.local_fire_department,
+                    //           color: Colors.white),
+                    //       color: Colors.deepOrange[400],
+                    //       padding: EdgeInsets.all(10),
+                    //       label: Text(
+                    //         'เพิ่มรายการด่วน',
+                    //         style: GoogleFonts.sarabun(
+                    //             fontSize: 14, color: Colors.white),
+                    //       ),
+                    //     )),
+                    // Container(
+                    //     margin: EdgeInsets.only(top: 13, left: 20),
+                    //     child: RaisedButton.icon(
+                    //       onPressed: () {
+                    //         globals.editingProductCart = null;
+                    //         Navigator.push(
+                    //             context,
+                    //             MaterialPageRoute(
+                    //                 builder: (context) => ContainerProduct(
+                    //                     'สั่งรายการสินค้า ลำดับที่ ', null)));
+                    //       },
+                    //       icon: Icon(Icons.list, color: Colors.white),
+                    //       color: Colors.blueAccent,
+                    //       padding: EdgeInsets.all(10),
+                    //       label: Text(
+                    //         'เพิ่มรายการโปรโมชั่น',
+                    //         style: GoogleFonts.sarabun(
+                    //             fontSize: 14, color: Colors.white),
+                    //       ),
+                    //     )),
                   ],
                 ),
                 SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Row(children: [
-                      SaleOrderDetails(),
-                    ])),
+                    child:
+                      SaleOrderDetails(),),
                 Row(
                   children: [
                     SizedBox(height: 80),
@@ -1405,15 +1430,15 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold)),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      showDiscountTypeDialog();
-                                      //focusDiscount.requestFocus();
-                                    },
-                                    child: setDiscountType()),
-                              ),
+                              // Padding(
+                              //   padding: const EdgeInsets.only(left: 8.0),
+                              //   child: ElevatedButton(
+                              //       onPressed: () {
+                              //         showDiscountTypeDialog();
+                              //         //focusDiscount.requestFocus();
+                              //       },
+                              //       child: setDiscountType()),
+                              // ),
                               Expanded(
                                   child: Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -1570,43 +1595,43 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                   ],
                 ),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 100,
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: ElevatedButton(
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.orange),
-                            ),
-                            onPressed: () {
-                              AwesomeDialog(
-                                context: context,
-                                dialogType: DialogType.INFO,
-                                animType: AnimType.BOTTOMSLIDE,
-                                width: 450,
-                                title: 'Confirmation',
-                                desc: 'Are you sure to create sales order ?',
-                                btnCancelOnPress: () {},
-                                btnOkOnPress: () {
-                                  setState(() {});
-                                  postSaleOrder()
-                                      .then((value) => setState(() {}));
-                                },
-                              )..show();
-                              //print(jsonEncode(globals.productCart));
-                            },
-                            child: Text(
-                              'แก้ไขคำสั่งสินค้า',
-                              style: TextStyle(fontSize: 20),
-                            )),
-                      ),
-                    )
-                  ],
-                ),
-                //SizedBox(height: 20,)
+                // Row(
+                //   children: [
+                //     Expanded(
+                //       child: Container(
+                //         height: 100,
+                //         padding: const EdgeInsets.only(top: 30.0),
+                //         child: ElevatedButton(
+                //             style: ButtonStyle(
+                //               backgroundColor: MaterialStateProperty.all<Color>(
+                //                   Colors.orange),
+                //             ),
+                //             onPressed: () {
+                //               AwesomeDialog(
+                //                 context: context,
+                //                 dialogType: DialogType.INFO,
+                //                 animType: AnimType.BOTTOMSLIDE,
+                //                 width: 450,
+                //                 title: 'Confirmation',
+                //                 desc: 'Are you sure to create sales order ?',
+                //                 btnCancelOnPress: () {},
+                //                 btnOkOnPress: () {
+                //                   setState(() {});
+                //                   postSaleOrder()
+                //                       .then((value) => setState(() {}));
+                //                 },
+                //               )..show();
+                //               //print(jsonEncode(globals.productCart));
+                //             },
+                //             child: Text(
+                //               'แก้ไขคำสั่งสินค้า',
+                //               style: TextStyle(fontSize: 20),
+                //             )),
+                //       ),
+                //     )
+                //   ],
+                // ),
+                SizedBox(height: 30,)
               ],
             )
           ]),

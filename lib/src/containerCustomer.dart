@@ -106,35 +106,58 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
                   hintText: 'ชื่อลูกค้า, รหัสลูกค้า, ที่อยู่',
                   border: OutlineInputBorder(),
                 ),
+                onChanged: (value){
+                  setState(() {
+                    allCustomer = globals.allCustomer
+                        .where((x) =>
+                    x.custName
+                        .toLowerCase()
+                        .contains(value) ||
+                        x.custCode
+                            .toLowerCase()
+                            .contains(value) ||
+                        x.custAddr1
+                            .toLowerCase()
+                            .contains(value))
+                        .toList();
+                  });
+                },
               ),
-              SizedBox(
-                height: 50,
+              // SizedBox(
+              //   height: 50,
+              //   width: double.infinity,
+              //   child: ElevatedButton.icon(
+              //     onPressed: () {
+              //       String query = txtKeyword.text;
+              //       setState(() {
+              //         allCustomer = globals.allCustomer
+              //             .where((x) =>
+              //                 x.custName
+              //                     .toLowerCase()
+              //                     .contains(query) ||
+              //                 x.custCode
+              //                     .toLowerCase()
+              //                     .contains(query) ||
+              //                 x.custAddr1
+              //                     .toLowerCase()
+              //                     .contains(query))
+              //             .toList();
+              //       });
+              //     },
+              //     //style: ButtonStyle(padding:),
+              //     icon: Icon(Icons.search),
+              //     label: Text(
+              //       'ค้นหาลูกค้า',
+              //       style: TextStyle(fontSize: 18),
+              //     ),
+              //   ),
+              // ),
+              Container(
+                color: Colors.deepPurple,
                 width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    String query = txtKeyword.text;
-                    setState(() {
-                      allCustomer = globals.allCustomer
-                          .where((x) =>
-                              x.custName
-                                  .toLowerCase()
-                                  .contains(query) ||
-                              x.custCode
-                                  .toLowerCase()
-                                  .contains(query) ||
-                              x.custAddr1
-                                  .toLowerCase()
-                                  .contains(query))
-                          .toList();
-                    });
-                  },
-                  //style: ButtonStyle(padding:),
-                  icon: Icon(Icons.search),
-                  label: Text(
-                    'ค้นหาลูกค้า',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
+                margin: EdgeInsets.only(top: 0.0),
+                padding: EdgeInsets.all(20.0),
+                child: Center(child: Text('ลูกค้าทั้งหมด ${allCustomer.length.toString()} ราย', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
               ),
               Expanded(
                 flex: 6,
@@ -226,15 +249,16 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
       SizedBox(
         height: 83,
       ),
-      ElevatedButton(
-          onPressed: () {},
-          //icon: Icon(Icons.),
-          child: Text(
-            'Coupon',
-            style: TextStyle(fontSize: 18),
-          ),
-          style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.all(12), primary: Colors.deepOrangeAccent)),
+      // ElevatedButton(
+      //     onPressed: () {},
+      //     //icon: Icon(Icons.),
+      //     child: Text(
+      //       'Coupon',
+      //       style: TextStyle(fontSize: 18),
+      //     ),
+      //     style: ElevatedButton.styleFrom(
+      //         padding: EdgeInsets.all(12), primary: Colors.deepOrangeAccent)
+      // ),
     ]);
   }
 }

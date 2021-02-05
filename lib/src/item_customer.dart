@@ -81,17 +81,27 @@ class _ItemCustomerState extends State<ItemCustomer> {
         Scrollbar(
           controller: _scroll,
           isAlwaysShown: false,
+          thickness: 3.0,
+          radius: Radius.circular(20.0),
           child: ListView(
             controller: _scroll,
             children: widget.allCustomer?.map((item) {
-              return ListTile(
-                  title: Text(item?.custName),
-                  subtitle: Text(item?.custCode),
-                  onTap: () => widget.itemSelectedCallback(item),
-                  selected: widget.selectedItem?.custCode == item?.custCode,
-                  selectedTileColor: Colors.grey[200],
-                  hoverColor: Colors.grey,
-                );
+              return Container(
+                  decoration:
+                  BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(width: 0.5, color: Colors.black26)
+                      )
+                  ),
+                child: ListTile(
+                    title: Text(item?.custName),
+                    subtitle: Text(item?.custCode),
+                    onTap: () => widget.itemSelectedCallback(item),
+                    selected: widget.selectedItem?.custCode == item?.custCode,
+                    selectedTileColor: Colors.grey[200],
+                    hoverColor: Colors.grey,
+                  ),
+              );
             })?.toList() ?? [],
     ),
         );

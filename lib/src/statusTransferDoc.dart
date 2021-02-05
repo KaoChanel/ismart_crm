@@ -55,16 +55,16 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
     'ชื่อลูกค้า (A-Z)',
   ];
 
-  Future<void> getSOHDByEmp(int id) async {
+  Future<List<SaleOrderHeader>> getSOHDByEmp(int id) async {
     try {
       String strUrl =
           '${globals.publicAddress}/api/SaleOrderHeader/GetTempSohdByEmp/${globals.company}/$id';
       final response = await http.get(strUrl);
-        if (response.statusCode == 200) {
-          globals.tempSOHD = saleOrderHeaderFromJson(response.body);
-        } else {
-          globals.tempSOHD = null;
-        }
+      if (response.statusCode == 200) {
+        return saleOrderHeaderFromJson(response.body);
+      } else {
+        return null;
+      }
     } catch (e) {
       showDialog(
           context: context,
@@ -83,7 +83,6 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getSOHDByEmp(globals.employee.empId);
   }
 
   onSort(int columnIndex, bool ascending) {
@@ -119,7 +118,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
     });
   }
 
-  SingleChildScrollView dataBody() {
+  Widget dataBody(List<SaleOrderHeader> dataList) {
     int rowIndex = 1;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -143,9 +142,9 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
             tooltip: "วันที่บันทึก",
           ),
           DataColumn(
-            label: Text("ประเภทเอกสาร"),
+            label: Text("วันที่ส่งสินค้า"),
             numeric: false,
-            tooltip: "ประเภทเอกสาร",
+            tooltip: "วันที่ส่งสินค้า",
           ),
           DataColumn(
               label: Text("เลขที่เอกสาร"),
@@ -158,9 +157,9 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                 onSort(columnIndex, ascending);
               }),
           DataColumn(
-            label: Text("Rev."),
+            label: Text("Reference No."),
             numeric: false,
-            tooltip: "Rev.",
+            tooltip: "Reference No.",
           ),
           DataColumn(
               label: Text("รหัสลูกค้า"),
@@ -183,7 +182,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                 onSort(columnIndex, ascending);
               }),
         ],
-        rows: globals.tempSOHD
+        rows: dataList
                 .asMap()
                 .map((i, element) => MapEntry(
                     i,
@@ -193,22 +192,51 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                         onSelectChanged: (isSelect) {
                           selectedItem = element;
                           onSelectedRow(isSelect, element);
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SaleOrderEdit(saleOrderHD: element,)));
-                          },
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SaleOrderEdit(
+                                    saleOrderHD: element,
+                                  )));
+                          // if (element.isTransfer == 'N') {
+                          //   selectedItem = element;
+                          //   onSelectedRow(isSelect, element);
+                          //   Navigator.push(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //           builder: (context) => SaleOrderEdit(
+                          //                 saleOrderHD: element,
+                          //               )));
+                          // } else {
+                          //   showDialog(
+                          //       context: context,
+                          //       child: AlertDialog(
+                          //         title: Text('แจ้งเตือน'),
+                          //         content: Text(
+                          //             'เลขที่เอกสาร ${element.docuNo} ถูกโอนแล้ว ไม่สามารถแก้ไขได้'),
+                          //       ));
+                          // }
+                        },
                         cells: <DataCell>[
                           DataCell(
-                            Text(
-                              (i + 1).toString(),
-                              textAlign: TextAlign.center,
+                            Center(
+                              child: Text(
+                                (i + 1).toString(),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             //onTap: () {},
                           ),
                           DataCell(
-                            Text(element.isTransfer == null
-                                ? ''
-                                : element.isTransfer == 'N'
-                                    ? 'ยังไม่ได้โอน'
-                                    : 'โอนแล้ว'),
+                            Center(
+                              child: Text(element.isTransfer == null
+                                  ? ''
+                                  : element.isTransfer == 'N'
+                                      ? 'รอดำเนินการ'
+                                      : 'ส่งเข้าระบบแล้ว',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: element.isTransfer == 'N' ? Colors.orange[600] : Colors.green,fontWeight: FontWeight.normal),),
+                            ),
                             // onTap: () {
                             //   print('Selected ${element.isTransfer ?? ''}');
                             // },
@@ -216,13 +244,12 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                           DataCell(
                             Text(element.docuDate == null
                                 ? ''
-                                : DateFormat('dd/MM/yyyy')
-                                    .format(element.docuDate)),
+                                : DateFormat('dd/MM/yyyy').format(element.docuDate)),
                           ),
                           DataCell(
-                            Text(element.docuType == null
+                            Text(element.shipDate == null
                                 ? ''
-                                : element.docuType.toString()),
+                                : DateFormat('dd/MM/yyyy').format(element.shipDate)),
                           ),
                           DataCell(
                             Text(element.docuNo ?? ''),
@@ -441,9 +468,26 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
         ),
         Row(
           children: [
-            Expanded(
-              child: dataBody(),
-            ),
+            FutureBuilder(
+                future: getSOHDByEmp(globals.employee.empId),
+                builder:
+                    (BuildContext context, AsyncSnapshot<Object> snapShot) {
+                  if (snapShot.hasData) {
+                    globals.tempSOHD = snapShot.data;
+                    return Expanded(
+                      child: dataBody(snapShot.data),
+                    );
+                  } else {
+                    //return Expanded(child: Center(child: CircularProgressIndicator()));
+                    return Expanded(
+                      //child: dataBody(List<SaleOrderHeader>()),
+                      child: Container(
+                        padding: EdgeInsets.all(20.0),
+                          child: Center(
+                              child: CircularProgressIndicator())),
+                    );
+                  }
+                })
           ],
         ),
       ]),

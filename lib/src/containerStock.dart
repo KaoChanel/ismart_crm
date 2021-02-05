@@ -72,34 +72,52 @@ class _ContainerStockState extends State<ContainerStock> {
                   hintText: 'ชื่อสินค้า, รหัสสินค้า...',
                   border: OutlineInputBorder(),
                 ),
+                onChanged: (value){
+                  setState(() {
+                    allStock = tempStock
+                                .where((x) => x.goodName1.toLowerCase().contains(value) ||
+                                x.goodCode.toLowerCase().contains(value))
+                                .toList();
+
+                            final ids = allStock.map((e) => e.goodid).toSet();
+                            allStock.retainWhere((x) => ids.remove(x.goodid));
+                            allStock.forEach((element) => element.orderNumber = 1);
+                  });
+                },
               ),
 
-              SizedBox(
+              // SizedBox(
+              //   width: double.infinity,
+              //   height: 50,
+              //   child: ElevatedButton.icon(
+              //     onPressed: () {
+              //       String query = txtKeyword.text;
+              //       setState(() {
+              //         allStock = tempStock
+              //             .where((x) => x.goodName1.toLowerCase().contains(query) ||
+              //             x.goodCode.toLowerCase().contains(query))
+              //             .toList();
+              //
+              //         final ids = allStock.map((e) => e.goodid).toSet();
+              //         allStock.retainWhere((x) => ids.remove(x.goodid));
+              //         allStock.forEach((element) => element.orderNumber = 1);
+              //       });
+              //     },
+              //     //style: ButtonStyle(padding:),
+              //     icon: Icon(Icons.search),
+              //     label: Text(
+              //       'ค้นหาสินค้า',
+              //       style: TextStyle(fontSize: 18),
+              //     ),
+              //   ),
+              // ),
+              Container(
+                color: Colors.deepPurple,
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    String query = txtKeyword.text;
-                    setState(() {
-                      allStock = tempStock
-                          .where((x) => x.goodName1.toLowerCase().contains(query) ||
-                          x.goodCode.toLowerCase().contains(query))
-                          .toList();
-
-                      final ids = allStock.map((e) => e.goodid).toSet();
-                      allStock.retainWhere((x) => ids.remove(x.goodid));
-                      allStock.forEach((element) => element.orderNumber = 1);
-                    });
-                  },
-                  //style: ButtonStyle(padding:),
-                  icon: Icon(Icons.search),
-                  label: Text(
-                    'ค้นหาสินค้า',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
+                margin: EdgeInsets.only(top: 0.0),
+                padding: EdgeInsets.all(20.0),
+                child: Center(child: Text('สินค้าคงเหลือ ${allStock.length.toString()} รายการ', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
               ),
-
               Expanded(
                 child: ItemStock(
                   // Instead of pushing a new route here, we update

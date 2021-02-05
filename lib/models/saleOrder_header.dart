@@ -150,7 +150,7 @@ class SaleOrderHeader {
   dynamic fixedRate;
   dynamic exchRate;
   dynamic exchDate;
-  dynamic shipDate;
+  DateTime shipDate;
   dynamic printTime;
   dynamic sumIncludeAmnt;
   dynamic sumExcludeAmnt;
@@ -253,7 +253,7 @@ class SaleOrderHeader {
     fixedRate: json["fixedRate"],
     exchRate: json["exchRate"],
     exchDate: json["exchDate"],
-    shipDate: json["shipDate"],
+    shipDate: json["shipDate"] == null ? null : DateTime.parse(json["shipDate"]),
     printTime: json["printTime"],
     sumIncludeAmnt: json["sumIncludeAmnt"],
     sumExcludeAmnt: json["sumExcludeAmnt"],
@@ -357,7 +357,7 @@ class SaleOrderHeader {
     "fixedRate": fixedRate,
     "exchRate": exchRate,
     "exchDate": exchDate,
-    "shipDate": shipDate,
+    "shipDate": shipDate == null ? null : shipDate.toIso8601String(),
     "printTime": printTime,
     "sumIncludeAmnt": sumIncludeAmnt,
     "sumExcludeAmnt": sumExcludeAmnt,

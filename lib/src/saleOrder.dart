@@ -330,6 +330,8 @@ class _SaleOrderState extends State<SaleOrder> {
             header.refNo = refNo;
             header.docuType = 104;
             header.docuDate = _docuDate;
+            header.shipDate = _shiptoDate;
+            header.custPodate = _orderDate;
             header.validDays = 0;
             header.onHold = 'N';
             header.vatRate = 0;
@@ -518,12 +520,12 @@ class _SaleOrderState extends State<SaleOrder> {
               style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
             ),
           ),
-          DataColumn(
-            label: Text(
-              'ประเภท',
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-            ),
-          ),
+          // DataColumn(
+          //   label: Text(
+          //     'ประเภท',
+          //     style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+          //   ),
+          // ),
           DataColumn(
             label: Text(
               'รหัสสินค้า',
@@ -581,7 +583,7 @@ class _SaleOrderState extends State<SaleOrder> {
         rows: globals.productCart
                 ?.map((e) => DataRow(cells: [
                       DataCell(Text('${e.rowIndex}')),
-                      DataCell(Text('${e.goodTypeFlag}')),
+                      // DataCell(Text('${e.goodTypeFlag}')),
                       DataCell(Text('${e.goodCode}')),
                       DataCell(Text('${e.goodName1}')),
                       DataCell(Text('${currency.format(e.goodQty)}')),
@@ -642,7 +644,7 @@ class _SaleOrderState extends State<SaleOrder> {
                 ?.toList() ??
             <DataRow>[
               DataRow(cells: [
-                DataCell(Text('ยังไม่มีรายการคำสั่ง')),
+                // DataCell(Text('ยังไม่มีรายการคำสั่ง')),
                 DataCell(Text('ยังไม่มีรายการคำสั่ง')),
                 DataCell(Text('ยังไม่มีรายการคำสั่ง')),
                 DataCell(Text('ยังไม่มีรายการคำสั่ง')),
@@ -791,8 +793,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                   ? _shiptoDate
                                   : DateTime.now(),
                               firstDate: DateTime.now(),
-                              lastDate:
-                                  DateTime.now().add(new Duration(hours: 168)),
+                              lastDate: DateTime.now().add(new Duration(days: 365)),
                             );
                             txtShiptoDate.text =
                                 DateFormat('dd/MM/yyyy').format(_shiptoDate);

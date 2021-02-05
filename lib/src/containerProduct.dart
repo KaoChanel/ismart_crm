@@ -111,31 +111,46 @@ class _ContainerProductState extends State<ContainerProduct> {
                   hintText: 'ชื่อสินค้า, รหัสสินค้า...',
                   border: OutlineInputBorder(),
                 ),
+                onChanged: (value){
+                  setState(() {
+                    allProduct = globals.allProduct
+                                .where((x) =>
+                                    x.goodName1.toLowerCase().contains(value) ||
+                                    x.goodCode.toLowerCase().contains(value))
+                                .toList();
+                  });
+                },
               ),
 
-              SizedBox(
+              // SizedBox(
+              //   width: double.infinity,
+              //   height: 50,
+              //   child: ElevatedButton.icon(
+              //     onPressed: () {
+              //       String query = txtKeyword.text;
+              //       setState(() {
+              //         allProduct = globals.allProduct
+              //             .where((x) =>
+              //                 x.goodName1.toLowerCase().contains(query) ||
+              //                 x.goodCode.toLowerCase().contains(query))
+              //             .toList();
+              //       });
+              //     },
+              //     //style: ButtonStyle(padding:),
+              //     icon: Icon(Icons.search),
+              //     label: Text(
+              //       'ค้นหาสินค้า',
+              //       style: TextStyle(fontSize: 18),
+              //     ),
+              //   ),
+              // ),
+              Container(
+                color: Colors.deepPurple,
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    String query = txtKeyword.text;
-                    setState(() {
-                      allProduct = globals.allProduct
-                          .where((x) =>
-                              x.goodName1.toLowerCase().contains(query) ||
-                              x.goodCode.toLowerCase().contains(query))
-                          .toList();
-                    });
-                  },
-                  //style: ButtonStyle(padding:),
-                  icon: Icon(Icons.search),
-                  label: Text(
-                    'ค้นหาสินค้า',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
+                margin: EdgeInsets.only(top: 0.0),
+                padding: EdgeInsets.all(20.0),
+                child: Center(child: Text('สินค้าทั้งหมด ${allProduct.length.toString()} รายการ', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
               ),
-
               Expanded(
                 flex: 5,
                 child: ItemProduct(

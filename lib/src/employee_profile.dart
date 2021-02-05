@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/models/employee.dart';
 import 'package:ismart_crm/globals.dart' as globals;
+import 'package:ismart_crm/api_service.dart';
 
 class EmployeeProfile extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
   static const routeName = '/employee_profile';
   Employee _employees;
   TabController _controller;
+  ApiService _apiService = ApiService();
 
   Future<void> getEmployee(String empId) async {
     String strUrl = '${globals.publicAddress}/api/employees/$empId';
@@ -27,6 +29,14 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
     // TODO: implement initState
     super.initState();
     _controller = TabController(length: 3, vsync: this);
+    if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null || globals.allStock == null){
+      //_apiService.getCompany();
+      _apiService.getCustomer();
+      _apiService.getProduct();
+      _apiService.getUnit();
+      _apiService.getShipto();
+      _apiService.getStock();
+    }
   }
 
   @override
