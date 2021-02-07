@@ -133,25 +133,33 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
 
   void setHeader() {
     SOHD = widget.saleOrderHD;
-    runningNo = widget.saleOrderHD.docuNo ?? '';
-    refNo = widget.saleOrderHD.refNo ?? '';
-    _docuDate = editedDocuDate == false ? widget.saleOrderHD.docuDate : _docuDate;
-    _shiptoDate = editedShipDate == false ? widget.saleOrderHD.shipDate : _shiptoDate;
+    runningNo = SOHD.docuNo ?? '';
+    refNo = SOHD.refNo ?? '';
+    _docuDate = editedDocuDate == false ? SOHD.docuDate : _docuDate;
+    _shiptoDate = editedShipDate == false ? SOHD.shipDate : _shiptoDate;
+    discountBill = SOHD.billDiscAmnt;
 
     txtRunningNo.text = runningNo;
     txtRefNo.text = refNo;
-    txtDocuNo.text = widget.saleOrderHD.docuNo;
+    txtDocuNo.text = SOHD.docuNo;
     txtDocuDate.text = DateFormat('dd/MM/yyyy').format(_docuDate);
     txtShiptoDate.text = _shiptoDate != null ? DateFormat('dd/MM/yyyy').format(_shiptoDate) : '';
     txtEmpCode.text = '${globals.employee?.empCode}';
     txtCustCode.text = globals.allCustomer
             ?.firstWhere(
-                (element) => element.custId == widget.saleOrderHD.custId)
+                (element) => element.custId == SOHD.custId)
             ?.custCode ??
         '';
-    txtCustName.text = widget.saleOrderHD.custName ?? '';
-    txtCredit.text = widget.saleOrderHD.creditDays.toString() ?? '0';
-    txtRemark.text = widget.saleOrderHD.remark ?? '';
+    txtCustName.text = SOHD.custName ?? '';
+    txtCredit.text = SOHD.creditDays.toString() ?? '0';
+    txtRemark.text = SOHD.remark ?? '';
+
+    //txtDiscountTotal.text = currency.format(SOHD.billDiscAmnt);
+    //txtPriceTotal.text = currency.format(priceTotal);
+    txtDiscountBill.text = currency.format(SOHD.billDiscAmnt);
+    txtPriceAfterDiscount.text = currency.format(priceAfterDiscount);
+    txtVatTotal.text = currency.format(SOHD.vatamnt ?? 0);
+    txtNetTotal.text = currency.format(SOHD.netAmnt);
 
     // _apiService.getRefNo().then((value) {
     //   runningNo = value;
@@ -701,7 +709,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   Widget build(BuildContext context) {
     setHeader();
     setSelectedShipto();
-    calculateSummary();
+    // calculateSummary();
     print('Build Sale Order');
 
     return Scaffold(

@@ -130,6 +130,7 @@ class _SaleOrderState extends State<SaleOrder> {
   TextEditingController txtRunningNo = new TextEditingController();
   TextEditingController txtDocuNo = new TextEditingController();
   TextEditingController txtRefNo = new TextEditingController();
+  TextEditingController txtCustPONo = new TextEditingController();
   TextEditingController txtSONo;
   TextEditingController txtDeptCode;
   TextEditingController txtCopyDocuNo;
@@ -332,6 +333,7 @@ class _SaleOrderState extends State<SaleOrder> {
             header.docuDate = _docuDate;
             header.shipDate = _shiptoDate;
             header.custPodate = _orderDate;
+            header.custPono = txtCustPONo.text;
             header.validDays = 0;
             header.onHold = 'N';
             header.vatRate = 0;
@@ -354,7 +356,7 @@ class _SaleOrderState extends State<SaleOrder> {
             header.sumGoodAmnt = netTotal;
             header.billAftrDiscAmnt = netTotal;
             header.netAmnt = netTotal;
-            header.billDiscAmnt = discountBill;
+            header.billDiscAmnt = globals.discountBill;
 
             /// shipment to customer.
             header.shipToCode = globals.selectedShipto.shiptoCode;
@@ -817,7 +819,7 @@ class _SaleOrderState extends State<SaleOrder> {
                     child: ListTile(
                       title: TextField(
                         readOnly: true,
-                        controller: txtRefNo,
+                        controller: txtCustPONo,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:
