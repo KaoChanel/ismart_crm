@@ -30,9 +30,11 @@ dependencies:
 
   # CONNECTIVITY
   http: ^0.12.2
+  data_connection_checker: ^0.3.4
 
   # Identification
   uuid: 2.2.2
+  shared_preferences: ^0.5.1+4
 
   # UI
   #cupertino_icons: ^1.0.0
@@ -42,6 +44,18 @@ dependencies:
   fluttertoast: ^7.1.2
   rich_alert: ^0.1.32
   awesome_dialog: ^1.2.1
+  flutter_launcher_icons: ^0.8.1
+
+  # Key Store
+  flutter_automation: ^1.4.0
+
+flutter_icons:
+  ios: true
+  android: true
+  image_path_ios: "assets/launcher/icon.png"
+  image_path_android: "assets/launcher/icon.png"
+  adaptive_icon_background: "assets/launcher/background.png"
+  adaptive_icon_foreground: "assets/launcher/foreground.png"
 
 dev_dependencies:
   flutter_test:

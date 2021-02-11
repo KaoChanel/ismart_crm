@@ -115,7 +115,8 @@ class _SaleOrderState extends State<SaleOrder> {
   String runningNo;
   String docuNo;
   String refNo;
-  double vat = 0.7;
+  String custPONo;
+  double vat = 0.07;
   double priceTotal = 0;
   double discountTotal = 0;
   double discountBill = 0;
@@ -124,7 +125,7 @@ class _SaleOrderState extends State<SaleOrder> {
   double netTotal = 0.0;
   DateTime _docuDate = DateTime.now();
   DateTime _shiptoDate = DateTime.now().add(new Duration(hours: 24));
-  DateTime _orderDate;
+  DateTime _orderDate = DateTime.now();
 
   FocusNode focusDiscount = FocusNode();
   TextEditingController txtRunningNo = new TextEditingController();
@@ -181,9 +182,11 @@ class _SaleOrderState extends State<SaleOrder> {
   {
     _apiService.getRefNo().then((value){
       runningNo = value;
-      refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
+      // refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
+      custPONo = '${globals.employee?.empCode}-${runningNo ?? ''}';
+      txtCustPONo.text = custPONo ?? '';
       txtRunningNo.text = runningNo ?? '';
-      txtRefNo.text = refNo ?? '';
+      // txtRefNo.text = refNo ?? '';
     });
     _apiService.getDocNo().then((value) {
       docuNo = value;
@@ -200,7 +203,7 @@ class _SaleOrderState extends State<SaleOrder> {
 
     print('Set Header.');
     print('Doc No: $docuNo');
-    print('Ref No: $refNo');
+    print('Ref No: $custPONo');
   }
 
   Widget setDiscountType() {
@@ -234,7 +237,7 @@ class _SaleOrderState extends State<SaleOrder> {
         netTotal = 0;
       }
 
-      priceTotal = priceTotal - discountTotal;
+      //priceTotal = priceTotal - discountTotal;
       if (globals.discountType == globals.DiscountType.PER) {
         double percentDiscount = globals.discountBill / 100;
         priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
@@ -247,12 +250,17 @@ class _SaleOrderState extends State<SaleOrder> {
         globals.productCart.where((element) => element?.vatRate != null)
             .toList()
             .forEach((element) {
-          sumPriceIncludeVat += element.goodPrice;
+          sumPriceIncludeVat += element.goodAmount;
         });
       }
 
       // vatTotal = (priceAfterDiscount * vat) / 100;
-      vatTotal = (sumPriceIncludeVat * vat) / 100;
+      // vatTotal = (sumPriceIncludeVat * vat) / 100;
+      sumPriceIncludeVat = sumPriceIncludeVat - (globals.discountBill);
+      print('sumPriceIncludeVat:  ' + sumPriceIncludeVat.toString());
+      //print('sumPriceIncludeVat * 0.07:  ' + (sumPriceIncludeVat + (sumPriceIncludeVat * vat)).toString());
+      print((sumPriceIncludeVat * vat).toString());
+      vatTotal = (sumPriceIncludeVat * 0.07);
       netTotal = priceAfterDiscount + vatTotal;
 
       setState(() {
@@ -315,6 +323,7 @@ class _SaleOrderState extends State<SaleOrder> {
   Future<dynamic> postSaleOrder() async {
     try
     {
+      globals.showLoaderDialog(context);
       SaleOrderHeader header = new SaleOrderHeader();
       List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
       _apiService.getRefNo().then((value){
@@ -323,6 +332,10 @@ class _SaleOrderState extends State<SaleOrder> {
 
           _apiService.getDocNo().then((value) {
             docuNo = value;
+
+            /// Company Info
+            header.brchId = 1;
+
             /// document header.
             header.soid = 0;
             header.saleAreaId = 1004;
@@ -336,12 +349,17 @@ class _SaleOrderState extends State<SaleOrder> {
             header.custPono = txtCustPONo.text;
             header.validDays = 0;
             header.onHold = 'N';
-            header.vatRate = 0;
-            header.vatType = '3';
             header.goodType = '1';
             header.docuStatus = 'Y';
             header.isTransfer = 'N';
             header.remark = txtRemark?.text ?? '';
+            header.postdocutype = 1702;
+
+            /// VAT Info
+            header.vatgroupId = 1000;
+            header.vatRate = 7;
+            header.vatType = '2';
+            header.vatamnt = vatTotal;
 
             /// employee information.
             header.empId = globals.employee.empId;
@@ -352,11 +370,14 @@ class _SaleOrderState extends State<SaleOrder> {
             header.custName = globals.customer.custName;
             header.creditDays = globals.customer.creditDays;
 
-            /// cost summary.
-            header.sumGoodAmnt = netTotal;
-            header.billAftrDiscAmnt = netTotal;
+            /// Cost Summary.
+            header.sumGoodAmnt = priceTotal;
+            header.billAftrDiscAmnt = priceAfterDiscount;
             header.netAmnt = netTotal;
             header.billDiscAmnt = globals.discountBill;
+
+            /// Discount
+
 
             /// shipment to customer.
             header.shipToCode = globals.selectedShipto.shiptoCode;
@@ -386,6 +407,7 @@ class _SaleOrderState extends State<SaleOrder> {
                   obj.goodQty2 = e.goodQty;
                   obj.goodPrice2 = e.goodPrice;
                   obj.goodAmnt = e.goodAmount;
+                  obj.afterMarkupamnt = e.goodAmount;
                   obj.goodDiscAmnt = e.discountBase;
                   detail.add(obj);
                 });
@@ -393,6 +415,7 @@ class _SaleOrderState extends State<SaleOrder> {
                 _apiService.addSaleOrderDetail(detail).then((value) {
                   if (value == true) {
                     globals.clearOrder();
+                    Navigator.pop(context);
                     print('Order Successful.');
                     setState(() {
 
@@ -410,6 +433,7 @@ class _SaleOrderState extends State<SaleOrder> {
                     // globals.clearOrder();
                     // print('Order Successful.');
                   } else {
+                    Navigator.pop(context);
                     return showDialog<void>(
                         context: context,
                         builder: (BuildContext context) {
@@ -425,6 +449,7 @@ class _SaleOrderState extends State<SaleOrder> {
                   }
                 });
               } else {
+                Navigator.pop(context);
                  showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -443,6 +468,7 @@ class _SaleOrderState extends State<SaleOrder> {
       });
 
     } catch (e) {
+      Navigator.pop(context);
       return showAboutDialog(
           context: context,
           applicationName: 'Post Sale Order Exception',
@@ -723,7 +749,7 @@ class _SaleOrderState extends State<SaleOrder> {
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
-                          labelText: "เลขที่ใบสั่งสินค้าห",
+                          labelText: "เลขที่ใบสั่งสินค้า",
                         ),
                       ),
                     ),
@@ -1652,11 +1678,12 @@ class _SaleOrderState extends State<SaleOrder> {
                                 title: 'Confirmation',
                                 desc: 'Are you sure to create sales order ?',
                                 btnCancelOnPress: () {},
-                                btnOkOnPress: () {
+                                btnOkOnPress: () async {
                                   setState(() {
 
                                   });
-                                  postSaleOrder().then((value) => setState((){}));
+                                  await postSaleOrder();
+                                  // postSaleOrder().then((value) => setState((){}));
                                 },
                               )..show();
                               //print(jsonEncode(globals.productCart));

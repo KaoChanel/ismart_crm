@@ -10,6 +10,7 @@ import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/models/product.dart';
 import 'package:ismart_crm/models/stock.dart';
+import 'package:ismart_crm/api_service.dart';
 
 class ItemProductDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
@@ -35,6 +36,7 @@ class ItemProductDetail extends StatefulWidget {
 }
 
 class _ItemProductDetailState extends State<ItemProductDetail> {
+  ApiService _apiService = new ApiService();
   final currency = new NumberFormat("#,##0.00", "en_US");
   final DateFormat dateFormat = DateFormat('dd MMM yyyy');
   bool _isFreeProduct = false;
@@ -123,9 +125,17 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void calculatedPrice(double _quantity, double _discountValue, double _price) {
+    //double newPrice = await _apiService.getPrice(widget.product.goodCode, _quantity) ?? 0.00;
+    // var newPrice = await _apiService.getPrice(widget.product?.goodCode, double.parse(txtQty.text.replaceAll(',', '')));
+    // if(globals.newPrice != null){
+    //   calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), globals.newPrice);
+    // }
+    // else{
+    //   calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), newPrice);
+    // }
+    _goodQty = _quantity;
+    _discount = _discountValue;
     setState(() {
-      _goodQty = _quantity;
-      _discount = _discountValue;
       if (_isFreeProduct == true) {
         _totalAmount = 0;
         _totalNet = 0;
@@ -250,16 +260,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
           title: new Text('สินค้าคงเหลือ ' + widget.product.goodName1 + ' (' + widget.product.goodCode + ')'),
           content: Container(
             height: 350.0,
-            width: 500,
+            width: 400,
             child: ListView(
               children:
               StockByProd.map((e) =>
-                ListTile(
-                  title: Text('Lot No. ' + e.lotNo + '               คงเหลือ:  ' + currency.format(e.remaqty)),
-                  subtitle: Text('Expire: ' + dateFormat.format(e.expiredate) + '                        ' + e.goodUnitCode),
-                  onTap: (){},
-                )
-              ).toList(),
+                  ListTile(
+                  title: Text(
+                      'Lot No. ' + e.lotNo + '               คงเหลือ:  ' +
+                          currency.format(e.remaqty)),
+                  subtitle: Text('Expire: ' + dateFormat.format(e.expiredate) +
+                      '                        ' + e.goodUnitCode),
+                  onTap: () {},
+                ) ).toList() ?? [],
             ),
           ),
         );
@@ -324,15 +336,14 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   Widget build(BuildContext context) {
     setSelectedItem();
 
-    if(globals.newPrice == 0){
+    if(globals.newPrice == 0) {
       globals.newPrice = widget.price;
     }
-
-      if(globals.newPrice != widget.price){
-        calculatedPrice(_goodQty, _discount, globals.newPrice);
-      }
-    else{
-        print('globals.newPrice == widget.price');
+    if(globals.newPrice != widget.price) {
+      calculatedPrice(_goodQty, _discount, globals.newPrice);
+    }
+    else {
+      print('globals.newPrice == widget.price');
       calculatedPrice(_goodQty, _discount, null);
     }
 
@@ -380,7 +391,17 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                 child: Container(
                   child: ElevatedButton(
                       onPressed: () {
-                        _showStockDialog(context);
+                        if(widget.product == null){
+                          return showDialog(
+                            context: context,
+                          child: AlertDialog(
+                            title: Text('แจ้งเตือน'),
+                            content: Text('กรุณาเลือกลูกค้า'),
+                          ));
+                        }
+                        else{
+                          _showStockDialog(context);
+                        }
                       },
                       child: Text(
                         'เช็คสต๊อค',
@@ -464,9 +485,15 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     //     calculatedPrice(double.parse(value));
                     //   }
                     // },
-                    onEditingComplete: () {
+                    onEditingComplete: () async {
+                      double qty = double.parse(txtQty.text.replaceAll(',', ''));
+                      double priceList = await _apiService.getPrice(widget.product.goodCode, qty);
+                      print('price List: ' + priceList.toString());
+                      if(widget.editedPrice == 1){
+                        priceList = globals.newPrice;
+                      }
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), globals.newPrice);
+                        calculatedPrice(qty, double.parse(txtDiscount.text.replaceAll(',', '')), priceList);
                         FocusScope.of(context).unfocus();
                       });
                     },
@@ -626,7 +653,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text), null);
+                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text), double.parse(txtPrice.text.replaceAll(',', '')));
                         FocusScope.of(context).unfocus();
                       });
                     },

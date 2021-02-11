@@ -1,4 +1,8 @@
 library app.globals;
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
 import 'models/companies.dart';
 import 'models/employee.dart';
 import 'models/customer.dart';
@@ -9,6 +13,7 @@ import 'models/shipto.dart';
 import 'models/goods_unit.dart';
 import 'models/saleOrder_header.dart';
 import 'models/saleOrder_detail.dart';
+import'package:data_connection_checker/data_connection_checker.dart';
 
 enum DiscountType{ THB, PER }
 
@@ -34,6 +39,7 @@ List<ProductCart> productCart = new List<ProductCart>();
 List<GoodsUnit> allGoodsUnit = new List<GoodsUnit>();
 double newPrice;
 List<SaleOrderHeader> tempSOHD = new List<SaleOrderHeader>();
+StreamSubscription<DataConnectionStatus> listener;
 
 void clearOrder(){
   productCart = new List<ProductCart>();
@@ -42,4 +48,63 @@ void clearOrder(){
   discountBill = 0;
 }
 
+Future<DataConnectionStatus> checkConnection(BuildContext context) async{
+  var internetStatus = "Unknown";
+  var contentMessage = "Unknown";
+  listener = DataConnectionChecker().onStatusChange.listen((status) {
+    switch (status){
+      // case DataConnectionStatus.connected:
+      //   internetStatus = "Connected to the Internet";
+      //   contentMessage = "Connected to the Internet";
+      //   showAlertDialog(internetStatus, contentMessage, context);
+      //   break;
+      case DataConnectionStatus.disconnected:
+        internetStatus = "You are disconnected to the Internet. ";
+        contentMessage = "Please check your internet connection";
+        showAlertDialog(internetStatus, contentMessage, context);
+        break;
+    }
+  });
+  return await DataConnectionChecker().connectionStatus;
+}
+
+void showAlertDialog(String title, String content, BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+            title: new Text(title),
+            content: new Text(content),
+            actions: <Widget>[
+              new FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: new Text("Close"))
+            ]
+        );
+      }
+  );
+}
+
+showLoaderDialog(BuildContext context){
+  var alert = AlertDialog(
+    content: new Row(
+      children: [
+        CircularProgressIndicator(),
+        Container(
+            margin: EdgeInsets.only(left: 7),
+            child:Text("  Loading..." )
+        ),
+      ],),
+  );
+
+  showDialog(
+    barrierDismissible: false,
+    context:context,
+    builder:(BuildContext context){
+      return alert;
+    },
+  );
+}
 

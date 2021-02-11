@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:data_connection_checker/data_connection_checker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/models/employee.dart';
@@ -29,73 +32,124 @@ class _LoginPageState extends State<LoginPage> {
   ApiService _apiService = new ApiService();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    globals.checkConnection(context);
+    autoLogIn();
+  }
+
+  @override
   void dispose() {
     super.dispose();
     txtUsername.dispose();
     txtPassword.dispose();
+    globals.listener.cancel();
+  }
+
+  void autoLogIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String username = prefs.getString('username');
+    final String password = prefs.getString('password');
+    final String company = prefs.getString('company');
+
+    if(username != null && password != null && company != null){
+      getUser(company, username, password);
+    }
+
+    txtUsername.text = username ?? '';
+
+    // if (userName != null) {
+    //   setState(() {
+    //     isLoggedIn = true;
+    //     name = userName;
+    //   });
+    //   return;
+    // }
+  }
+
+  Future<Null> logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('password', '');
+    prefs.setString('company', '');
+
+    // setState(() {
+    //   name = '';
+    //   isLoggedIn = false;
+    // });
   }
 
   Future<Employee> getUser(String company, String username, String password) async {
-    //showLoaderDialog(context);
-    try {
+    try
+    {
+      globals.showLoaderDialog(context);
       String strUrl = '${globals.publicAddress}/api/login/LoginByEmpCode/$company/$username/$password';
       http.Response response = await http.get(strUrl);
-      print(response.body);
-      var decode = jsonDecode(response.body);
+      if(response.body.isNotEmpty) {
+        var decode = jsonDecode(response.body);
 
-      if (decode['empId'] != 0) {
-        // _user = userFromJson(response.body);
+        print(response.body);
+
+        if (decode['empId'] != 0) {
+          // _user = userFromJson(response.body);
+          //
+          // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
+          // response = await http.get(strUrl);
+          globals.employee = employeeFromJson(response.body);
+          globals.company = company;
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('username', globals.employee.empCode);
+          prefs.setString('password', password);
+          prefs.setString('company', company);
+          Navigator.pop(context);
+          _apiService.getCompany().then((value) =>
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Launcher()))
+          );
+        }
+        else {
+          Navigator.pop(context);
+          showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+        }
+        // Navigator.pop(context);
+        //print(_user);
+        //     .then((value) {
+        //   if(value.statusCode == 200){
+        //     print(value.body);
+        //     var decode = jsonDecode(value.body);
         //
-        // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
-        // response = await http.get(strUrl);
-
-        globals.employee = employeeFromJson(response.body);
-        globals.company = company;
-        _apiService.getCompany().then((value) =>
-            Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Launcher()))
-        );
-        // _apiService.getCustomer();
-        // _apiService.getProduct();
-        // _apiService.getUnit();
-        // _apiService.getShipto();
-        // _apiService.getStock();
+        //     if (decode['empId'] != 0) {
+        //       // _user = userFromJson(response.body);
+        //       //
+        //       // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
+        //       // response = await http.get(strUrl);
+        //
+        //       globals.employee = employeeFromJson(value.body);
+        //       globals.company = company;
+        //
+        //       Navigator.pushReplacement(
+        //           context,
+        //           MaterialPageRoute(builder: (context) => Launcher()));
+        //     }
+        //     else {
+        //       showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+        //     }
+        //     // Navigator.pop(context);
+        //     print(_user);
+        //   }
+        //   else{
+        //     showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
+        //   }
+        // });
       }
       else {
+        Navigator.pop(context);
         showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
       }
-      // Navigator.pop(context);
-      print(_user);
-      //     .then((value) {
-      //   if(value.statusCode == 200){
-      //     print(value.body);
-      //     var decode = jsonDecode(value.body);
-      //
-      //     if (decode['empId'] != 0) {
-      //       // _user = userFromJson(response.body);
-      //       //
-      //       // String strUrl = '${globals.publicAddress}/api/employees/$company/${_user.empId}';
-      //       // response = await http.get(strUrl);
-      //
-      //       globals.employee = employeeFromJson(value.body);
-      //       globals.company = company;
-      //
-      //       Navigator.pushReplacement(
-      //           context,
-      //           MaterialPageRoute(builder: (context) => Launcher()));
-      //     }
-      //     else {
-      //       showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
-      //     }
-      //     // Navigator.pop(context);
-      //     print(_user);
-      //   }
-      //   else{
-      //     showAlertDialog(context, 'เข้าสู่ระบบไม่สำเร็จ');
-      //   }
-      // });
-
+    }
+    on SocketException{
+      globals.showAlertDialog('Internet Connection', 'ไม่สามารถเชื่อมต่อกับอินเตอร์เน็ต', context);
     }
     catch(e){
       showAlertDialog(context, e.toString());
@@ -236,7 +290,10 @@ showAlertDialog(BuildContext context, String _message) {
 Widget _submitButton() {
   return InkWell(
     onTap: () {
-      // showLoaderDialog(context);
+      if(compValue == null || txtUsername.text == '' || txtPassword.text == ''){
+        return globals.showAlertDialog('แจ้งเตือน', 'โปรดกรอกข้อมูล', context);
+      }
+
       getUser(compValue.compCode, txtUsername.text, txtPassword.text);
       //Navigator.pop(context);
       print("Username: " + txtUsername?.text + " Password: " + txtPassword?.text);

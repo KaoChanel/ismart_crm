@@ -119,9 +119,9 @@ class SaleOrderHeader {
   int empId;
   dynamic currTypeId;
   dynamic creditId;
-  dynamic brchId;
+  int brchId;
   dynamic currId;
-  dynamic transpAreaId;
+  int transpAreaId;
   int transpId;
   int custId;
   int deptId;
@@ -129,7 +129,7 @@ class SaleOrderHeader {
   int docuType;
   DateTime docuDate;
   int validDays;
-  dynamic expireDate;
+  DateTime expireDate;
   String onHold;
   int vatRate;
   String vatType;
@@ -208,11 +208,11 @@ class SaleOrderHeader {
   dynamic pkgStatus;
   dynamic jobId;
   dynamic refeflag;
-  dynamic postdocutype;
+  int postdocutype;
   dynamic appvid;
   dynamic clearDate;
   String alertFlag;
-  dynamic clearflag;
+  String clearflag;
   String isTransfer;
 
   factory SaleOrderHeader.fromJson(Map<String, dynamic> json) => SaleOrderHeader(

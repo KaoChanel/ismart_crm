@@ -166,7 +166,7 @@ class SaleOrderDetail {
   int remaQtyPkg;
   String expireflag;
   String poststock;
-  int afterMarkupamnt;
+  double afterMarkupamnt;
   int remaGoodStockQty;
   double remaamnt;
   dynamic serialsNo;

@@ -241,7 +241,7 @@ class DashboardPageState extends State<DashboardPage> {
         ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.refresh),
-        onPressed: (){
+        onPressed: () async {
           setState(() {
             _apiService.getCustomer();
             _apiService.getProduct();

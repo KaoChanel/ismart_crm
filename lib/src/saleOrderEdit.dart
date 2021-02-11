@@ -121,6 +121,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    setHeader();
     setSelectedShipto();
   }
 
@@ -131,8 +132,9 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
     focusDiscount.dispose();
   }
 
-  void setHeader() {
+  void setHeader() async {
     SOHD = widget.saleOrderHD;
+    SODT = await _apiService.getSODT(SOHD.soid);
     runningNo = SOHD.docuNo ?? '';
     refNo = SOHD.refNo ?? '';
     _docuDate = editedDocuDate == false ? SOHD.docuDate : _docuDate;
@@ -153,11 +155,12 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
     txtCustName.text = SOHD.custName ?? '';
     txtCredit.text = SOHD.creditDays.toString() ?? '0';
     txtRemark.text = SOHD.remark ?? '';
-
-    //txtDiscountTotal.text = currency.format(SOHD.billDiscAmnt);
-    //txtPriceTotal.text = currency.format(priceTotal);
+    double DiscountTotal = 0;
+    SODT.where((element) => element.soid == SOHD.soid).forEach((element) {DiscountTotal += element.goodDiscAmnt;});
+    txtDiscountTotal.text = currency.format(DiscountTotal);
+    txtPriceTotal.text = currency.format(SOHD.sumGoodAmnt);
     txtDiscountBill.text = currency.format(SOHD.billDiscAmnt);
-    txtPriceAfterDiscount.text = currency.format(priceAfterDiscount);
+    txtPriceAfterDiscount.text = currency.format(SOHD.billAftrDiscAmnt);
     txtVatTotal.text = currency.format(SOHD.vatamnt ?? 0);
     txtNetTotal.text = currency.format(SOHD.netAmnt);
 
@@ -707,8 +710,8 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
   }
 
   Widget build(BuildContext context) {
-    setHeader();
-    setSelectedShipto();
+    // setHeader();
+    // setSelectedShipto();
     // calculateSummary();
     print('Build Sale Order');
 
@@ -1431,7 +1434,7 @@ class _SaleOrderEditState extends State<SaleOrderEdit> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               SizedBox(
-                                width: 122,
+                                width: 195,
                                 child: Text('ส่วนลดท้ายบิล',
                                     textAlign: TextAlign.right,
                                     style: TextStyle(

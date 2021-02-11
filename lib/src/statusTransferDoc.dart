@@ -474,9 +474,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                     (BuildContext context, AsyncSnapshot<Object> snapShot) {
                   if (snapShot.hasData) {
                     globals.tempSOHD = snapShot.data;
-                    return Expanded(
-                      child: dataBody(snapShot.data),
-                    );
+                    return Expanded(child: dataBody(snapShot.data));
                   } else {
                     //return Expanded(child: Center(child: CircularProgressIndicator()));
                     return Expanded(

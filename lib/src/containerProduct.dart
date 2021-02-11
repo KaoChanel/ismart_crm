@@ -149,7 +149,7 @@ class _ContainerProductState extends State<ContainerProduct> {
                 width: double.infinity,
                 margin: EdgeInsets.only(top: 0.0),
                 padding: EdgeInsets.all(20.0),
-                child: Center(child: Text('สินค้าทั้งหมด ${allProduct.length.toString()} รายการ', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
+                child: Center(child: Text('สินค้าทั้งหมด ${allProduct != null ? allProduct.length.toString() : 0} รายการ', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
               ),
               Expanded(
                 flex: 5,

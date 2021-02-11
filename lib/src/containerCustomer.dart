@@ -157,7 +157,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
                 width: double.infinity,
                 margin: EdgeInsets.only(top: 0.0),
                 padding: EdgeInsets.all(20.0),
-                child: Center(child: Text('ลูกค้าทั้งหมด ${allCustomer.length.toString()} ราย', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
+                child: Center(child: Text('ลูกค้าทั้งหมด ${allCustomer?.length.toString()} ราย', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
               ),
               Expanded(
                 flex: 6,

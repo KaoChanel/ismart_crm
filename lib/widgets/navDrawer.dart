@@ -3,9 +3,17 @@ import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/src/loginPage.dart';
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NavDrawer extends StatelessWidget {
   ApiService _apiService = new ApiService();
+
+  Future<Null> logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('password', null);
+    prefs.setString('company', null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -66,8 +74,9 @@ class NavDrawer extends StatelessWidget {
               globals.productCart = new List<ProductCart>();
               globals.allProduct = null;
               globals.editingProductCart = null;
+              logout();
 
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
             },
           ),
         ],
