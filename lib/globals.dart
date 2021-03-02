@@ -13,6 +13,7 @@ import 'models/shipto.dart';
 import 'models/goods_unit.dart';
 import 'models/saleOrder_header.dart';
 import 'models/saleOrder_detail.dart';
+import 'models/master_remark.dart';
 import'package:data_connection_checker/data_connection_checker.dart';
 
 enum DiscountType{ THB, PER }
@@ -23,6 +24,8 @@ List<Company> allCompany;
 bool enableEditPrice = false;
 DiscountType discountType = DiscountType.THB;
 double discountBill = 0;
+double discountBillDraft = 0;
+double discountBillCopy = 0;
 Employee employee;
 Customer customer;
 Customer selectedOrderCustomer;
@@ -34,12 +37,18 @@ List<Product> allProduct;
 Stock selectedStock;
 List<Stock> groupStock;
 List<Stock> allStock;
+MasterRemark selectedRemark = MasterRemark();
+MasterRemark selectedRemarkDraft = MasterRemark();
+List<MasterRemark> allRemark = List<MasterRemark>();
 ProductCart editingProductCart;
 List<ProductCart> productCart = new List<ProductCart>();
+List<ProductCart> productCartDraft = new List<ProductCart>();
+List<ProductCart> productCartCopy = List<ProductCart>();
 List<GoodsUnit> allGoodsUnit = new List<GoodsUnit>();
 double newPrice;
 List<SaleOrderHeader> tempSOHD = new List<SaleOrderHeader>();
 StreamSubscription<DataConnectionStatus> listener;
+bool isDraftInitial = false;
 
 void clearOrder(){
   productCart = new List<ProductCart>();
@@ -94,7 +103,7 @@ showLoaderDialog(BuildContext context){
         CircularProgressIndicator(),
         Container(
             margin: EdgeInsets.only(left: 7),
-            child:Text("  Loading..." )
+            child:Text("  Loading ..." )
         ),
       ],),
   );

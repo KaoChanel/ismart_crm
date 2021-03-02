@@ -14,22 +14,26 @@ import 'package:ismart_crm/api_service.dart';
 
 class ItemProductDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
-  ItemProductDetail(
-      {@required this.isInTabletLayout,
-      @required this.product,
-      @required this.price,
-        this.editedPrice,
-        this.newPrice,
-      this.quantity,
-      this.total});
+  ItemProductDetail({
+    @required this.isDraft,
+    @required this.isInTabletLayout,
+    @required this.productCart,
+    @required this.product,
+    @required this.price,
+    this.editedPrice,
+    this.newPrice,
+    this.quantity,
+    this.total});
 
+  final bool isDraft;
   final bool isInTabletLayout;
   final Product product;
-  double price;
   final double quantity;
   final double total;
+  double price;
   double editedPrice = 0;
   double newPrice = 0;
+  ProductCart productCart = ProductCart();
 
   @override
   _ItemProductDetailState createState() => _ItemProductDetailState();
@@ -64,7 +68,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   void initState() {
     // TODO: implement initState
     globals.newPrice = widget.price;
-    _isFreeProduct = globals.editingProductCart?.isFree ?? false;
+    //_goodQty = widget.isDraft == true ? widget.quantity : _goodQty;
+    _isFreeProduct = widget.isDraft == true ? widget.productCart?.isFree ?? false : globals.editingProductCart?.isFree ?? false;
     super.initState();
     //calculatedPrice(1, 0, widget.editedPrice);
     // txtQty = TextEditingController(text: _goodQty.toString());
@@ -88,26 +93,50 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   void setSelectedItem() {
-    print('set Selected');
+    print('set Selected item detail');
+
       if (widget.product?.goodCode == null) {
         _goodQty = 0;
       }
       else {
         StockByProd = globals.allStock.where((element) => element.goodid == widget.product.goodId).toList();
-        if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
-          print('Compare < / Qty = $_goodQty');
-          if (_goodQty == null) {
-            _goodQty = widget.quantity;
-            _discount = globals.editingProductCart?.discount;
-            _discountType = globals.editingProductCart?.discountType;
+
+        if(widget.isDraft == false){
+          if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
+            print('Compare < / Qty = $_goodQty');
+            if (_goodQty == null) {
+              _goodQty = widget.quantity;
+              _discount = globals.editingProductCart?.discount;
+              _discountType = globals.editingProductCart?.discountType;
+            }
+            //_isFreeProduct = globals.editingProductCart.isFree;
+          } else if (txtGoodCode.text != widget.product?.goodCode) {
+            _goodQty = 1;
+            //globals.newPrice = 0;
+            globals.newPrice = widget.price;
+            print('txtGoodCode.text != widget.product?.goodCode');
           }
-          //_isFreeProduct = globals.editingProductCart.isFree;
-        } else if (txtGoodCode.text != widget.product?.goodCode) {
-          _goodQty = 1;
-          //globals.newPrice = 0;
-          globals.newPrice = widget.price;
-          print('txtGoodCode.text != widget.product?.goodCode');
         }
+        else{
+          if (widget.productCart?.goodCode == widget.product?.goodCode) {
+            print('Draft Compare < / Qty = $_goodQty');
+            if (_goodQty == null) {
+              _goodQty = widget.productCart?.goodQty;
+              _discount = widget.productCart?.discount;
+              _discountType = widget.productCart?.discountType;
+            }
+            else{
+              widget.productCart.goodQty = _goodQty;
+            }
+            //_isFreeProduct = globals.editingProductCart.isFree;
+          } else if (txtGoodCode.text != widget.product?.goodCode) {
+            _goodQty = 1;
+            //globals.newPrice = 0;
+            globals.newPrice = widget.price;
+            print('txtGoodCode.text != widget.product?.goodCode');
+          }
+        }
+
       }
 
       if(widget.product?.mainGoodUnitId != null){
@@ -135,6 +164,11 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     // }
     _goodQty = _quantity;
     _discount = _discountValue;
+
+    if(widget.isDraft && widget.productCart != null){
+      widget.productCart.discountBase = _discountValue ?? 0;
+    }
+
     setState(() {
       if (_isFreeProduct == true) {
         _totalAmount = 0;
@@ -155,11 +189,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
           widget.editedPrice = 0;
           globals.newPrice = 0;
           _totalAmount = widget.price * _goodQty;
-          txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
-          print('Price / Unit: ' +
-              widget.price.toString() +
-              ' Total: ' +
-              _totalNet.toString());
+          txtPrice.text = currency.format(widget.price ?? 0) ?? 'รอราคา...';
         }
 
         if (_discountType == 'PER') {
@@ -177,75 +207,148 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
       txtTotalNet.text = currency.format(_totalNet) ?? '0';
 
       print('Quantity: ' + _goodQty.toString());
+      print('Price / Unit: ' +
+          widget.price.toString() +
+          ' Total: ' +
+          _totalNet.toString());
     });
   }
 
   void addProductToCart() {
     int row = 1;
-    print('editedPrice : ' + widget.editedPrice.toString());
-    if (globals.productCart.length> 0) {
-      print('Product Cart not equal null. ${globals.productCart.length}');
-      row = globals.productCart.last.rowIndex + 1;
+    if(widget.isDraft == false){
+      print('editedPrice : ' + widget.editedPrice.toString());
+      if (globals.productCart.length> 0) {
+        print('Product Cart not equal null. ${globals.productCart.length}');
+        row = globals.productCart.last.rowIndex + 1;
+      }
+
+      print('Product Cart Length = ${globals.productCart.length}');
+      print('Row Index = $row');
+
+      if (globals.editingProductCart != null) {
+        print('globals.editingProductCart != null');
+        int startIndex = globals.productCart.indexWhere(
+                (element) => element.rowIndex == globals.editingProductCart?.rowIndex);
+        globals.productCart[startIndex].goodId = widget.product.goodId;
+        globals.productCart[startIndex].goodCode = widget.product.goodCode;
+        globals.productCart[startIndex].goodName1 = widget.product.goodName1;
+        globals.productCart[startIndex].goodQty = _goodQty;
+        if(widget.editedPrice > 0){
+          globals.productCart[startIndex].goodPrice = globals.newPrice;
+        }
+        else{
+          globals.productCart[startIndex].goodPrice = widget.price;
+        }
+
+        globals.productCart[startIndex].discount = _discount;
+        globals.productCart[startIndex].discountType = _discountType;
+        globals.productCart[startIndex].discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
+        globals.productCart[startIndex].goodAmount = _totalNet;
+        globals.productCart[startIndex].isFree = _isFreeProduct;
+        globals.productCart[startIndex].vatGroupId = widget.product.vatGroupId;
+        globals.productCart[startIndex].vatGroupCode = widget.product.vatGroupCode;
+        globals.productCart[startIndex].vatType = widget.product.vatType;
+        globals.productCart[startIndex].vatRate = widget.product.vatRate;
+        globals.editingProductCart = null;
+        // List<ProductCart> temp = globals.productCart.where((element) => element.rowIndex == globals.editingProductCart.rowIndex).toList();
+        // print('Index: $startIndex');
+        // globals.productCart.replaceRange(startIndex, startIndex, temp);
+        // print('Updated: ' + globals.editingProductCart.goodName1);
+      } else {
+        ProductCart order = new ProductCart()
+          ..productCartId = UniqueKey().toString()
+          ..rowIndex = row
+          ..goodId = widget.product.goodId
+          ..goodCode = widget.product.goodCode
+          ..goodName1 = widget.product.goodName1
+          ..mainGoodUnitId = widget.product.mainGoodUnitId
+          ..goodQty = _goodQty
+          ..goodPrice = widget.price
+          ..discount = _discount
+          ..discountType = _discountType
+          ..discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
+          ..goodAmount = _totalNet
+          ..isFree = _isFreeProduct
+          ..vatGroupId = widget.product.vatGroupId
+          ..vatGroupCode = widget.product.vatGroupCode
+          ..vatType = widget.product.vatType
+          ..vatRate = widget.product.vatRate;
+
+        if(widget.editedPrice > 0){
+          order.goodPrice = globals.newPrice;
+        }
+
+        print('Add: ' + order.goodName1);
+        globals.productCart.add(order);
+      }
     }
-
-    print('Product Cart Length = ${globals.productCart.length}');
-    print('Row Index = $row');
-
-    if (globals.editingProductCart != null) {
-      print('globals.editingProductCart != null');
-      int startIndex = globals.productCart.indexWhere(
-          (element) => element.rowIndex == globals.editingProductCart?.rowIndex);
-      globals.productCart[startIndex].goodId = widget.product.goodId;
-      globals.productCart[startIndex].goodCode = widget.product.goodCode;
-      globals.productCart[startIndex].goodName1 = widget.product.goodName1;
-      globals.productCart[startIndex].goodQty = _goodQty;
-      if(widget.editedPrice > 0){
-        globals.productCart[startIndex].goodPrice = globals.newPrice;
-      }
-      else{
-        globals.productCart[startIndex].goodPrice = widget.price;
+    else {
+      print('editedPrice : ' + widget.editedPrice.toString());
+      if (globals.productCartDraft.length > 0) {
+        print('Product Cart not equal null. ${globals.productCartDraft.length}');
+        row = globals.productCartDraft.last.rowIndex + 1;
       }
 
-      globals.productCart[startIndex].discount = _discount;
-      globals.productCart[startIndex].discountType = _discountType;
-      globals.productCart[startIndex].discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
-      globals.productCart[startIndex].goodAmount = _totalNet;
-      globals.productCart[startIndex].isFree = _isFreeProduct;
-      globals.productCart[startIndex].vatGroupId = widget.product.vatGroupId;
-      globals.productCart[startIndex].vatGroupCode = widget.product.vatGroupCode;
-      globals.productCart[startIndex].vatType = widget.product.vatType;
-      globals.productCart[startIndex].vatRate = widget.product.vatRate;
-      globals.editingProductCart = null;
-      // List<ProductCart> temp = globals.productCart.where((element) => element.rowIndex == globals.editingProductCart.rowIndex).toList();
-      // print('Index: $startIndex');
-      // globals.productCart.replaceRange(startIndex, startIndex, temp);
-      // print('Updated: ' + globals.editingProductCart.goodName1);
-    } else {
-      ProductCart order = new ProductCart()
-        ..productCartId = UniqueKey().toString()
-        ..rowIndex = row
-        ..goodId = widget.product.goodId
-        ..goodCode = widget.product.goodCode
-        ..goodName1 = widget.product.goodName1
-        ..mainGoodUnitId = widget.product.mainGoodUnitId
-        ..goodQty = _goodQty
-        ..goodPrice = widget.price
-        ..discount = _discount
-        ..discountType = _discountType
-        ..discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
-        ..goodAmount = _totalNet
-        ..isFree = _isFreeProduct
-        ..vatGroupId = widget.product.vatGroupId
-        ..vatGroupCode = widget.product.vatGroupCode
-        ..vatType = widget.product.vatType
-        ..vatRate = widget.product.vatRate;
+      print('Product Cart Length = ${globals.productCartDraft.length}');
+      print('Row Index = $row');
 
-      if(widget.editedPrice > 0){
-        order.goodPrice = globals.newPrice;
+      if (globals.editingProductCart != null) {
+        print('globals.editingProductCart != null');
+        int startIndex = globals.productCartDraft.indexWhere(
+                (element) => element.rowIndex == globals.editingProductCart?.rowIndex);
+        globals.productCartDraft[startIndex].goodId = widget.product.goodId;
+        globals.productCartDraft[startIndex].goodCode = widget.product.goodCode;
+        globals.productCartDraft[startIndex].goodName1 = widget.product.goodName1;
+        globals.productCartDraft[startIndex].goodQty = _goodQty;
+        if(widget.editedPrice > 0) {
+          globals.productCartDraft[startIndex].goodPrice = globals.newPrice;
+        }
+        else {
+          globals.productCartDraft[startIndex].goodPrice = widget.price;
+        }
+
+        globals.productCartDraft[startIndex].discount = _discount;
+        globals.productCartDraft[startIndex].discountType = _discountType;
+        globals.productCartDraft[startIndex].discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
+        globals.productCartDraft[startIndex].goodAmount = _totalNet;
+        globals.productCartDraft[startIndex].isFree = _isFreeProduct;
+        globals.productCartDraft[startIndex].vatGroupId = widget.product.vatGroupId;
+        globals.productCartDraft[startIndex].vatGroupCode = widget.product.vatGroupCode;
+        globals.productCartDraft[startIndex].vatType = widget.product.vatType;
+        globals.productCartDraft[startIndex].vatRate = widget.product.vatRate;
+        globals.editingProductCart = null;
+        // List<ProductCart> temp = globals.productCart.where((element) => element.rowIndex == globals.editingProductCart.rowIndex).toList();
+        // print('Index: $startIndex');
+        // globals.productCart.replaceRange(startIndex, startIndex, temp);
+        // print('Updated: ' + globals.editingProductCart.goodName1);
+      } else {
+        ProductCart order = new ProductCart()
+          ..productCartId = UniqueKey().toString()
+          ..rowIndex = row
+          ..goodId = widget.product.goodId
+          ..goodCode = widget.product.goodCode
+          ..goodName1 = widget.product.goodName1
+          ..mainGoodUnitId = widget.product.mainGoodUnitId
+          ..goodQty = _goodQty
+          ..goodPrice = widget.price
+          ..discount = _discount
+          ..discountType = _discountType
+          ..discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
+          ..goodAmount = _totalNet
+          ..isFree = _isFreeProduct
+          ..vatGroupId = widget.product.vatGroupId
+          ..vatGroupCode = widget.product.vatGroupCode
+          ..vatType = widget.product.vatType
+          ..vatRate = widget.product.vatRate;
+
+        if(widget.editedPrice > 0) {
+          order.goodPrice = globals.newPrice;
+        }
+
+        print('Add: ' + order.goodName1);
+        globals.productCartDraft.add(order);
       }
-
-      print('Add: ' + order.goodName1);
-      globals.productCart.add(order);
     }
 
     Navigator.pop(context);
@@ -344,7 +447,16 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     }
     else {
       print('globals.newPrice == widget.price');
-      calculatedPrice(_goodQty, _discount, null);
+      if(widget.isDraft == true && widget.productCart != null){
+        print('widget.isDraft == true | Price = ${widget.productCart?.goodPrice ?? 0} | QTY = ${widget.productCart?.goodQty ?? 0}');
+        calculatedPrice(widget.productCart?.goodQty ?? 0, widget.productCart?.discountBase ?? 0, widget.price);
+      }
+      else if(widget.productCart == null){
+        calculatedPrice(_goodQty, _discount, widget.price);
+      }
+      else{
+        calculatedPrice(_goodQty, _discount, null);
+      }
     }
 
 
@@ -487,15 +599,17 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     // },
                     onEditingComplete: () async {
                       double qty = double.parse(txtQty.text.replaceAll(',', ''));
+                      double discAmnt = double.parse(txtDiscount.text.replaceAll(',', ''));
                       double priceList = await _apiService.getPrice(widget.product.goodCode, qty);
-                      print('price List: ' + priceList.toString());
+
+                      print('Price List: ' + priceList.toString());
+
                       if(widget.editedPrice == 1){
                         priceList = globals.newPrice;
                       }
-                      setState(() {
-                        calculatedPrice(qty, double.parse(txtDiscount.text.replaceAll(',', '')), priceList);
-                        FocusScope.of(context).unfocus();
-                      });
+
+                      calculatedPrice(qty, discAmnt, priceList);
+                      FocusScope.of(context).unfocus();
                     },
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -653,7 +767,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text), double.parse(txtPrice.text.replaceAll(',', '')));
+                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text.replaceAll(',', '')), double.parse(txtPrice.text.replaceAll(',', '')));
                         FocusScope.of(context).unfocus();
                       });
                     },

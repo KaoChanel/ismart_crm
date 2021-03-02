@@ -128,33 +128,33 @@ class _SaleOrderState extends State<SaleOrder> {
   DateTime _orderDate = DateTime.now();
 
   FocusNode focusDiscount = FocusNode();
-  TextEditingController txtRunningNo = new TextEditingController();
-  TextEditingController txtDocuNo = new TextEditingController();
-  TextEditingController txtRefNo = new TextEditingController();
-  TextEditingController txtCustPONo = new TextEditingController();
+  TextEditingController txtRunningNo = TextEditingController();
+  TextEditingController txtDocuNo = TextEditingController();
+  TextEditingController txtRefNo = TextEditingController();
+  TextEditingController txtCustPONo = TextEditingController();
   TextEditingController txtSONo;
   TextEditingController txtDeptCode;
   TextEditingController txtCopyDocuNo;
-  TextEditingController txtEmpCode = new TextEditingController();
+  TextEditingController txtEmpCode = TextEditingController();
   TextEditingController txtEmpName;
   TextEditingController txtCustCode;
   TextEditingController txtCustName;
   TextEditingController txtCreditType;
   TextEditingController txtCredit;
   TextEditingController txtStatus;
-  TextEditingController txtRemark;
+  TextEditingController txtRemark = TextEditingController();
 
   TextEditingController txtShiptoName;
   TextEditingController txtShiptoCode;
-  TextEditingController txtShiptoProvince = new TextEditingController();
-  TextEditingController txtShiptoAddress = new TextEditingController();
-  TextEditingController txtShiptoRemark = new TextEditingController();
-  TextEditingController txtPriceTotal = new TextEditingController();
-  TextEditingController txtDiscountTotal = new TextEditingController();
-  TextEditingController txtDiscountBill = new TextEditingController();
-  TextEditingController txtPriceAfterDiscount = new TextEditingController();
-  TextEditingController txtVatTotal = new TextEditingController();
-  TextEditingController txtNetTotal = new TextEditingController();
+  TextEditingController txtShiptoProvince = TextEditingController();
+  TextEditingController txtShiptoAddress = TextEditingController();
+  TextEditingController txtShiptoRemark = TextEditingController();
+  TextEditingController txtPriceTotal = TextEditingController();
+  TextEditingController txtDiscountTotal = TextEditingController();
+  TextEditingController txtDiscountBill = TextEditingController();
+  TextEditingController txtPriceAfterDiscount = TextEditingController();
+  TextEditingController txtVatTotal = TextEditingController();
+  TextEditingController txtNetTotal = TextEditingController();
 
   TextEditingController txtDocuDate = TextEditingController(
       text: DateFormat('dd/MM/yyyy').format(DateTime.now()));
@@ -178,14 +178,14 @@ class _SaleOrderState extends State<SaleOrder> {
     focusDiscount.dispose();
   }
 
-  void setHeader()
-  {
+  void setHeader() {
     _apiService.getRefNo().then((value){
       runningNo = value;
       // refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
       custPONo = '${globals.employee?.empCode}-${runningNo ?? ''}';
       txtCustPONo.text = custPONo ?? '';
       txtRunningNo.text = runningNo ?? '';
+      txtRemark.text = globals.selectedRemark.remark;
       // txtRefNo.text = refNo ?? '';
     });
     _apiService.getDocNo().then((value) {
@@ -320,7 +320,32 @@ class _SaleOrderState extends State<SaleOrder> {
     return ListView(children: list);
   }
 
-  Future<dynamic> postSaleOrder() async {
+  Future<Widget> getRemarkList(BuildContext context) async {
+    //var allRemark = globals.allRemark.toList() ?? [];
+    var allRemark = await _apiService.getRemark();
+    print(allRemark);
+    List<Widget> list = new List<Widget>();
+    for (var i = 0; i < allRemark?.length; i++) {
+      list.add(ListTile(
+        title: Text(allRemark[i]?.remark ?? ''),
+        //subtitle: Text(item?.custCode),
+        onTap: () {
+          globals.selectedRemark = allRemark[i];
+          setState(() {
+            txtRemark.text = globals.selectedRemark?.remark;
+            Navigator.pop(context);
+          });
+        },
+        // selected:
+        // globals.selectedRemark.remark ?? '' == allRemark[i]?.remark ?? '',
+        // selectedTileColor: Colors.grey[200],
+        // hoverColor: Colors.grey,
+      ));
+    }
+    return ListView(children: list);
+  }
+
+  Future<dynamic> postSaleOrder(String status) async {
     try
     {
       globals.showLoaderDialog(context);
@@ -352,7 +377,7 @@ class _SaleOrderState extends State<SaleOrder> {
             header.goodType = '1';
             header.docuStatus = 'Y';
             header.isTransfer = 'N';
-            header.remark = txtRemark?.text ?? '';
+            header.remark = txtRemark.text ?? '';
             header.postdocutype = 1702;
 
             /// VAT Info
@@ -390,6 +415,8 @@ class _SaleOrderState extends State<SaleOrder> {
             header.province = globals.selectedShipto.province;
             header.postCode = globals.selectedShipto.postcode;
 
+            header.isTransfer = status;
+
             bool isSuccess = false;
             _apiService.addSaleOrderHeader(header).then((value) {
               header = value;
@@ -409,6 +436,12 @@ class _SaleOrderState extends State<SaleOrder> {
                   obj.goodAmnt = e.goodAmount;
                   obj.afterMarkupamnt = e.goodAmount;
                   obj.goodDiscAmnt = e.discountBase;
+
+                  /// Empty Field
+                  obj.goodQty1 = 0.00;
+                  obj.goodPrice1 = 0.00;
+                  obj.goodCompareQty = 0;
+                  obj.goodCost = 0;
                   detail.add(obj);
                 });
 
@@ -425,7 +458,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         builder: (BuildContext context) {
                           return RichAlertDialog(
                             //uses the custom alert dialog
-                            alertTitle: richTitle("Transaction Successfully."),
+                            alertTitle: status == 'N' ? richTitle("Transaction Successfully.") : richTitle("Your draft has saved."),
                             alertSubtitle: richSubtitle("Your order has created. "),
                             alertType: RichAlertType.SUCCESS,
                           );
@@ -491,6 +524,26 @@ class _SaleOrderState extends State<SaleOrder> {
             title: new Text('สถานที่จัดส่ง'),
             content: Container(
                 width: 500, height: 300, child: getShiptoListWidgets(context)));
+      },
+    );
+  }
+
+  void _showRemarkDialog(context) async {
+    // flutter defined function
+    var alert = AlertDialog(
+        elevation: 0,
+        title: new Text('ข้อความหมายเหตุ'),
+        content: Container(
+            width: 500,
+            height: 300,
+            child: await getRemarkList(context)
+        ));
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return alert dialog object
+        return alert;
       },
     );
   }
@@ -627,8 +680,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                   context,
                                   CupertinoPageRoute(
                                       builder: (context) => ContainerProduct(
-                                          'แก้ไขรายการสินค้า ลำดับที่ ',
-                                          e))).then((value) {
+                                          'แก้ไขรายการสินค้า ลำดับที่ ', e, false))).then((value) {
                                 setState(() {});
                               });
                             },
@@ -726,7 +778,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                         // boxShadow: [
                         //   BoxShadow(color: Colors.green, spreadRadius: 3),
                         // ],
@@ -761,18 +813,18 @@ class _SaleOrderState extends State<SaleOrder> {
                         controller: txtDocuDate,
                         // initialValue: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                         readOnly: true,
-                        onTap: () {
-                          setState(() async {
-                            _docuDate = await showDatePicker(
-                              context: context,
-                              initialDate: _docuDate != null
-                                  ? _docuDate
-                                  : DateTime.now(),
-                              firstDate: DateTime(1995),
-                              lastDate: DateTime(2030),
-                            );
-                            txtDocuDate.text =
-                                DateFormat('dd/MM/yyyy').format(_docuDate);
+                        onTap: () async {
+                          _docuDate = await showDatePicker(
+                            context: context,
+                            initialDate: _docuDate != null
+                                ? _docuDate
+                                : DateTime.now(),
+                            firstDate: DateTime(1995),
+                            lastDate: DateTime(2030),
+                          );
+
+                          setState(() {
+                            txtDocuDate.text = DateFormat('dd/MM/yyyy').format(_docuDate ?? DateTime.now());
                           });
                         },
                         decoration: InputDecoration(
@@ -813,18 +865,18 @@ class _SaleOrderState extends State<SaleOrder> {
                       title: TextFormField(
                         controller: txtShiptoDate,
                         readOnly: true,
-                        onTap: () {
-                          setState(() async {
-                            _shiptoDate = await showDatePicker(
-                              context: context,
-                              initialDate: _shiptoDate != null
-                                  ? _shiptoDate
-                                  : DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(new Duration(days: 365)),
-                            );
-                            txtShiptoDate.text =
-                                DateFormat('dd/MM/yyyy').format(_shiptoDate);
+                        onTap: () async {
+                          _shiptoDate = await showDatePicker(
+                            context: context,
+                            initialDate: _shiptoDate != null
+                                ? _shiptoDate
+                                : DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(new Duration(days: 365)),
+                          );
+
+                          setState(() {
+                            txtShiptoDate.text = DateFormat('dd/MM/yyyy').format(_shiptoDate ?? DateTime.now().add(new Duration(hours: 24)));
                           });
                         },
                         decoration: InputDecoration(
@@ -862,18 +914,18 @@ class _SaleOrderState extends State<SaleOrder> {
                       title: TextField(
                         controller: txtOrderDate,
                         readOnly: true,
-                        onTap: () {
-                          setState(() async {
-                            _orderDate = await showDatePicker(
-                              context: context,
-                              initialDate: _orderDate != null
-                                  ? _orderDate
-                                  : DateTime.now(),
-                              firstDate: DateTime(1995),
-                              lastDate: DateTime(2030),
-                            );
-                            txtOrderDate.text =
-                                DateFormat('dd/MM/yyyy').format(_orderDate);
+                        onTap: () async {
+                          _orderDate = await showDatePicker(
+                            context: context,
+                            initialDate: _orderDate != null
+                                ? _orderDate
+                                : DateTime.now(),
+                            firstDate: DateTime(1995),
+                            lastDate: DateTime(2030),
+                          );
+
+                          setState(() {
+                            txtOrderDate.text = DateFormat('dd/MM/yyyy').format(_orderDate ?? DateTime.now());
                           });
                         },
                         decoration: InputDecoration(
@@ -1031,6 +1083,7 @@ class _SaleOrderState extends State<SaleOrder> {
                     flex: 6,
                     child: ListTile(
                       title: TextFormField(
+                        readOnly: true,
                         //initialValue: globals.customer?.,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
@@ -1059,7 +1112,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ],
@@ -1231,7 +1284,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                     SizedBox(height: 10),
@@ -1245,7 +1298,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                 CupertinoPageRoute(
                                     builder: (context) => ContainerProduct(
                                         'สั่งรายการสินค้า ลำดับที่ ',
-                                        null))).then((value) {
+                                        null, false))).then((value) {
                               globals.editingProductCart = null;
                               setState(() {});
                             });
@@ -1270,7 +1323,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ', null)));
+                                        'สั่งรายการสินค้า ลำดับที่ ', null, false)));
                           },
                           icon: Icon(Icons.local_fire_department,
                               color: Colors.white),
@@ -1291,7 +1344,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ', null)));
+                                        'สั่งรายการสินค้า ลำดับที่ ', null, false)));
                           },
                           icon: Icon(Icons.list, color: Colors.white),
                           color: Colors.blueAccent,
@@ -1325,7 +1378,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ],
@@ -1337,7 +1390,9 @@ class _SaleOrderState extends State<SaleOrder> {
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          _showRemarkDialog(context);
+                        },
                         icon: Icon(Icons.add_comment),
                         label: Text(
                           'ข้อความหมายเหตุ',
@@ -1418,6 +1473,7 @@ class _SaleOrderState extends State<SaleOrder> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: TextFormField(
+                            controller: txtRemark,
                             maxLines: 8,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
@@ -1428,6 +1484,9 @@ class _SaleOrderState extends State<SaleOrder> {
                               labelText: "หมายเหตุ",
                               //border: OutlineInputBorder()
                             ),
+                            onChanged: (value){
+                              globals.selectedRemark.remark = value;
+                            },
                           ),
                         )),
                     //Spacer(),
@@ -1670,6 +1729,46 @@ class _SaleOrderState extends State<SaleOrder> {
                         padding: const EdgeInsets.only(top: 30.0),
                         child: ElevatedButton(
                             onPressed: () {
+
+                              if(globals.productCart.length == 0){
+                                return globals.showAlertDialog('โปรดเพิ่มรายการสินค้า', 'คุณยังไม่มีรายการสินค้า', context);
+                              }
+
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.INFO,
+                                animType: AnimType.BOTTOMSLIDE,
+                                width: 450,
+                                title: 'Confirmation',
+                                desc: 'Are you sure to save draft ?',
+                                btnCancelOnPress: () {},
+                                btnOkOnPress: () async {
+                                  setState(() {
+
+                                  });
+                                  await postSaleOrder('D');
+                                  // postSaleOrder().then((value) => setState((){}));
+                                },
+                              )..show();
+                              //print(jsonEncode(globals.productCart));
+                            },
+                            style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.green)),
+                            child: Text(
+                              'บันทึกฉบับร่าง',
+                              style: TextStyle(fontSize: 20),
+                            )),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 100,
+                        padding: const EdgeInsets.only(top: 30.0),
+                        child: ElevatedButton(
+                            onPressed: () {
+                              if(globals.productCart.length == 0){
+                                return globals.showAlertDialog('โปรดเพิ่มรายการสินค้า', 'คุณยังไม่มีรายการสินค้า', context);
+                              }
+
                               AwesomeDialog(
                                 context: context,
                                 dialogType: DialogType.INFO,
@@ -1682,7 +1781,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                   setState(() {
 
                                   });
-                                  await postSaleOrder();
+                                  await postSaleOrder('N');
                                   // postSaleOrder().then((value) => setState((){}));
                                 },
                               )..show();

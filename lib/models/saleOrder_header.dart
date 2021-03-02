@@ -166,7 +166,7 @@ class SaleOrderHeader {
   dynamic attach;
   dynamic organName;
   String remark;
-  dynamic custPodate;
+  DateTime custPodate;
   dynamic statusRemark;
   dynamic custPono;
   dynamic vateffc;
@@ -232,7 +232,7 @@ class SaleOrderHeader {
     docuType: json["docuType"] == null ? null : json["docuType"],
     docuDate: json["docuDate"] == null ? null : DateTime.parse(json["docuDate"]),
     validDays: json["validDays"] == null ? null : json["validDays"],
-    expireDate: json["expireDate"],
+    expireDate: json["expireDate"] == null ? null : DateTime.parse(json["expireDate"]),
     onHold: json["onHold"] == null ? null : json["onHold"],
     vatRate: json["vatRate"] == null ? null : json["vatRate"],
     vatType: json["vatType"] == null ? null : json["vatType"],
@@ -269,7 +269,7 @@ class SaleOrderHeader {
     attach: json["attach"],
     organName: json["organName"],
     remark: json["remark"] == null ? null : json["remark"],
-    custPodate: json["custPodate"],
+    custPodate: json["custPodate"] == null ? null : DateTime.parse(json["custPodate"]),
     statusRemark: json["statusRemark"],
     custPono: json["custPono"],
     vateffc: json["vateffc"],
@@ -336,7 +336,7 @@ class SaleOrderHeader {
     "docuType": docuType == null ? null : docuType,
     "docuDate": docuDate == null ? null : docuDate.toIso8601String(),
     "validDays": validDays == null ? null : validDays,
-    "expireDate": expireDate,
+    "expireDate": expireDate == null ? null : expireDate.toIso8601String(),
     "onHold": onHold == null ? null : onHold,
     "vatRate": vatRate == null ? null : vatRate,
     "vatType": vatType == null ? null : vatType,
@@ -373,7 +373,7 @@ class SaleOrderHeader {
     "attach": attach,
     "organName": organName,
     "remark": remark == null ? null : remark,
-    "custPodate": custPodate,
+    "custPodate": custPodate == null ? null : custPodate.toIso8601String(),
     "statusRemark": statusRemark,
     "custPono": custPono,
     "vateffc": vateffc,

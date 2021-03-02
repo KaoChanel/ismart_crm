@@ -4,6 +4,7 @@ import 'package:ismart_crm/globals.dart' as globals;
 class ProductCart {
   ProductCart({
     this.rowIndex,
+    this.soid,
     this.productCartId,
     this.goodId,
     this.goodCode,
@@ -36,6 +37,7 @@ class ProductCart {
   });
 
   int rowIndex;
+  int soid;
   String productCartId;
   int goodId;
   String goodCode;
@@ -68,6 +70,7 @@ class ProductCart {
 
   Map<String, dynamic> toJson() => {
     "rowIndex": rowIndex == null ? null : rowIndex,
+    "soid": soid == null ? null : soid,
     "goodId": goodId == null ? null : goodId,
     "goodCode": goodCode == null ? null : goodCode,
     "goodName1": goodName1 == null ? null : goodName1,

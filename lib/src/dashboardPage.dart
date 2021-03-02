@@ -60,7 +60,7 @@ class DashboardPageState extends State<DashboardPage> {
     super.initState();
     if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null || globals.allStock == null){
       //_apiService.getCompany();
-      _apiService.getCustomer();
+      _apiService.getAllCustomer();
       _apiService.getProduct();
       _apiService.getUnit();
       _apiService.getShipto();
@@ -95,10 +95,9 @@ class DashboardPageState extends State<DashboardPage> {
                       // ),
                       Flexible(
                           child: TextFormField(
-                        readOnly: true,
-                        //initialValue: 'โรงงานสัตว์เลี้ยง 55555',
+                            readOnly: true,
                             controller: txtCustomer,
-                        textAlign: TextAlign.center,
+                            textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           suffixIcon: Icon(Icons.arrow_drop_down),
                           border: OutlineInputBorder(
@@ -243,7 +242,7 @@ class DashboardPageState extends State<DashboardPage> {
         child: Icon(Icons.refresh),
         onPressed: () async {
           setState(() {
-            _apiService.getCustomer();
+            _apiService.getAllCustomer();
             _apiService.getProduct();
             _apiService.getUnit();
             _apiService.getShipto();

@@ -72,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('password', '');
     prefs.setString('company', '');
+    prefs.setString('customer', '');
 
     // setState(() {
     //   name = '';
@@ -101,6 +102,12 @@ class _LoginPageState extends State<LoginPage> {
           prefs.setString('username', globals.employee.empCode);
           prefs.setString('password', password);
           prefs.setString('company', company);
+          final int custId = prefs.getInt('customer');
+          if(custId != null){
+            globals.customer = await _apiService.getCustomer(globals.employee.empId, custId);
+            globals.selectedShipto = await _apiService.getShiptoByCustomer(custId);
+          }
+
           Navigator.pop(context);
           _apiService.getCompany().then((value) =>
               Navigator.pushReplacement(

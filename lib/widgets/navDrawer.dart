@@ -22,14 +22,14 @@ class NavDrawer extends StatelessWidget {
         children: <Widget>[
           DrawerHeader(
             child: Text(
-              'Side Menu',
+              'Smart Sales BIS',
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
             decoration: BoxDecoration(
                 color: Colors.green,
                 image: DecorationImage(
                     fit: BoxFit.fill,
-                    image: AssetImage('assets/images/cover.jpg'))),
+                    image: AssetImage('assets/bg_02.jpg'))),
           ),
           // ListTile(
           //   leading: Icon(Icons.refresh),
@@ -42,11 +42,11 @@ class NavDrawer extends StatelessWidget {
             title: Text('Sale Order'),
             onTap: () => {},
           ),
-          ListTile(
-            leading: Icon(Icons.monetization_on),
-            title: Text('Commission'),
-            onTap: () => {Navigator.of(context).pop()},
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.monetization_on),
+          //   title: Text('Commission'),
+          //   onTap: () => {Navigator.of(context).pop()},
+          // ),
           ListTile(
             leading: Icon(Icons.people_alt),
             title: Text('Customers'),

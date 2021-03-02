@@ -8,6 +8,7 @@ import 'models/goods_unit.dart';
 import 'models/shipto.dart';
 import 'models/saleOrder_header.dart';
 import 'models/saleOrder_detail.dart';
+import 'models/master_remark.dart';
 import 'models/stock.dart';
 import 'package:ismart_crm/src/saleOrder.dart';
 import 'globals.dart' as globals;
@@ -28,7 +29,7 @@ class ApiService {
       }
   }
 
-  Future<void> getCustomer() async {
+  Future<void> getAllCustomer() async {
     String strUrl =
         '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
     var response = await client.get(strUrl);
@@ -37,6 +38,28 @@ class ApiService {
       } else {
         globals.allCustomer = null;
       }
+  }
+
+  Future<List<Customer>> getCustomerList() async {
+    String strUrl =
+        '${globals.publicAddress}/api/customers/${globals.company}/${globals.employee.empId}';
+    var response = await client.get(strUrl);
+    if (response.statusCode == 200) {
+      return customerFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  Future<Customer> getCustomer(int empId, int custId) async {
+    String strUrl =
+        '${globals.publicAddress}/api/customers/${globals.company}/$empId';
+    var response = await client.get(strUrl);
+    if (response.statusCode == 200) {
+      return customerFromJson(response.body).firstWhere((element) => element.custId == custId, orElse: null);
+    } else {
+      return null;
+    }
   }
 
   Future<void> getProduct() async {
@@ -49,6 +72,30 @@ class ApiService {
       globals.allProduct = productFromJson(response.body);
     } else {
       globals.allProduct = null;
+    }
+  }
+
+  // Future<void> getRemark() async {
+  //   String strUrl = '${globals.publicAddress}/api/SaleOrderHeader/GetTbmRemark/${globals.company}';
+  //   var response = await client.get(strUrl);
+  //
+  //   if (response.statusCode == 200) {
+  //     globals.allRemark = masterRemarkFromJson(response.body);
+  //   } else {
+  //     globals.allRemark = null;
+  //   }
+  // }
+
+  Future<List<MasterRemark>> getRemark() async {
+    String strUrl = '${globals.publicAddress}/api/SaleOrderHeader/GetTbmRemark/${globals.company}';
+    var response = await client.get(strUrl);
+
+    if (response.statusCode == 200) {
+      //globals.allRemark = masterRemarkFromJson(response.body);
+      return masterRemarkFromJson(response.body);
+    } else {
+      //globals.allRemark = null;
+      return null;
     }
   }
 
@@ -95,6 +142,18 @@ class ApiService {
       globals.allShipto = shiptoFromJson(response.body);
     } else {
       globals.allShipto = null;
+    }
+  }
+
+  Future<Shipto> getShiptoByCustomer(int custId) async {
+    String strUrl;
+    strUrl = '${globals.publicAddress}/api/shipto/${globals.company}';
+    final response = await client.get(strUrl);
+
+    if (response.statusCode == 200) {
+      return shiptoFromJson(response.body).firstWhere((element) => element.custId == custId, orElse: null);
+    } else {
+      return null;
     }
   }
 
@@ -228,7 +287,7 @@ class ApiService {
   }
 
   Future<bool> updateSaleOrderDetail(List<SaleOrderDetail> data) async {
-    final response = await client.put(
+    final response = await client.post(
       "$baseUrl/SaleOrderDetail/${globals.company}",
       headers: {"content-type": "application/json"},
       body: saleOrderDetailToJson(data),
@@ -237,6 +296,39 @@ class ApiService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  Future<bool> saveDraft(SaleOrderHeader header, List<SaleOrderDetail> data) async {
+    try {
+      var response = await client.put(
+        "$baseUrl/SaleOrderHeader/${globals.company}/${header.soid}",
+        headers: {"content-type": "application/json"},
+        body: json.encode(header.toJson()),
+      );
+
+      if (response.statusCode == 204) {
+        response = await client.delete(
+          "$baseUrl/SaleOrderDetail/${globals.company}/${header.soid}",
+          headers: {"content-type": "application/json"},
+        );
+
+        if (response.statusCode == 204 || response.statusCode == 404) {
+          response = await client.post(
+            "$baseUrl/SaleOrderDetail/${globals.company}/",
+            headers: {"content-type": "application/json"},
+            body: saleOrderDetailToJson(data),
+          );
+
+          if (response.statusCode == 201) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    catch(e){
+      print('Exception: ' + e);
     }
   }
 

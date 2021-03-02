@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,7 +7,9 @@ import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/models/saleOrder_header.dart';
 import 'package:intl/intl.dart';
 import 'package:ismart_crm/api_service.dart';
-import 'saleOrderEdit.dart';
+import 'package:ismart_crm/src/saleOrderDraft.dart';
+import 'saleOrderView.dart';
+import 'package:ismart_crm/models/customer.dart';
 
 class StatusTransferDoc extends StatefulWidget {
   @override
@@ -22,6 +25,8 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
   String _selectedStatus = 'ทั้งหมด';
   String _selectedSort = 'สถานะเอกสาร (Z-A)';
   ApiService _apiService = new ApiService();
+  int docCount = 0;
+  StreamController<int> streamController = new StreamController<int>();
 
   static const _docType = [
     'ทั้งหมด',
@@ -83,6 +88,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    streamController.add(docCount);
   }
 
   onSort(int columnIndex, bool ascending) {
@@ -182,8 +188,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                 onSort(columnIndex, ascending);
               }),
         ],
-        rows: dataList
-                .asMap()
+        rows: dataList.asMap()
                 .map((i, element) => MapEntry(
                     i,
                     DataRow(
@@ -192,12 +197,28 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                         onSelectChanged: (isSelect) {
                           selectedItem = element;
                           onSelectedRow(isSelect, element);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SaleOrderEdit(
-                                    saleOrderHD: element,
-                                  )));
+
+                          if(element.isTransfer != 'D'){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SaleOrderView(
+                                      saleOrderHD: element,
+                                    )
+                                )
+                            );
+                          }
+                          else{
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SaleOrderDraft(
+                                      saleOrderHeader: element,
+                                    )
+                                )
+                            );
+                          }
+
                           // if (element.isTransfer == 'N') {
                           //   selectedItem = element;
                           //   onSelectedRow(isSelect, element);
@@ -233,9 +254,9 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                                   ? ''
                                   : element.isTransfer == 'N'
                                       ? 'รอดำเนินการ'
-                                      : 'ส่งเข้าระบบแล้ว',
+                                      : element.isTransfer == 'D' ? 'ฉบับร่าง' : 'เข้าระบบแล้ว',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: element.isTransfer == 'N' ? Colors.orange[600] : Colors.green,fontWeight: FontWeight.normal),),
+                              style: TextStyle(color: element.isTransfer == 'N' ? Colors.orange[600] : element.isTransfer == 'D' ? Colors.blue : Colors.green, fontWeight: FontWeight.normal),),
                             ),
                             // onTap: () {
                             //   print('Selected ${element.isTransfer ?? ''}');
@@ -260,10 +281,8 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                           DataCell(
                             Text(globals.allCustomer
                                     .firstWhere(
-                                        (e) => e.custId == element.custId,
-                                        orElse: null)
-                                    .custCode ??
-                                ''),
+                                        (e) => e.custId == element.custId, orElse: () => new Customer()).custCode ?? ''),
+                            //Text(''),
                           ),
                           DataCell(
                             Text(element.custName ?? ''),
@@ -284,6 +303,17 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
               ])
             ],
       ),
+    );
+  }
+
+  Widget docCounter(){
+    return StreamBuilder(
+      stream: streamController.stream,
+      builder: (context, snapshot){
+        print('render - Counter Widget');
+        return Text('รายการเอกสาร (${snapshot.data ?? 0} เอกสาร)',
+          style: TextStyle(color: Colors.white, fontSize: 20),);
+      },
     );
   }
 
@@ -452,10 +482,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
               margin: EdgeInsets.only(top: 11),
               padding: EdgeInsets.all(10),
               width: 350,
-              child: Text(
-                'รายการเอกสาร (${globals.tempSOHD?.length ?? 0} เอกสาร)',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
+              child: docCounter(),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
@@ -474,7 +501,9 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                     (BuildContext context, AsyncSnapshot<Object> snapShot) {
                   if (snapShot.hasData) {
                     globals.tempSOHD = snapShot.data;
-                    return Expanded(child: dataBody(snapShot.data));
+                    streamController.add(globals.tempSOHD.length);
+                    print('snapShot ==>> ${snapShot.data}');
+                    return Expanded(child: dataBody(globals.tempSOHD));
                   } else {
                     //return Expanded(child: Center(child: CircularProgressIndicator()));
                     return Expanded(

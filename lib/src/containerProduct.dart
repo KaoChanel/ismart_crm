@@ -22,10 +22,11 @@ import 'item_product_detail.dart';
 
 class ContainerProduct extends StatefulWidget {
   //const ContainerProduct({ Key key }) : super(key: key);
-  const ContainerProduct(this.title, this.editing_product);
+  const ContainerProduct(this.title, this.editing_product, this.isDraft);
 
   final String title;
   final ProductCart editing_product;
+  final bool isDraft;
 
   @override
   _ContainerProductState createState() => _ContainerProductState();
@@ -52,20 +53,20 @@ class _ContainerProductState extends State<ContainerProduct> {
 
   void setEditingSelected() {
     if (widget.editing_product != null) {
-      setState(() {
-        globals.editingProductCart = widget.editing_product;
-        _selectedItem = allProduct.firstWhere(
-            (element) => element.goodCode == widget.editing_product.goodCode);
-        _goodQty = globals.editingProductCart.goodQty;
-        _goodPrice = globals.editingProductCart.goodPrice;
-        _discount = globals.editingProductCart.discount;
-        _total = globals.editingProductCart.goodAmount;
+      globals.editingProductCart = widget.editing_product;
 
-        print(widget.editing_product.goodCode);
-        print('Editing Qty: ${globals.editingProductCart.goodQty}');
-        print('Editing GoodQty: $_goodQty');
-        print(widget.editing_product.goodAmount);
-      });
+      _selectedItem = allProduct.firstWhere(
+            (element) => element.goodCode == widget.editing_product.goodCode);
+      _goodQty = widget.editing_product.goodQty;
+      _goodPrice = widget.editing_product.goodPrice;
+      _discount = widget.editing_product.discount;
+      _total = widget.editing_product.goodAmount;
+
+      print(widget.editing_product.goodCode);
+      print('Editing Qty: ${widget.editing_product.goodQty}');
+      print('Editing GoodQty: $_goodQty');
+      print('Editing Good Price: ${widget.editing_product.goodPrice}');
+      print(widget.editing_product.goodAmount);
     }
   }
 
@@ -74,16 +75,11 @@ class _ContainerProductState extends State<ContainerProduct> {
         '${globals.publicAddress}/api/product/${globals.company}/${_selectedItem?.goodCode}/1');
     Map values = json.decode(response.body);
 
-    setState(() {
-      _goodQty = 1;
-      _goodPrice = double.parse(values['price'].toString());
-      _total = double.parse(values['total'].toString());
+    _goodQty = 1;
+    _goodPrice = double.parse(values['price'].toString());
+    _total = double.parse(values['total'].toString());
 
-      print('Price / Unit: ' +
-          _goodPrice.toString() +
-          ' Total: ' +
-          values['total'].toString());
-    });
+    print('Price / Unit: ' + _goodPrice.toString() + ' Total: ' + values['total'].toString());
   }
 
   Widget _buildTabletLayout() {
@@ -178,11 +174,13 @@ class _ContainerProductState extends State<ContainerProduct> {
             // The item details just blindly accepts whichever
             // item we throw in its way, just like before.
             product: _selectedItem,
-            quantity: _goodQty,
-            price: _goodPrice,
+            quantity: widget.isDraft == true ? widget.editing_product != null ? widget.editing_product.goodQty : _goodQty : _goodQty,
+            price: widget.isDraft == true ? widget.editing_product != null ? widget.editing_product?.goodPrice : _goodPrice : _goodPrice,
             editedPrice: 0,
             total: _total,
             isInTabletLayout: true,
+            isDraft: widget.isDraft,
+            productCart: widget.editing_product,
           ),
         ),
       ],

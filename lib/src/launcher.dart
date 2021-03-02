@@ -74,6 +74,7 @@ class _LauncherState extends State<Launcher> {
           children: [
             DoubleBackToCloseApp(
               snackBar: const SnackBar(
+                duration: Duration(milliseconds: 800),
                   content: Text(
                 'Tap back again to exit',
                 textAlign: TextAlign.center,

@@ -91,17 +91,17 @@ class SaleOrderDetail {
     this.serialsNo,
   });
 
-  dynamic refSoid;
+  int refSoid;
   int soid;
   int listNo;
   int docuType;
-  dynamic jobId;
-  dynamic vatgroupId;
+  int jobId;
+  int vatgroupId;
   int goodId;
   String goodName;
   int inveId;
   int locaId;
-  dynamic goodUnitId1;
+  int goodUnitId1;
   double goodPrice1;
   double goodQty1;
   int goodUnitId2;
@@ -141,9 +141,9 @@ class SaleOrderDetail {
   int goodStockUnitId;
   dynamic postFlag;
   int goodStockQty;
-  int goodCost;
-  String vatType;
-  dynamic vatrate;
+  double goodCost;
+  int vatType;
+  int vatrate;
   int stockFlag;
   String goodFlag;
   int remaQty;
@@ -172,17 +172,17 @@ class SaleOrderDetail {
   dynamic serialsNo;
 
   factory SaleOrderDetail.fromJson(Map<String, dynamic> json) => SaleOrderDetail(
-    refSoid: json["refSoid"],
+    refSoid: json["refSoid"] == null ? null : json["refSoid"],
     soid: json["soid"] == null ? null : json["soid"],
     listNo: json["listNo"] == null ? null : json["listNo"],
     docuType: json["docuType"] == null ? null : json["docuType"],
-    jobId: json["jobId"],
-    vatgroupId: json["vatgroupId"],
+    jobId: json["jobId"] == null ? null : json["jobId"],
+    vatgroupId: json["vatgroupId"] == null ? null : json["vatgroupId"],
     goodId: json["goodId"] == null ? null : json["goodId"],
     goodName: json["goodName"] == null ? null : json["goodName"],
     inveId: json["inveId"] == null ? null : json["inveId"],
     locaId: json["locaId"] == null ? null : json["locaId"],
-    goodUnitId1: json["goodUnitId1"],
+    goodUnitId1: json["goodUnitId1"] == null ? null : json["goodUnitId1"],
     goodPrice1: json["goodPrice1"] == null ? null : json["goodPrice1"],
     goodQty1: json["goodQty1"] == null ? null : json["goodQty1"],
     goodUnitId2: json["goodUnitId2"] == null ? null : json["goodUnitId2"],
@@ -254,17 +254,17 @@ class SaleOrderDetail {
   );
 
   Map<String, dynamic> toJson() => {
-    "refSoid": refSoid,
+    "refSoid": refSoid == null ? null : refSoid,
     "soid": soid == null ? null : soid,
     "listNo": listNo == null ? null : listNo,
     "docuType": docuType == null ? null : docuType,
-    "jobId": jobId,
-    "vatgroupId": vatgroupId,
+    "jobId": jobId == null ? null : jobId,
+    "vatgroupId": vatgroupId  == null ? null : vatgroupId,
     "goodId": goodId == null ? null : goodId,
     "goodName": goodName == null ? null : goodName,
     "inveId": inveId == null ? null : inveId,
     "locaId": locaId == null ? null : locaId,
-    "goodUnitId1": goodUnitId1,
+    "goodUnitId1": goodUnitId1 == null ? null : goodUnitId1,
     "goodPrice1": goodPrice1 == null ? null : goodPrice1,
     "goodQty1": goodQty1 == null ? null : goodQty1,
     "goodUnitId2": goodUnitId2 == null ? null : goodUnitId2,

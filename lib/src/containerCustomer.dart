@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ismart_crm/models/item.dart';
 import 'package:ismart_crm/models/customer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'item_customer.dart';
 import 'item_customer_detail.dart';
 import 'package:ismart_crm/globals.dart' as globals;
@@ -110,6 +111,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
                   setState(() {
                     allCustomer = globals.allCustomer
                         .where((x) =>
+                    x.inactive == 'A' &&
                     x.custName
                         .toLowerCase()
                         .contains(value) ||
@@ -157,7 +159,10 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
                 width: double.infinity,
                 margin: EdgeInsets.only(top: 0.0),
                 padding: EdgeInsets.all(20.0),
-                child: Center(child: Text('ลูกค้าทั้งหมด ${allCustomer?.length.toString()} ราย', style: TextStyle(fontSize: 18.0, color: Colors.white),)),
+                child: Center(
+                    child: Text(
+                      'ลูกค้าทั้งหมด ${allCustomer != null ? allCustomer.length.toString() : '0'} ราย',
+                      style: TextStyle(fontSize: 18.0, color: Colors.white),)),
               ),
               Expanded(
                 flex: 6,
@@ -203,7 +208,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
           height: 15,
         ),
         ElevatedButton.icon(
-            onPressed: () {
+            onPressed: () async {
               if(_selectedItem == null){
                 return showDialog(
                     context: context,
@@ -233,6 +238,8 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
               else{
                 globals.customer = _selectedItem;
                 globals.selectedShipto = _allShipto;
+                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setInt('customer', _selectedItem.custId);
                 Navigator.pop(context);
               }
 

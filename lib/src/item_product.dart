@@ -22,14 +22,6 @@ class _ItemProductState extends State<ItemProduct> {
   ScrollController _scroll = ScrollController();
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getScrollAtElement(widget.allProduct?.indexWhere((x) => x.goodCode == widget.selectedItem?.goodCode));
-    print(widget.allProduct?.indexWhere((x) => x.goodCode == widget.selectedItem?.goodCode));
-  }
-
-  @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
@@ -55,8 +47,8 @@ class _ItemProductState extends State<ItemProduct> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Scrollbar(
+    getScrollAtElement(widget.allProduct?.indexWhere((x) => x.goodCode == widget.selectedItem?.goodCode));
+    return Scrollbar(
         controller: _scroll,
         isAlwaysShown: false,
         thickness: 3.0,

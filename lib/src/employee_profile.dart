@@ -29,13 +29,14 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
     // TODO: implement initState
     super.initState();
     _controller = TabController(length: 3, vsync: this);
-    if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null || globals.allStock == null){
+    if(globals.allCustomer == null || globals.allProduct == null || globals.allGoodsUnit == null || globals.allShipto == null || globals.allStock == null || globals.allRemark == null){
       //_apiService.getCompany();
-      _apiService.getCustomer();
+      _apiService.getAllCustomer();
       _apiService.getProduct();
       _apiService.getUnit();
       _apiService.getShipto();
       _apiService.getStock();
+      _apiService.getRemark();
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:ismart_crm/models/customer.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+import 'package:intl/intl.dart';
 import 'package:ismart_crm/globals.dart' as globals;
 
 class ItemCustomerDetail extends StatefulWidget {
@@ -18,18 +19,22 @@ class ItemCustomerDetail extends StatefulWidget {
 }
 
 class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
-  TextEditingController txtCustName = new TextEditingController();
-  TextEditingController txtCustCode = new TextEditingController();
-  TextEditingController txtAddress = new TextEditingController();
-  TextEditingController txtContact = new TextEditingController();
-  TextEditingController txtTel = new TextEditingController();
-  TextEditingController txtRemark = new TextEditingController();
-  TextEditingController txtCustGroup = new TextEditingController();
-  TextEditingController txtCustType = new TextEditingController();
-  TextEditingController txtCustTaxId = new TextEditingController();
-  TextEditingController txtBranch = new TextEditingController();
-  TextEditingController txtCreditType = new TextEditingController();
-  TextEditingController txtCreditDays = new TextEditingController();
+  final currency = NumberFormat("#,##0.00", "en_US");
+  TextEditingController txtCustName = TextEditingController();
+  TextEditingController txtCustCode = TextEditingController();
+  TextEditingController txtAddress = TextEditingController();
+  TextEditingController txtContact = TextEditingController();
+  TextEditingController txtTel = TextEditingController();
+  TextEditingController txtRemark = TextEditingController();
+  TextEditingController txtCustGroup = TextEditingController();
+  TextEditingController txtCustType = TextEditingController();
+  TextEditingController txtCustTaxId = TextEditingController();
+  TextEditingController txtBranch = TextEditingController();
+  TextEditingController txtCreditType = TextEditingController();
+  TextEditingController txtCreditDays = TextEditingController();
+  TextEditingController txtCreditAmnt = TextEditingController();
+  TextEditingController txtCreditState = TextEditingController();
+  TextEditingController txtInactive = TextEditingController();
 
   @override
   void initState() {
@@ -43,14 +48,17 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
       txtCustCode.text = widget.customer?.custCode;
       txtCustName.text = widget.customer?.custName;
       txtAddress.text = '${widget.customer?.custAddr1 ?? ''} ${widget.customer?.custAddr2 ?? ''} ${widget.customer?.district ?? ''} ${widget.customer?.amphur ?? ''} ${widget.customer?.province ?? ''} ${widget.customer?.postCode ?? ''}';
-      //txtTel.text = widget.customer?;
+      txtTel.text = widget.customer?.contTel ?? '';
+      txtCustGroup.text = widget.customer?.custGroupName ?? '';
       txtCustType.text = widget.customer?.custTypeName;
       txtBranch.text = widget.customer?.brchName;
       txtCustTaxId.text = widget.customer?.taxId;
       //txtCreditType.text = widget.customer?.typ;
+      txtInactive.text = widget.customer?.inactive == 'A' ? 'ปกติ' : 'ไม่พร้อมใช้งาน';
+      txtCreditType.text = widget.customer?.creditType;
+      txtCreditState.text = widget.customer?.creditState;
       txtCreditDays.text = widget.customer?.creditDays.toString();
-
-      print('setState Customer...');
+      txtCreditAmnt.text = currency.format(widget.customer?.creditAmnt ?? 0);
     });
 
     final TextTheme textTheme = Theme.of(context).textTheme;
@@ -74,7 +82,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   child: ListTile(
                     //
                     title: TextFormField(
-
+                      readOnly: true,
                       controller: txtCustCode,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -151,6 +159,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   child: ListTile(
                     //
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtAddress,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -179,6 +188,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
+                      readOnly: true,
                       initialValue: '',
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -193,6 +203,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtTel,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -221,7 +232,8 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   child: ListTile(
                     //
                     title: TextFormField(
-                      initialValue: '',
+                      readOnly: true,
+                      controller: txtCustGroup,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -249,6 +261,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   child: ListTile(
                     //
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtCustType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -277,6 +290,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   child: ListTile(
                     //
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtCustTaxId,
                       textAlign: TextAlign.left,
                       keyboardType:
@@ -294,6 +308,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtBranch,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -367,7 +382,8 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
-                      initialValue: '',
+                      readOnly: true,
+                      controller: txtCreditAmnt,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -382,8 +398,8 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   child: ListTile(
                     title: TextFormField(
                       readOnly: true,
-                      initialValue: '',
-                      textAlign: TextAlign.right,
+                      controller: txtInactive,
+                      textAlign: TextAlign.left,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -411,6 +427,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
+                      readOnly: true,
                       controller: txtCreditType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -455,6 +472,7 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
+                      readOnly: true,
                       initialValue: '',
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
@@ -493,13 +511,14 @@ class _ItemCustomerDetailState extends State<ItemCustomerDetail> {
                 SizedBox(
                     width: 100,
                     child: Text('หมายเหตุ',
-                        textAlign: TextAlign.left,
+                        textAlign: TextAlign.right,
                         style: TextStyle(fontSize: 16))),
                 Flexible(
                   flex: 6,
                   child: ListTile(
                     title: TextFormField(
-                      initialValue: '',
+                      readOnly: true,
+                      controller: txtRemark,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
