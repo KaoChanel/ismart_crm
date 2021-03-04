@@ -155,7 +155,7 @@ class _ContainerCustomerState extends State<ContainerCustomer> {
               //   ),
               // ),
               Container(
-                color: Colors.deepPurple,
+                color: Theme.of(context).primaryColor,
                 width: double.infinity,
                 margin: EdgeInsets.only(top: 0.0),
                 padding: EdgeInsets.all(20.0),

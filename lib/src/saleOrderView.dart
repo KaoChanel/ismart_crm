@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ismart_crm/models/discount.dart';
 import 'package:ismart_crm/models/product_cart.dart';
 import 'package:ismart_crm/models/shipto.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ismart_crm/src/saleOrderCopy.dart';
+import 'package:ismart_crm/src/saleOrderDraft.dart';
 import 'containerProduct.dart';
 import 'package:http/http.dart' as http;
 import 'package:ismart_crm/globals.dart' as globals;
@@ -16,42 +19,6 @@ import 'package:ismart_crm/models/saleOrder_header.dart';
 import 'package:ismart_crm/models/saleOrder_detail.dart';
 import 'package:rich_alert/rich_alert.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-
-dynamic _selectDate(BuildContext context, DateTime _selectedDate,
-    TextEditingController _textEditController) async {
-  DateTime newSelectedDate = await showDatePicker(
-    context: context,
-    initialDate: _selectedDate != null ? _selectedDate : DateTime.now(),
-    firstDate: DateTime(1995),
-    lastDate: DateTime(2030),
-  );
-
-  if (newSelectedDate != null) {
-    _selectedDate = newSelectedDate;
-    _textEditController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
-  }
-}
-
-void _showShiptoDialog(context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      // return alert dialog object
-      return AlertDialog(
-        title: new Text('เลือกสถานที่จัดส่ง'),
-        content: Container(
-          height: 150.0,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
 
 class SaleOrderView extends StatefulWidget {
   SaleOrderView({@required this.saleOrderHD});
@@ -169,139 +136,6 @@ class _SaleOrderViewState extends State<SaleOrderView> {
     txtPriceAfterDiscount.text = currency.format(SOHD.billAftrDiscAmnt);
     txtVatTotal.text = currency.format(SOHD.vatamnt ?? 0);
     txtNetTotal.text = currency.format(SOHD.netAmnt);
-
-    // _apiService.getRefNo().then((value) {
-    //   runningNo = value;
-    //   refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
-    //   txtRunningNo.text = runningNo ?? '';
-    //   txtRefNo.text = refNo ?? '';
-    // });
-    // _apiService.getDocNo().then((value) {
-    //   docuNo = value;
-    //   txtDocuNo.text = docuNo ?? '';
-    //   txtEmpCode.text = '${globals.employee?.empCode}';
-    // });
-
-    // setState(() {
-    //   txtRunningNo.text = runningNo ?? '';
-    //   txtRefNo.text = refNo ?? '';
-    //   txtDocuNo.text = docuNo ?? '';
-    //   txtEmpCode.text = '${globals.company}${globals.employee?.empCode}';
-    // });
-
-    print('Set Header.');
-    print('Doc No: $docuNo');
-    print('Ref No: $refNo');
-  }
-
-  Widget setDiscountType() {
-    if (globals.discountType == globals.DiscountType.THB) {
-      return Text('THB');
-    } else {
-      return Text('%');
-    }
-  }
-
-  void calculateSummary() async {
-    try {
-      double sumPriceIncludeVat = 0;
-      var tempList = List<SaleOrderDetail>();
-
-      if (SODT.length == 0) {
-        tempList = await _apiService.getSODT(SOHD.soid);
-        print('Calculate globals.productCart : ' + tempList?.length.toString());
-        if (tempList.length > 0) {
-          discountTotal = 0;
-          priceTotal = 0;
-          tempList.forEach((element) {
-            discountTotal += element.goodDiscAmnt;
-          });
-          tempList.forEach((element) {
-            priceTotal += element.goodAmnt;
-          });
-        } else {
-          discountTotal = 0;
-          priceTotal = 0;
-          priceAfterDiscount = 0;
-          globals.discountBill = 0;
-          vatTotal = 0;
-          netTotal = 0;
-        }
-
-        priceTotal = priceTotal - discountTotal;
-        if (globals.discountType == globals.DiscountType.PER) {
-          double percentDiscount = globals.discountBill / 100;
-          priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
-        } else {
-          priceAfterDiscount = priceTotal - globals.discountBill;
-        }
-
-        if (tempList != null) {
-          tempList
-              .where((element) => element?.vatrate != null)
-              .toList()
-              .forEach((element) {
-            sumPriceIncludeVat += element.goodPrice2;
-          });
-        }
-      } else {
-        print('Calculate globals.productCart : ' + SODT?.length.toString());
-        if (SODT.length > 0) {
-          discountTotal = 0;
-          priceTotal = 0;
-          SODT.forEach((element) {
-            discountTotal += element.goodDiscAmnt;
-          });
-          SODT.forEach((element) {
-            priceTotal += element.goodAmnt;
-          });
-        } else {
-          discountTotal = 0;
-          priceTotal = 0;
-          priceAfterDiscount = 0;
-          globals.discountBill = 0;
-          vatTotal = 0;
-          netTotal = 0;
-        }
-
-        priceTotal = priceTotal - discountTotal;
-        if (globals.discountType == globals.DiscountType.PER) {
-          double percentDiscount = globals.discountBill / 100;
-          priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
-        } else {
-          priceAfterDiscount = priceTotal - globals.discountBill;
-        }
-
-        if (SODT != null) {
-          SODT
-              .where((element) => element?.vatrate != null)
-              .toList()
-              .forEach((element) {
-            sumPriceIncludeVat += element.goodPrice2;
-          });
-        }
-      }
-
-      // vatTotal = (priceAfterDiscount * vat) / 100;
-      vatTotal = (sumPriceIncludeVat * vat) / 100;
-      netTotal = priceAfterDiscount + vatTotal;
-
-      setState(() {
-        txtDiscountTotal.text = currency.format(discountTotal);
-        txtPriceTotal.text = currency.format(priceTotal);
-        txtDiscountBill.text = currency.format(globals.discountBill);
-        txtPriceAfterDiscount.text = currency.format(priceAfterDiscount);
-        txtVatTotal.text = currency.format(vatTotal);
-        txtNetTotal.text = currency.format(netTotal);
-      });
-    } catch (e) {
-      showDialog(
-          context: context,
-          child: AlertDialog(
-            title: Text('Exception'),
-            content: Text(e.toString()),
-          ));
-    }
   }
 
   void setSelectedShipto() {
@@ -349,184 +183,6 @@ class _SaleOrderViewState extends State<SaleOrderView> {
       ));
     }
     return ListView(children: list);
-  }
-
-  Future<dynamic> postSaleOrder() async {
-    try {
-      SaleOrderHeader header = new SaleOrderHeader();
-      List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
-
-      /// document header.
-      header.soid = 0;
-      header.saleAreaId = 1004;
-      header.vatgroupId = 1000;
-      header.docuNo = docuNo;
-      header.refNo = refNo;
-      header.docuType = 104;
-      header.docuDate = _docuDate;
-      header.validDays = 0;
-      header.onHold = 'N';
-      header.vatRate = 0;
-      header.vatType = '3';
-      header.goodType = '1';
-      header.docuStatus = 'Y';
-      header.isTransfer = 'N';
-      header.remark = txtRemark?.text ?? '';
-
-      /// employee information.
-      header.empId = globals.employee.empId;
-      header.deptId = globals.employee.deptId;
-
-      /// customer information.
-      header.custId = globals.customer.custId;
-      header.custName = globals.customer.custName;
-      header.creditDays = globals.customer.creditDays;
-
-      /// cost summary.
-      header.sumGoodAmnt = netTotal;
-      header.billAftrDiscAmnt = netTotal;
-      header.netAmnt = netTotal;
-      header.billDiscAmnt = discountBill;
-
-      /// shipment to customer.
-      header.shipToCode = selectedShipTo.shiptoCode;
-      header.transpId = selectedShipTo.transpId;
-      header.transpAreaId = selectedShipTo.transpAreaId;
-      header.shipToAddr1 = selectedShipTo.shiptoAddr1;
-      header.shipToAddr2 = selectedShipTo.shiptoAddr2;
-      header.district = selectedShipTo.district;
-      header.amphur = selectedShipTo.amphur;
-      header.province = selectedShipTo.province;
-      header.postCode = selectedShipTo.postcode;
-
-      bool isSuccess = false;
-      await _apiService.updateSaleOrderHeader(header);
-      //header = value;
-      print('Add result: ${header.soid}');
-      if (header != null) {
-        SODT.forEach((e) {
-          SaleOrderDetail obj = new SaleOrderDetail();
-          obj.soid = header.soid;
-          obj.listNo = e.listNo;
-          obj.docuType = 104;
-          obj.goodType = '1';
-          obj.goodId = e.goodId;
-          obj.goodName = e.goodName;
-          obj.goodUnitId2 = e.goodUnitId2;
-          obj.goodQty2 = e.goodQty2;
-          obj.goodPrice2 = e.goodPrice2;
-          obj.goodAmnt = e.goodAmnt;
-          obj.goodDiscAmnt = e.goodDiscAmnt;
-          detail.add(obj);
-        });
-
-        var dtResponse = await _apiService.updateSaleOrderDetail(detail);
-        if (dtResponse == true) {
-          globals.clearOrder();
-          print('Order Successful.');
-          setState(() {});
-          return showDialog<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return RichAlertDialog(
-                  //uses the custom alert dialog
-                  alertTitle: richTitle("Transaction Successfully."),
-                  alertSubtitle: richSubtitle("Your order has created. "),
-                  alertType: RichAlertType.SUCCESS,
-                );
-              });
-          // globals.clearOrder();
-          // print('Order Successful.');
-        } else {
-          return showDialog<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return RichAlertDialog(
-                  //uses the custom alert dialog
-                  alertTitle: richTitle("Details of Sales Order was failed."),
-                  alertSubtitle: richSubtitle(
-                      "Something was wrong while creating SO Details."),
-                  alertType: RichAlertType.ERROR,
-                );
-              });
-        }
-      } else {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return RichAlertDialog(
-                //uses the custom alert dialog
-                alertTitle: richTitle("Header of Sales Order was failed."),
-                alertSubtitle: richSubtitle(
-                    "Something was wrong while creating SO Header."),
-                alertType: RichAlertType.ERROR,
-              );
-            });
-      }
-    } catch (e) {
-      return showAboutDialog(
-          context: context,
-          applicationName: 'Post Sale Order Exception',
-          applicationIcon: Icon(Icons.error_outline),
-          children: [
-            Text(e),
-          ]);
-    }
-  }
-
-// Show Dialog function
-  void _showDialog(context) {
-    // flutter defined function
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return alert dialog object
-        return AlertDialog(
-            elevation: 0,
-            title: new Text('สถานที่จัดส่ง'),
-            content: Container(
-                width: 500, height: 300, child: getShiptoListWidgets(context)));
-      },
-    );
-  }
-
-  void showDiscountTypeDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return alert dialog object
-        return AlertDialog(
-            elevation: 0,
-            title: new Text('ประเภทส่วนลด'),
-            content: Container(
-                width: 250,
-                height: 180,
-                child: ListView(children: [
-                  ListTile(
-                      onTap: () {
-                        //discountType = globals.DiscountType.THB;
-                        globals.discountType = globals.DiscountType.THB;
-                        Navigator.pop(context);
-                        setState(() {});
-                      },
-                      selected:
-                          globals.discountType == globals.DiscountType.THB,
-                      selectedTileColor: Colors.black12,
-                      title: Text('THB')),
-                  ListTile(
-                    onTap: () {
-                      //discountType = globals.DiscountType.PER;
-                      globals.discountType = globals.DiscountType.PER;
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                    selected: globals.discountType == globals.DiscountType.PER,
-                    selectedTileColor: Colors.black12,
-                    title: Text('%'),
-                  )
-                ])));
-      },
-    );
   }
 
   Widget SaleOrderDetails() {
@@ -627,74 +283,6 @@ class _SaleOrderViewState extends State<SaleOrderView> {
                           DataCell(
                               Text('${currency.format(e.goodDiscAmnt)}')),
                           DataCell(Text('${currency.format(e.goodAmnt)}')),
-                          // DataCell(Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          //   children: [
-                          //     ElevatedButton(
-                          //       onPressed: () {
-                          //         String goodCode = globals.allProduct
-                          //                 .firstWhere((element) =>
-                          //                     element.goodId == e.goodId)
-                          //                 .goodCode ??
-                          //             '';
-                          //         ProductCart editProduct = ProductCart()
-                          //           ..goodId = e.goodId
-                          //           ..goodCode = goodCode
-                          //           ..goodName1 = e.goodName
-                          //           ..goodPrice = e.goodPrice2
-                          //           ..goodQty = e.goodQty2
-                          //           ..mainGoodUnitId = e.goodUnitId2
-                          //           ..discountBase = e.goodDiscAmnt;
-                          //         Navigator.push(
-                          //             context,
-                          //             CupertinoPageRoute(
-                          //                 builder: (context) =>
-                          //                     ContainerProduct(
-                          //                         'แก้ไขรายการสินค้า ลำดับที่ ',
-                          //                         editProduct))).then(
-                          //             (value) {
-                          //           setState(() {});
-                          //         });
-                          //       },
-                          //       child: Icon(Icons.edit),
-                          //       style: ButtonStyle(
-                          //         backgroundColor:
-                          //             MaterialStateProperty.all<Color>(
-                          //                 Colors.blueAccent),
-                          //       ),
-                          //     ),
-                          //     SizedBox(
-                          //       width: 10,
-                          //     ),
-                          //     ElevatedButton(
-                          //       onPressed: () {
-                          //         //int removeIndex = globals.productCart.indexWhere((element) => element.rowIndex == e.rowIndex);
-                          //         int index = 1;
-                          //         SODT.removeWhere((element) =>
-                          //             element.soid == e.soid &&
-                          //             element.listNo == e.listNo);
-                          //         // SODT.forEach((element) {
-                          //         //   element.rowIndex = index++;
-                          //         // });
-                          //         globals.editingProductCart = null;
-                          //         //print(SODT?.length.toString());
-                          //         setState(() {});
-                          //       },
-                          //       child: Icon(Icons.delete_forever),
-                          //       style: ButtonStyle(
-                          //         backgroundColor:
-                          //             MaterialStateProperty.all<Color>(
-                          //                 Colors.redAccent),
-                          //       ),
-                          //     )
-                          //   ],
-                          // )),
-                          // DataCell(ElevatedButton(
-                          //     onPressed: () {},
-                          //     child: Icon(Icons.delete_forever),
-                          //   style: ButtonStyle(
-                          //     backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
-                          //   ),)),
                         ])))
                     .values
                     .toList() ??
@@ -716,11 +304,6 @@ class _SaleOrderViewState extends State<SaleOrderView> {
   }
 
   Widget build(BuildContext context) {
-    // setHeader();
-    // setSelectedShipto();
-    // calculateSummary();
-    print('Build Sale Order');
-
     return Scaffold(
         appBar: AppBar(
           title: Center(
@@ -756,7 +339,7 @@ class _SaleOrderViewState extends State<SaleOrderView> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                         // boxShadow: [
                         //   BoxShadow(color: Colors.green, spreadRadius: 3),
                         // ],
@@ -1049,7 +632,7 @@ class _SaleOrderViewState extends State<SaleOrderView> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ],
@@ -1186,77 +769,10 @@ class _SaleOrderViewState extends State<SaleOrderView> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                     SizedBox(height: 10),
-                    // Container(
-                    //     margin: EdgeInsets.only(top: 13, left: 30),
-                    //     child: RaisedButton.icon(
-                    //       onPressed: () {
-                    //         globals.editingProductCart = null;
-                    //         Navigator.push(
-                    //             context,
-                    //             CupertinoPageRoute(
-                    //                 builder: (context) => ContainerProduct(
-                    //                     'สั่งรายการสินค้า ลำดับที่ ',
-                    //                     null))).then((value) {
-                    //           globals.editingProductCart = null;
-                    //           setState(() {});
-                    //         });
-                    //       },
-                    //       icon: Icon(Icons.add_circle_outline_outlined,
-                    //           color: Colors.white),
-                    //       color: Colors.green,
-                    //       splashColor: Colors.green,
-                    //       padding: EdgeInsets.all(10),
-                    //       label: Text(
-                    //         'เพิ่มรายการสินค้า',
-                    //         style: GoogleFonts.sarabun(
-                    //             fontSize: 14, color: Colors.white),
-                    //       ),
-                    //     )),
-                    // Container(
-                    //     margin: EdgeInsets.only(top: 13, left: 20),
-                    //     child: RaisedButton.icon(
-                    //       onPressed: () {
-                    //         globals.editingProductCart = null;
-                    //         Navigator.push(
-                    //             context,
-                    //             MaterialPageRoute(
-                    //                 builder: (context) => ContainerProduct(
-                    //                     'สั่งรายการสินค้า ลำดับที่ ', null)));
-                    //       },
-                    //       icon: Icon(Icons.local_fire_department,
-                    //           color: Colors.white),
-                    //       color: Colors.deepOrange[400],
-                    //       padding: EdgeInsets.all(10),
-                    //       label: Text(
-                    //         'เพิ่มรายการด่วน',
-                    //         style: GoogleFonts.sarabun(
-                    //             fontSize: 14, color: Colors.white),
-                    //       ),
-                    //     )),
-                    // Container(
-                    //     margin: EdgeInsets.only(top: 13, left: 20),
-                    //     child: RaisedButton.icon(
-                    //       onPressed: () {
-                    //         globals.editingProductCart = null;
-                    //         Navigator.push(
-                    //             context,
-                    //             MaterialPageRoute(
-                    //                 builder: (context) => ContainerProduct(
-                    //                     'สั่งรายการสินค้า ลำดับที่ ', null)));
-                    //       },
-                    //       icon: Icon(Icons.list, color: Colors.white),
-                    //       color: Colors.blueAccent,
-                    //       padding: EdgeInsets.all(10),
-                    //       label: Text(
-                    //         'เพิ่มรายการโปรโมชั่น',
-                    //         style: GoogleFonts.sarabun(
-                    //             fontSize: 14, color: Colors.white),
-                    //       ),
-                    //     )),
                   ],
                 ),
                 SingleChildScrollView(
@@ -1279,7 +795,7 @@ class _SaleOrderViewState extends State<SaleOrderView> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(20),
                             bottomRight: Radius.circular(0)),
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ],
@@ -1531,43 +1047,45 @@ class _SaleOrderViewState extends State<SaleOrderView> {
                   ],
                 ),
 
-                // Row(
-                //   children: [
-                //     Expanded(
-                //       child: Container(
-                //         height: 100,
-                //         padding: const EdgeInsets.only(top: 30.0),
-                //         child: ElevatedButton(
-                //             style: ButtonStyle(
-                //               backgroundColor: MaterialStateProperty.all<Color>(
-                //                   Colors.orange),
-                //             ),
-                //             onPressed: () {
-                //               AwesomeDialog(
-                //                 context: context,
-                //                 dialogType: DialogType.INFO,
-                //                 animType: AnimType.BOTTOMSLIDE,
-                //                 width: 450,
-                //                 title: 'Confirmation',
-                //                 desc: 'Are you sure to create sales order ?',
-                //                 btnCancelOnPress: () {},
-                //                 btnOkOnPress: () {
-                //                   setState(() {});
-                //                   postSaleOrder()
-                //                       .then((value) => setState(() {}));
-                //                 },
-                //               )..show();
-                //               //print(jsonEncode(globals.productCart));
-                //             },
-                //             child: Text(
-                //               'แก้ไขคำสั่งสินค้า',
-                //               style: TextStyle(fontSize: 20),
-                //             )),
-                //       ),
-                //     )
-                //   ],
-                // ),
-                SizedBox(height: 30,)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 100,
+                        padding: const EdgeInsets.only(top: 30.0),
+                        child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.orange),
+                            ),
+                            onPressed: () {
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.INFO,
+                                animType: AnimType.BOTTOMSLIDE,
+                                width: 450,
+                                title: 'Duplicate Order ?',
+                                desc: 'Are you sure to duplicate sales order ?',
+                                btnCancelOnPress: () {},
+                                btnOkOnPress: () {
+                                  globals.discountBillCopy = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => SaleOrderCopy(header:widget.saleOrderHD, detail:SODT)));
+                                },
+                              )..show();
+                              //print(jsonEncode(globals.productCart));
+                            },
+                            child: Text(
+                              'ทำรายการคำสั่งซ้ำ',
+                              style: TextStyle(fontSize: 20),
+                            )),
+                      ),
+                    )
+                  ],
+                ),
+                // SizedBox(height: 30,)
               ],
             )
           ]),

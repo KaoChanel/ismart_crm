@@ -22,11 +22,11 @@ import 'item_product_detail.dart';
 
 class ContainerProduct extends StatefulWidget {
   //const ContainerProduct({ Key key }) : super(key: key);
-  const ContainerProduct(this.title, this.editing_product, this.isDraft);
+  const ContainerProduct(this.title, this.editing_product, this.docType);
 
   final String title;
   final ProductCart editing_product;
-  final bool isDraft;
+  final String docType;
 
   @override
   _ContainerProductState createState() => _ContainerProductState();
@@ -141,7 +141,7 @@ class _ContainerProductState extends State<ContainerProduct> {
               //   ),
               // ),
               Container(
-                color: Colors.deepPurple,
+                color: Theme.of(context).primaryColor,
                 width: double.infinity,
                 margin: EdgeInsets.only(top: 0.0),
                 padding: EdgeInsets.all(20.0),
@@ -174,12 +174,12 @@ class _ContainerProductState extends State<ContainerProduct> {
             // The item details just blindly accepts whichever
             // item we throw in its way, just like before.
             product: _selectedItem,
-            quantity: widget.isDraft == true ? widget.editing_product != null ? widget.editing_product.goodQty : _goodQty : _goodQty,
-            price: widget.isDraft == true ? widget.editing_product != null ? widget.editing_product?.goodPrice : _goodPrice : _goodPrice,
+            quantity: widget.docType != 'ORDER' ? widget.editing_product != null ? widget.editing_product.goodQty : _goodQty : _goodQty,
+            price: widget.docType != 'ORDER' ? widget.editing_product != null ? widget.editing_product?.goodPrice : _goodPrice : _goodPrice,
             editedPrice: 0,
             total: _total,
             isInTabletLayout: true,
-            isDraft: widget.isDraft,
+            docType: widget.docType,
             productCart: widget.editing_product,
           ),
         ),

@@ -178,21 +178,17 @@ class _SaleOrderState extends State<SaleOrder> {
     focusDiscount.dispose();
   }
 
-  void setHeader() {
-    _apiService.getRefNo().then((value){
-      runningNo = value;
-      // refNo = '${globals.employee?.empCode}-${runningNo ?? ''}';
-      custPONo = '${globals.employee?.empCode}-${runningNo ?? ''}';
-      txtCustPONo.text = custPONo ?? '';
-      txtRunningNo.text = runningNo ?? '';
-      txtRemark.text = globals.selectedRemark.remark;
-      // txtRefNo.text = refNo ?? '';
-    });
-    _apiService.getDocNo().then((value) {
-      docuNo = value;
-      txtDocuNo.text = docuNo ?? '';
-      txtEmpCode.text = '${globals.employee?.empCode}';
-    });
+  void setHeader() async {
+
+    runningNo = await _apiService.getRefNo();
+    custPONo = '${globals.employee?.empCode}-${runningNo ?? ''}';
+    txtCustPONo.text = custPONo ?? '';
+    txtRunningNo.text = runningNo ?? '';
+    txtRemark.text = globals.selectedRemark.remark;
+
+    docuNo = await _apiService.getDocNo();
+    txtDocuNo.text = docuNo ?? '';
+    txtEmpCode.text = '${globals.employee?.empCode}';
 
     // setState(() {
     //   txtRunningNo.text = runningNo ?? '';
@@ -232,17 +228,18 @@ class _SaleOrderState extends State<SaleOrder> {
         discountTotal = 0;
         priceTotal = 0;
         priceAfterDiscount = 0;
-        globals.discountBill = 0;
+        // globals.discountBill = 0;
         vatTotal = 0;
         netTotal = 0;
       }
 
       //priceTotal = priceTotal - discountTotal;
-      if (globals.discountType == globals.DiscountType.PER) {
-        double percentDiscount = globals.discountBill / 100;
+      if (globals.discountBill.discountType == 'PER') {
+        double percentDiscount = globals.discountBill.discountNumber / 100;
+        globals.discountBill.discountAmount = percentDiscount;
         priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
       } else {
-        priceAfterDiscount = priceTotal - globals.discountBill;
+        priceAfterDiscount = priceTotal - globals.discountBill.discountAmount;
       }
 
       double sumPriceIncludeVat = 0;
@@ -256,7 +253,7 @@ class _SaleOrderState extends State<SaleOrder> {
 
       // vatTotal = (priceAfterDiscount * vat) / 100;
       // vatTotal = (sumPriceIncludeVat * vat) / 100;
-      sumPriceIncludeVat = sumPriceIncludeVat - (globals.discountBill);
+      sumPriceIncludeVat = sumPriceIncludeVat - (globals.discountBill.discountAmount);
       print('sumPriceIncludeVat:  ' + sumPriceIncludeVat.toString());
       //print('sumPriceIncludeVat * 0.07:  ' + (sumPriceIncludeVat + (sumPriceIncludeVat * vat)).toString());
       print((sumPriceIncludeVat * vat).toString());
@@ -266,7 +263,7 @@ class _SaleOrderState extends State<SaleOrder> {
       setState(() {
         txtDiscountTotal.text = currency.format(discountTotal);
         txtPriceTotal.text = currency.format(priceTotal);
-        txtDiscountBill.text = currency.format(globals.discountBill);
+        txtDiscountBill.text = currency.format(globals.discountBill.discountAmount);
         txtPriceAfterDiscount.text = currency.format(priceAfterDiscount);
         txtVatTotal.text = currency.format(vatTotal);
         txtNetTotal.text = currency.format(netTotal);
@@ -399,7 +396,7 @@ class _SaleOrderState extends State<SaleOrder> {
             header.sumGoodAmnt = priceTotal;
             header.billAftrDiscAmnt = priceAfterDiscount;
             header.netAmnt = netTotal;
-            header.billDiscAmnt = globals.discountBill;
+            header.billDiscAmnt = globals.discountBill.discountAmount;
 
             /// Discount
 
@@ -680,7 +677,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                   context,
                                   CupertinoPageRoute(
                                       builder: (context) => ContainerProduct(
-                                          'แก้ไขรายการสินค้า ลำดับที่ ', e, false))).then((value) {
+                                          'แก้ไขรายการสินค้า ลำดับที่ ', e, 'COPY'))).then((value) {
                                 setState(() {});
                               });
                             },
@@ -1298,7 +1295,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                 CupertinoPageRoute(
                                     builder: (context) => ContainerProduct(
                                         'สั่งรายการสินค้า ลำดับที่ ',
-                                        null, false))).then((value) {
+                                        null, 'COPY'))).then((value) {
                               globals.editingProductCart = null;
                               setState(() {});
                             });
@@ -1323,7 +1320,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ', null, false)));
+                                        'สั่งรายการสินค้า ลำดับที่ ', null, 'COPY')));
                           },
                           icon: Icon(Icons.local_fire_department,
                               color: Colors.white),
@@ -1344,7 +1341,7 @@ class _SaleOrderState extends State<SaleOrder> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => ContainerProduct(
-                                        'สั่งรายการสินค้า ลำดับที่ ', null, false)));
+                                        'สั่งรายการสินค้า ลำดับที่ ', null, 'COPY')));
                           },
                           icon: Icon(Icons.list, color: Colors.white),
                           color: Colors.blueAccent,
@@ -1563,11 +1560,21 @@ class _SaleOrderState extends State<SaleOrder> {
                                                     RichAlertType.WARNING,
                                               );
                                             });
-                                      } else {
-                                        globals.discountBill = double.tryParse(
+                                      } else if(globals.discountBill.discountType == 'PER') {
+                                        globals.discountBill.discountNumber = double.tryParse(
                                             txtDiscountBill.text
                                                 .replaceAll(',', ''));
                                         FocusScope.of(context).unfocus();
+                                      }
+                                      else {
+                                        double disc = double.tryParse(
+                                            txtDiscountBill.text
+                                                .replaceAll(',', ''));
+
+                                      globals.discountBill.discountNumber = disc;
+                                      globals.discountBill.discountAmount = disc;
+
+                                      FocusScope.of(context).unfocus();
                                       }
                                     });
                                   },

@@ -487,7 +487,7 @@ class _StatusTransferDocState extends State<StatusTransferDoc> {
                 borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
                     bottomRight: Radius.circular(0)),
-                color: Colors.deepPurple,
+                color: Theme.of(context).primaryColor,
               ),
             ),
             SizedBox(height: 10),

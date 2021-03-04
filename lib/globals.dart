@@ -14,6 +14,7 @@ import 'models/goods_unit.dart';
 import 'models/saleOrder_header.dart';
 import 'models/saleOrder_detail.dart';
 import 'models/master_remark.dart';
+import 'models/discount.dart';
 import'package:data_connection_checker/data_connection_checker.dart';
 
 enum DiscountType{ THB, PER }
@@ -23,14 +24,17 @@ String company;
 List<Company> allCompany;
 bool enableEditPrice = false;
 DiscountType discountType = DiscountType.THB;
-double discountBill = 0;
-double discountBillDraft = 0;
-double discountBillCopy = 0;
+DiscountType discountTypeCopy = DiscountType.THB;
+DiscountType discountTypeDraft = DiscountType.THB;
+Discount discountBill = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+Discount discountBillCopy = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+Discount discountBillDraft = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
 Employee employee;
 Customer customer;
 Customer selectedOrderCustomer;
 List<Customer> allCustomer;
 Shipto selectedShipto;
+Shipto selectedShiptoDraft;
 List<Shipto> allShipto;
 Product selectedProduct;
 List<Product> allProduct;
@@ -39,6 +43,7 @@ List<Stock> groupStock;
 List<Stock> allStock;
 MasterRemark selectedRemark = MasterRemark();
 MasterRemark selectedRemarkDraft = MasterRemark();
+MasterRemark selectedRemarkDuplicate = MasterRemark();
 List<MasterRemark> allRemark = List<MasterRemark>();
 ProductCart editingProductCart;
 List<ProductCart> productCart = new List<ProductCart>();
@@ -54,7 +59,21 @@ void clearOrder(){
   productCart = new List<ProductCart>();
   editingProductCart = null;
   selectedProduct = null;
-  discountBill = 0;
+  discountBill = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+}
+
+void clearDraftOrder(){
+  productCart = new List<ProductCart>();
+  editingProductCart = null;
+  selectedProduct = null;
+  discountBillDraft = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+}
+
+void clearCopyOrder(){
+  productCart = new List<ProductCart>();
+  editingProductCart = null;
+  selectedProduct = null;
+  discountBillCopy = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
 }
 
 Future<DataConnectionStatus> checkConnection(BuildContext context) async{

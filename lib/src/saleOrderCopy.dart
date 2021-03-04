@@ -20,16 +20,17 @@ import 'package:ismart_crm/models/saleOrder_detail.dart';
 import 'package:rich_alert/rich_alert.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 
-class SaleOrderDraft extends StatefulWidget {
-  SaleOrderDraft({@required this.saleOrderHeader});
+class SaleOrderCopy extends StatefulWidget {
+  SaleOrderCopy({@required this.header, @required this.detail});
 
-  final SaleOrderHeader saleOrderHeader;
+  final SaleOrderHeader header;
+  final List<SaleOrderDetail> detail;
 
   @override
-  _SaleOrderDraftState createState() => _SaleOrderDraftState();
+  _SaleOrderCopyState createState() => _SaleOrderCopyState();
 }
 
-class _SaleOrderDraftState extends State<SaleOrderDraft> {
+class _SaleOrderCopyState extends State<SaleOrderCopy> {
   ApiService _apiService = new ApiService();
   final currency = new NumberFormat("#,##0.00", "en_US");
   StreamController<double> ctrl_discountTotal = StreamController<double>();
@@ -101,7 +102,6 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
     super.initState();
     setHeader();
     setSelectedShipto();
-    calculateSummary();
   }
 
   @override
@@ -117,8 +117,8 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
     ctrl_netTotal.close();
   }
 
-  void setHeader() {
-    SOHD = widget.saleOrderHeader;
+  void setHeader() async {
+    SOHD = widget.header;
     // SODT = await _apiService.getSODT(SOHD.soid);
     //
     // /// Mapping
@@ -137,19 +137,30 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
     //   productCart.add(cart);
     // });
 
-    runningNo = SOHD.docuNo ?? '';
-    refNo = SOHD.refNo ?? '';
+    // runningNo = SOHD.docuNo ?? '';
+    // refNo = SOHD.refNo ?? '';
     // _docuDate = editedDocuDate == false ? SOHD.docuDate : _docuDate;
     // _shiptoDate = editedShipDate == false ? SOHD.shipDate : _shiptoDate;
-    _docuDate = SOHD.docuDate;
-    _shiptoDate = SOHD.shipDate;
-    _orderDate = SOHD.custPodate;
+    // _docuDate = SOHD.docuDate;
+    // _shiptoDate = SOHD.shipDate;
+    // _orderDate = SOHD.custPodate;
+
+    //txtRefNo.text = refNo = await _apiService.getRefNo();
+    // custPONo = '${globals.employee?.empCode}-${runningNo ?? ''}';
+    // txtCustPONo.text = custPONo ?? '';
+    // txtRunningNo.text = await runningNo ?? '';
+    txtRemark.text = SOHD.remark;
+
+    docuNo = await _apiService.getDocNo();
+    txtDocuNo.text = docuNo ?? '';
+    refNo = '${globals.company}${globals.employee?.empCode}${docuNo ?? ''}';
+    txtRefNo.text = refNo;
+    txtEmpCode.text = globals.employee.empCode;
+
+    txtRemark.text = SOHD.remark;
     discountBill = SOHD.billDiscAmnt;
     vatTotal = SOHD.vatamnt;
 
-    txtRunningNo.text = runningNo;
-    txtRefNo.text = refNo;
-    txtDocuNo.text = SOHD.docuNo;
     txtDocuDate.text = DateFormat('dd/MM/yyyy').format(_docuDate);
     txtShiptoDate.text =
         _shiptoDate != null ? DateFormat('dd/MM/yyyy').format(_shiptoDate) : '';
@@ -162,10 +173,10 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
             ?.custCode ??
         '';
     txtCustName.text = SOHD.custName ?? '';
-    txtCreditType.text = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditType.toString() ?? '-';
+    txtCreditType.text = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditType ?? '';
     txtCredit.text = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditDays.toString() ?? '0';
     creditState = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditState ?? '-';
-    txtStatus.text = creditState == 'H' ? 'Holding' : creditState == 'I' ? 'Inactive' : 'Active' ;
+    txtStatus.text = creditState == 'H' ? 'Holding' : creditState == 'I' ? 'Inactive' : 'ปกติ' ;
     txtRemark.text = SOHD.remark ?? '';
     // double DiscountTotal = 0;
     // SODT.where((element) => element.soid == SOHD.soid).forEach((element) {DiscountTotal += element.goodDiscAmnt;});
@@ -176,23 +187,25 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
     txtVatTotal.text = currency.format(SOHD.vatamnt ?? 0);
     txtNetTotal.text = currency.format(SOHD.netAmnt);
 
-    globals.discountBillDraft.discountAmount = discountBill;
+    globals.discountBillCopy.discountAmount = discountBill;
     ctrl_discountBill.add(discountBill);
     ctrl_vatTotal.add(vatTotal);
+
+    calculateSummary();
   }
 
   void calculateSummary() {
     try {
-      print('Calculate globals.productCartDraft : ' +
-          globals.productCartDraft.length.toString());
-      if (globals.productCartDraft.length > 0) {
+      print('Calculate globals.productCartCopy : ' +
+          globals.productCartCopy.length.toString());
+      if (globals.productCartCopy.length > 0) {
         discountTotal = 0;
         priceTotal = 0;
-        globals.productCartDraft.forEach((element) {
+        globals.productCartCopy.forEach((element) {
           discountTotal += element.discountBase;
         });
 
-        globals.productCartDraft.forEach((element) {
+        globals.productCartCopy.forEach((element) {
           priceTotal += element.goodAmount;
         });
       } else {
@@ -205,17 +218,17 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       }
 
       //priceTotal = priceTotal - discountTotal;
-      if (globals.discountBillDraft.discountType == 'PER') {
-        double percentDiscount = globals.discountBillDraft.discountNumber / 100;
+      if (globals.discountBillCopy.discountType == 'PER') {
+        double percentDiscount = globals.discountBillCopy.discountNumber/ 100;
+        globals.discountBillCopy.discountAmount = percentDiscount;
         priceAfterDiscount = priceTotal - (percentDiscount * priceTotal);
-        globals.discountBillDraft.discountAmount = percentDiscount;
       } else {
-        priceAfterDiscount = priceTotal - globals.discountBillDraft.discountAmount;
+        priceAfterDiscount = priceTotal - globals.discountBillCopy.discountAmount;
       }
 
       double sumPriceIncludeVat = 0;
-      if (globals.productCartDraft != null) {
-        globals.productCartDraft
+      if (globals.productCartCopy != null) {
+        globals.productCartCopy
             .where((element) => element?.vatRate != null)
             .toList()
             .forEach((element) {
@@ -228,8 +241,8 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       // sumPriceIncludeVat = sumPriceIncludeVat - (globals.discountBillDraft);
       //sumPriceIncludeVat = priceAfterDiscount;
       print('sumPriceIncludeVat:  ' + sumPriceIncludeVat.toString());
-      print('globals.discountBillDraft:  ' +
-          globals.discountBillDraft.toString());
+      print('globals.discountBillCopy:  ' +
+          globals.discountBillCopy.discountAmount.toString());
       //print('sumPriceIncludeVat * 0.07:  ' + (sumPriceIncludeVat + (sumPriceIncludeVat * vat)).toString());
       print((sumPriceIncludeVat * vat).toString());
       vatTotal = (priceAfterDiscount * 0.07);
@@ -259,7 +272,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
   }
 
   Widget setDiscountType() {
-    if (globals.discountBillDraft.discountType == 'THB') {
+    if (globals.discountBillCopy.discountType == 'THB') {
       return Text('THB');
     } else {
       return Text('%');
@@ -380,7 +393,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       header.sumGoodAmnt = priceTotal;
       header.billAftrDiscAmnt = priceAfterDiscount;
       header.netAmnt = netTotal;
-      header.billDiscAmnt = globals.discountBillDraft.discountAmount;
+      header.billDiscAmnt = globals.discountBillCopy.discountAmount;
 
       /// Discount
 
@@ -545,7 +558,8 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       header.netAmnt = netTotal;
       header.billDiscAmnt = discountBill;
 
-      globals.productCartDraft.forEach((e) {
+      bool isSuccess = false;
+      globals.productCartCopy.forEach((e) {
         SaleOrderDetail obj = new SaleOrderDetail();
         obj.soid = header.soid;
         obj.listNo = e.rowIndex;
@@ -566,14 +580,14 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       var res = await _apiService.saveDraft(header, detail);
       if (res) {
         Navigator.pop(context);
+        print('Saved Daft Successful.');
         //setState(() {});
-        globals.clearOrder();
         return showDialog<void>(
             context: context,
             builder: (BuildContext context) {
               return RichAlertDialog(
                 //uses the custom alert dialog
-                alertTitle: richTitle("Draft has saved successfully."),
+                alertTitle: richTitle("Draft has saved."),
                 alertSubtitle: richSubtitle("Your draft has saved. "),
                 alertType: RichAlertType.SUCCESS,
                 actions: [
@@ -725,22 +739,22 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                   ListTile(
                       onTap: () {
                         //discountType = globals.DiscountType.THB;
-                        globals.discountBillDraft.discountType = 'THB';
+                        globals.discountBillCopy.discountType = 'THB';
                         Navigator.pop(context);
                         setState(() {});
                       },
                       selected:
-                      globals.discountBillDraft.discountType == 'THB',
+                          globals.discountBillCopy.discountType == 'THB',
                       selectedTileColor: Colors.black12,
                       title: Text('THB')),
                   ListTile(
                     onTap: () {
                       //discountType = globals.DiscountType.PER;
-                      globals.discountBillDraft.discountType = 'PER';
+                      globals.discountBillCopy.discountType = 'PER';
                       Navigator.pop(context);
                       setState(() {});
                     },
-                    selected: globals.discountBillDraft.discountType == 'PER',
+                    selected: globals.discountBillCopy.discountType == 'PER',
                     selectedTileColor: Colors.black12,
                     title: Text('%'),
                   )
@@ -902,212 +916,186 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
   onSortColumn(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       if (ascending) {
-        globals.productCartDraft.sort((a, b) => a.rowIndex.compareTo(b.rowIndex));
+        globals.productCartCopy.sort((a, b) => a.rowIndex.compareTo(b.rowIndex));
       } else {
-        globals.productCartDraft.sort((a, b) => b.rowIndex.compareTo(a.rowIndex));
+        globals.productCartCopy.sort((a, b) => b.rowIndex.compareTo(a.rowIndex));
       }
     }
   }
 
   Widget saleOrderDetails() {
-    return FutureBuilder<Object>(
-        future: _apiService.getSODT(SOHD.soid),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            SODT = snapshot.data;
+    globals.productCartCopy = List<ProductCart>();
+    widget.detail.forEach((x) {
+      ProductCart cart = ProductCart()
+        ..rowIndex = x.listNo
+        ..soid = x.soid
+        ..goodId = x.goodId
+        ..goodCode = globals.allProduct
+            .firstWhere((element) => element.goodId == x.goodId,
+            orElse: null)
+            .goodCode ??
+            '-'
+        ..goodName1 = x.goodName
+        ..goodAmount = x.goodAmnt
+        ..goodQty = x.goodQty2
+        ..goodPrice = x.goodPrice2
+        ..discountBase = x.goodDiscAmnt
+        ..mainGoodUnitId = x.goodUnitId2
+        ..vatRate = x.vatrate
+        ..vatType = x.vatType;
 
-            if (globals.isDraftInitial == false) {
-              globals.isDraftInitial = true;
-              globals.productCartDraft = List<ProductCart>();
-              SODT.forEach((x) {
-                ProductCart cart = ProductCart()
-                  ..rowIndex = x.listNo
-                  ..soid = x.soid
-                  ..goodId = x.goodId
-                  ..goodCode = globals.allProduct
-                          .firstWhere((element) => element.goodId == x.goodId,
-                              orElse: null)
-                          .goodCode ??
-                      '-'
-                  ..goodName1 = x.goodName
-                  ..goodAmount = x.goodAmnt
-                  ..goodQty = x.goodQty2
-                  ..goodPrice = x.goodPrice2
-                  ..discountBase = x.goodDiscAmnt
-                  ..mainGoodUnitId = x.goodUnitId2
-                  ..vatRate = x.vatrate
-                  ..vatType = x.vatType;
+      globals.productCartCopy.add(cart);
+    });
 
-                globals.productCartDraft.add(cart);
-              });
+    return DataTable(
+        showBottomBorder: true,
+        columnSpacing: 26,
+        sortColumnIndex: 0,
+        columns: <DataColumn>[
+          DataColumn(
+              label: Text(
+                'ลำดับ',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+              ),
+              onSort: (columnIndex, ascending){
+                setState(() {
 
-              // globals.productCartDraft.forEach((element) {
-              //   priceTotal += element.goodAmount;
-              // });
-              //
-              // ctrl_priceTotal.add(priceTotal);
-            } else {}
-
-            double discountTotal = 0;
-            globals.productCartDraft
-                .where((element) => element.soid == SOHD.soid)
-                .forEach((element) {
-              discountTotal += element.discountBase ?? 0;
-            });
-
-            //txtDiscountTotal.text = currency.format(discountTotal ?? 0);
-            calculateSummary();
-          }
-          return DataTable(
-              showBottomBorder: true,
-              columnSpacing: 26,
-              sortColumnIndex: 0,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: Text(
-                    'ลำดับ',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                  onSort: (columnIndex, ascending){
-                    setState(() {
-
+                });
+                onSortColumn(columnIndex, ascending);
+              }
+          ),
+          DataColumn(
+            label: Text(
+              'รหัสสินค้า',
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              'ชื่อสินค้า',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+            ),
+          ),
+          DataColumn(
+            numeric: true,
+            label: Text(
+              'จำนวน',
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+            ),
+          ),
+          DataColumn(
+            numeric: true,
+            label: Text(
+              'ราคา / หน่วย',
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+            ),
+          ),
+          DataColumn(
+            numeric: true,
+            label: Text(
+              'ส่วนลด',
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+            ),
+          ),
+          DataColumn(
+            numeric: true,
+            label: Text(
+              'ยอดสุทธิ',
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              '',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ],
+        rows: globals.productCartCopy
+            .map((e) => DataRow(cells: [
+          DataCell(Text('${e.rowIndex}')),
+          // DataCell(Text('${e.goodTypeFlag}')),
+          DataCell(Text('${e.goodCode}')),
+          DataCell(Text('${e.goodName2}')),
+          DataCell(Text('${currency.format(e.goodQty ?? 0)}')),
+          DataCell(Text('${currency.format(e.goodPrice ?? 0)}')),
+          DataCell(
+              Text('${currency.format(e.discountBase ?? 0)}')),
+          DataCell(Text('${currency.format(e.goodAmount ?? 0)}')),
+          DataCell(Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  SchedulerBinding.instance
+                      .addPostFrameCallback((timeStamp) {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) =>
+                                ContainerProduct(
+                                    'แก้ไขรายการสินค้า ลำดับที่ ',
+                                    e,
+                                    'COPY'))).then((value) {
+                      setState(() {});
                     });
-                    onSortColumn(columnIndex, ascending);
-                  }
+                  });
+                },
+                child: Icon(Icons.edit),
+                style: ButtonStyle(
+                  backgroundColor:
+                  MaterialStateProperty.all<Color>(
+                      Colors.blueAccent),
                 ),
-                DataColumn(
-                  label: Text(
-                    'รหัสสินค้า',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    'ชื่อสินค้า',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                ),
-                DataColumn(
-                  numeric: true,
-                  label: Text(
-                    'จำนวน',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                ),
-                DataColumn(
-                  numeric: true,
-                  label: Text(
-                    'ราคา / หน่วย',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                ),
-                DataColumn(
-                  numeric: true,
-                  label: Text(
-                    'ส่วนลด',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                ),
-                DataColumn(
-                  numeric: true,
-                  label: Text(
-                    'ยอดสุทธิ',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    '',
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ),
-              ],
-              rows: globals.productCartDraft
-                  .map((e) => DataRow(cells: [
-                        DataCell(Text('${e.rowIndex}')),
-                        // DataCell(Text('${e.goodTypeFlag}')),
-                        DataCell(Text('${e.goodCode}')),
-                        DataCell(Text('${e.goodName1}')),
-                        DataCell(Text('${currency.format(e.goodQty ?? 0)}')),
-                        DataCell(Text('${currency.format(e.goodPrice ?? 0)}')),
-                        DataCell(
-                            Text('${currency.format(e.discountBase ?? 0)}')),
-                        DataCell(Text('${currency.format(e.goodAmount ?? 0)}')),
-                        DataCell(Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                SchedulerBinding.instance
-                                    .addPostFrameCallback((timeStamp) {
-                                  Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                          builder: (context) =>
-                                              ContainerProduct(
-                                                  'แก้ไขรายการสินค้า ลำดับที่ ',
-                                                  e,
-                                                  'DRAFT'))).then((value) {
-                                    setState(() {});
-                                  });
-                                });
-                              },
-                              child: Icon(Icons.edit),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                        Colors.blueAccent),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                //int removeIndex = globals.productCart.indexWhere((element) => element.rowIndex == e.rowIndex);
-                                int index = 1;
-                                globals.productCartDraft.removeWhere(
-                                    (element) =>
-                                        element.rowIndex == e.rowIndex);
-                                globals.productCartDraft.forEach((element) {
-                                  element.rowIndex = index++;
-                                });
-                                //globals.editingProductCart = null;
-                                //globals.productCartDraft = List<ProductCart>();
-                                print(
-                                    globals.productCartDraft.length.toString());
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  //int removeIndex = globals.productCart.indexWhere((element) => element.rowIndex == e.rowIndex);
+                  int index = 1;
+                  globals.productCartCopy.removeWhere(
+                          (element) =>
+                      element.rowIndex == e.rowIndex);
+                  globals.productCartCopy.forEach((element) {
+                    element.rowIndex = index++;
+                  });
+                  //globals.editingProductCart = null;
+                  //globals.productCartDraft = List<ProductCart>();
+                  print(
+                      globals.productCartCopy.length.toString());
 
-                                // priceTotal = 0;
-                                // globals.productCartDraft.forEach((element) {
-                                //   priceTotal += element.goodAmount;
-                                // });
-                                //
-                                // ctrl_priceTotal.add(priceTotal);
+                  // priceTotal = 0;
+                  // globals.productCartDraft.forEach((element) {
+                  //   priceTotal += element.goodAmount;
+                  // });
+                  //
+                  // ctrl_priceTotal.add(priceTotal);
 
-                                calculateSummary();
+                  calculateSummary();
 
-                                setState(() {});
-                              },
-                              child: Icon(Icons.delete_forever),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                        Colors.redAccent),
-                              ),
-                            )
-                          ],
-                        )),
-                        // DataCell(ElevatedButton(
-                        //     onPressed: () {},
-                        //     child: Icon(Icons.delete_forever),
-                        //   style: ButtonStyle(
-                        //     backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
-                        //   ),)),
-                      ]))
-                  ?.toList());
-        });
+                  setState(() {});
+                },
+                child: Icon(Icons.delete_forever),
+                style: ButtonStyle(
+                  backgroundColor:
+                  MaterialStateProperty.all<Color>(
+                      Colors.redAccent),
+                ),
+              )
+            ],
+          )),
+          // DataCell(ElevatedButton(
+          //     onPressed: () {},
+          //     child: Icon(Icons.delete_forever),
+          //   style: ButtonStyle(
+          //     backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
+          //   ),)),
+        ]))
+            ?.toList());
   }
 
   Future<bool> _onWillPop() {
@@ -1118,10 +1106,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
             content: Text('คุณต้องการบันทึกฉบับร่างนี้หรือไม่ ?'),
             actions: <Widget>[
               FlatButton(
-                onPressed: () {
-                  globals.isDraftInitial = false;
-                  Navigator.of(context).pop(true);
-                  },
+                onPressed: () => Navigator.of(context).pop(true),
                 child: Text('ไม่ต้องการ'),
               ),
               FlatButton(
@@ -1707,7 +1692,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                       builder: (context) => ContainerProduct(
                                           'สั่งรายการสินค้า ลำดับที่ ',
                                           null,
-                                          'DRAFT'))).then((value) {
+                                          'COPY'))).then((value) {
                                 globals.editingProductCart = null;
                                 setState(() {});
                               });
@@ -1734,7 +1719,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                       builder: (context) => ContainerProduct(
                                           'สั่งรายการสินค้า ลำดับที่ ',
                                           null,
-                                          'DRAFT')));
+                                          'COPY')));
                             },
                             icon: Icon(Icons.local_fire_department,
                                 color: Colors.white),
@@ -1757,7 +1742,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                       builder: (context) => ContainerProduct(
                                           'สั่งรายการสินค้า ลำดับที่ ',
                                           null,
-                                          'DRAFT')));
+                                          'COPY')));
                             },
                             icon: Icon(Icons.list, color: Colors.white),
                             color: Colors.blueAccent,
@@ -1936,8 +1921,11 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                     },
                                     onEditingComplete: () {
                                       setState(() {
-                                        if (globals.discountBillDraft.discountType == 'PER'
-                                            && double.tryParse(txtDiscountBill.text.replaceAll(',', '')) > 100) {
+                                        if (globals.discountBillCopy.discountType ==
+                                                'PER' &&
+                                            double.tryParse(txtDiscountBill.text
+                                                    .replaceAll(',', '')) >
+                                                100) {
                                           // showDialog(
                                           //     context: context,
                                           //   builder: (BuildContext context){
@@ -1960,20 +1948,21 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                                       RichAlertType.WARNING,
                                                 );
                                               });
-                                        } else if(globals.discountBillDraft.discountType == 'PER') {
-                                          globals.discountBillDraft.discountNumber =
+                                        } else if(globals.discountBillCopy.discountType == 'PER') {
+                                          globals.discountBillCopy.discountNumber =
                                               double.tryParse(txtDiscountBill
                                                   .text
                                                   .replaceAll(',', ''));
                                           FocusScope.of(context).unfocus();
                                         }
                                         else {
-                                          globals.discountBillDraft.discountAmount =
-                                              double.tryParse(txtDiscountBill
-                                                  .text
-                                                  .replaceAll(',', ''));
-                                          globals.discountBillDraft.discountNumber = globals.discountBillDraft.discountAmount;
-                                          FocusScope.of(context).unfocus();
+                                          double disc = double.tryParse(txtDiscountBill
+                                              .text
+                                              .replaceAll(',', ''));
+
+                                        globals.discountBillCopy.discountNumber = disc;
+                                        globals.discountBillCopy.discountAmount = disc;
+                                        FocusScope.of(context).unfocus();
                                         }
                                       });
                                     },
@@ -2096,7 +2085,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                           padding: const EdgeInsets.only(top: 30.0),
                           child: ElevatedButton(
                               onPressed: () {
-                                if (globals.productCartDraft.length == 0) {
+                                if (globals.productCartCopy.length == 0) {
                                   return globals.showAlertDialog(
                                       'โปรดเพิ่มรายการสินค้า',
                                       'คุณยังไม่มีรายการสินค้า',

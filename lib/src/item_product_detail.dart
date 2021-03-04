@@ -14,18 +14,18 @@ import 'package:ismart_crm/api_service.dart';
 
 class ItemProductDetail extends StatefulWidget {
   // const ItemListDetails({ Key key }) : super(key: key);
-  ItemProductDetail({
-    @required this.isDraft,
-    @required this.isInTabletLayout,
-    @required this.productCart,
-    @required this.product,
-    @required this.price,
-    this.editedPrice,
-    this.newPrice,
-    this.quantity,
-    this.total});
+  ItemProductDetail(
+      {@required this.docType,
+      @required this.isInTabletLayout,
+      @required this.productCart,
+      @required this.product,
+      @required this.price,
+      this.editedPrice,
+      this.newPrice,
+      this.quantity,
+      this.total});
 
-  final bool isDraft;
+  final String docType;
   final bool isInTabletLayout;
   final Product product;
   final double quantity;
@@ -69,7 +69,9 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     // TODO: implement initState
     globals.newPrice = widget.price;
     //_goodQty = widget.isDraft == true ? widget.quantity : _goodQty;
-    _isFreeProduct = widget.isDraft == true ? widget.productCart?.isFree ?? false : globals.editingProductCart?.isFree ?? false;
+    _isFreeProduct = widget.docType != 'ORDER'
+        ? widget.productCart?.isFree ?? false
+        : globals.editingProductCart?.isFree ?? false;
     super.initState();
     //calculatedPrice(1, 0, widget.editedPrice);
     // txtQty = TextEditingController(text: _goodQty.toString());
@@ -95,62 +97,62 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   void setSelectedItem() {
     print('set Selected item detail');
 
-      if (widget.product?.goodCode == null) {
-        _goodQty = 0;
-      }
-      else {
-        StockByProd = globals.allStock.where((element) => element.goodid == widget.product.goodId).toList();
+    if (widget.product?.goodCode == null) {
+      _goodQty = 0;
+    } else {
+      StockByProd = globals.allStock
+          .where((element) => element.goodid == widget.product.goodId)
+          .toList();
 
-        if(widget.isDraft == false){
-          if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
-            print('Compare < / Qty = $_goodQty');
-            if (_goodQty == null) {
-              _goodQty = widget.quantity;
-              _discount = globals.editingProductCart?.discount;
-              _discountType = globals.editingProductCart?.discountType;
-            }
-            //_isFreeProduct = globals.editingProductCart.isFree;
-          } else if (txtGoodCode.text != widget.product?.goodCode) {
-            _goodQty = 1;
-            //globals.newPrice = 0;
-            globals.newPrice = widget.price;
-            print('txtGoodCode.text != widget.product?.goodCode');
+      if (widget.docType == 'ORDER') {
+        if (globals.editingProductCart?.goodCode == widget.product?.goodCode) {
+          print('Compare < / Qty = $_goodQty');
+          if (_goodQty == null) {
+            _goodQty = widget.quantity;
+            _discount = globals.editingProductCart?.discount;
+            _discountType = globals.editingProductCart?.discountType;
           }
+          //_isFreeProduct = globals.editingProductCart.isFree;
+        } else if (txtGoodCode.text != widget.product?.goodCode) {
+          _goodQty = 1;
+          //globals.newPrice = 0;
+          globals.newPrice = widget.price;
+          print('txtGoodCode.text != widget.product?.goodCode');
         }
-        else{
-          if (widget.productCart?.goodCode == widget.product?.goodCode) {
-            print('Draft Compare < / Qty = $_goodQty');
-            if (_goodQty == null) {
-              _goodQty = widget.productCart?.goodQty;
-              _discount = widget.productCart?.discount;
-              _discountType = widget.productCart?.discountType;
-            }
-            else{
-              widget.productCart.goodQty = _goodQty;
-            }
-            //_isFreeProduct = globals.editingProductCart.isFree;
-          } else if (txtGoodCode.text != widget.product?.goodCode) {
-            _goodQty = 1;
-            //globals.newPrice = 0;
-            globals.newPrice = widget.price;
-            print('txtGoodCode.text != widget.product?.goodCode');
+      } else {
+        if (widget.productCart?.goodCode == widget.product?.goodCode) {
+          print('Draft Compare < / Qty = $_goodQty');
+          if (_goodQty == null) {
+            _goodQty = widget.productCart?.goodQty;
+            _discount = widget.productCart?.discount;
+            _discountType = widget.productCart?.discountType;
+          } else {
+            widget.productCart.goodQty = _goodQty;
           }
+          //_isFreeProduct = globals.editingProductCart.isFree;
+        } else if (txtGoodCode.text != widget.product?.goodCode) {
+          _goodQty = 1;
+          //globals.newPrice = 0;
+          globals.newPrice = widget.price;
+          print('txtGoodCode.text != widget.product?.goodCode');
         }
-
       }
+    }
 
-      if(widget.product?.mainGoodUnitId != null){
-        _unitName = globals.allGoodsUnit.firstWhere((element) => element.goodUnitId == widget.product.mainGoodUnitId).goodUnitName;
-      }
+    if (widget.product?.mainGoodUnitId != null) {
+      _unitName = globals.allGoodsUnit
+          .firstWhere(
+              (element) => element.goodUnitId == widget.product.mainGoodUnitId)
+          .goodUnitName;
+    }
 
-      txtGoodCode.text = widget.product?.goodCode;
-      txtGoodName.text = widget.product?.goodName1;
-      // txtQty.text = currency.format(_goodQty) ?? '0.00';
-      // txtPrice.text = currency.format(widget.price) ?? '0.00';
-      // txtTotal.text = currency.format(_totalAmount) ?? '0.00';
-      // txtDiscount.text = currency.format(_discount) ?? '0.00';
-      // txtTotalNet.text = currency.format(_totalNet) ?? '0.00';
-
+    txtGoodCode.text = widget.product?.goodCode;
+    txtGoodName.text = widget.product?.goodName1;
+    // txtQty.text = currency.format(_goodQty) ?? '0.00';
+    // txtPrice.text = currency.format(widget.price) ?? '0.00';
+    // txtTotal.text = currency.format(_totalAmount) ?? '0.00';
+    // txtDiscount.text = currency.format(_discount) ?? '0.00';
+    // txtTotalNet.text = currency.format(_totalNet) ?? '0.00';
   }
 
   void calculatedPrice(double _quantity, double _discountValue, double _price) {
@@ -165,7 +167,11 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
     _goodQty = _quantity;
     _discount = _discountValue;
 
-    if(widget.isDraft && widget.productCart != null){
+    // if (widget.docType == 'ORDER' && widget.productCart != null) {
+    //   widget.productCart.discountBase = _discountValue ?? 0;
+    // }
+
+    if (widget.productCart != null) {
       widget.productCart.discountBase = _discountValue ?? 0;
     }
 
@@ -175,7 +181,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         _totalNet = 0;
         _discount = 0;
       } else {
-        if(_price != null){
+        if (_price != null) {
           widget.editedPrice = 1;
           globals.newPrice = _price;
           _totalAmount = globals.newPrice * _goodQty;
@@ -184,8 +190,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
               globals.newPrice.toString() +
               ' Total: ' +
               _totalNet.toString());
-        }
-        else{
+        } else {
           widget.editedPrice = 0;
           globals.newPrice = 0;
           _totalAmount = widget.price * _goodQty;
@@ -199,7 +204,9 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
         }
       }
 
-      _totalNet = _discountType == 'PER' ? _totalAmount - (_totalAmount * _discount / 100) : _totalAmount - _discount;
+      _totalNet = _discountType == 'PER'
+          ? _totalAmount - (_totalAmount * _discount / 100)
+          : _totalAmount - _discount;
       txtQty.text = currency.format(_goodQty) ?? '0';
       // txtPrice.text = currency.format(widget.price) ?? 'รอราคา...';
       txtTotal.text = currency.format(_totalAmount) ?? '0';
@@ -216,9 +223,9 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
   void addProductToCart() {
     int row = 1;
-    if(widget.isDraft == false){
+    if (widget.docType == 'ORDER') {
       print('editedPrice : ' + widget.editedPrice.toString());
-      if (globals.productCart.length> 0) {
+      if (globals.productCart.length > 0) {
         print('Product Cart not equal null. ${globals.productCart.length}');
         row = globals.productCart.last.rowIndex + 1;
       }
@@ -228,26 +235,27 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
       if (globals.editingProductCart != null) {
         print('globals.editingProductCart != null');
-        int startIndex = globals.productCart.indexWhere(
-                (element) => element.rowIndex == globals.editingProductCart?.rowIndex);
+        int startIndex = globals.productCart.indexWhere((element) =>
+            element.rowIndex == globals.editingProductCart?.rowIndex);
         globals.productCart[startIndex].goodId = widget.product.goodId;
         globals.productCart[startIndex].goodCode = widget.product.goodCode;
         globals.productCart[startIndex].goodName1 = widget.product.goodName1;
         globals.productCart[startIndex].goodQty = _goodQty;
-        if(widget.editedPrice > 0){
+        if (widget.editedPrice > 0) {
           globals.productCart[startIndex].goodPrice = globals.newPrice;
-        }
-        else{
+        } else {
           globals.productCart[startIndex].goodPrice = widget.price;
         }
 
         globals.productCart[startIndex].discount = _discount;
         globals.productCart[startIndex].discountType = _discountType;
-        globals.productCart[startIndex].discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
+        globals.productCart[startIndex].discountBase =
+            _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
         globals.productCart[startIndex].goodAmount = _totalNet;
         globals.productCart[startIndex].isFree = _isFreeProduct;
         globals.productCart[startIndex].vatGroupId = widget.product.vatGroupId;
-        globals.productCart[startIndex].vatGroupCode = widget.product.vatGroupCode;
+        globals.productCart[startIndex].vatGroupCode =
+            widget.product.vatGroupCode;
         globals.productCart[startIndex].vatType = widget.product.vatType;
         globals.productCart[startIndex].vatRate = widget.product.vatRate;
         globals.editingProductCart = null;
@@ -267,7 +275,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
           ..goodPrice = widget.price
           ..discount = _discount
           ..discountType = _discountType
-          ..discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
+          ..discountBase =
+              _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
           ..goodAmount = _totalNet
           ..isFree = _isFreeProduct
           ..vatGroupId = widget.product.vatGroupId
@@ -275,12 +284,84 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
           ..vatType = widget.product.vatType
           ..vatRate = widget.product.vatRate;
 
-        if(widget.editedPrice > 0){
+        if (widget.editedPrice > 0) {
           order.goodPrice = globals.newPrice;
         }
 
         print('Add: ' + order.goodName1);
         globals.productCart.add(order);
+      }
+    }
+
+    else if (widget.docType == 'COPY') {
+      print('editedPrice : ' + widget.editedPrice.toString());
+      if (globals.productCartCopy.length > 0) {
+        print('Product Cart not equal null. ${globals.productCartCopy.length}');
+        row = globals.productCartCopy.last.rowIndex + 1;
+      }
+
+      print('Product Cart Length = ${globals.productCartCopy.length}');
+      print('Row Index = $row');
+
+      if (globals.editingProductCart != null) {
+        print('globals.editingProductCart != null');
+        int startIndex = globals.productCartCopy.indexWhere((element) =>
+            element.rowIndex == globals.editingProductCart?.rowIndex);
+        globals.productCartCopy[startIndex].goodId = widget.product.goodId;
+        globals.productCartCopy[startIndex].goodCode = widget.product.goodCode;
+        globals.productCartCopy[startIndex].goodName1 =
+            widget.product.goodName1;
+        globals.productCartCopy[startIndex].goodQty = _goodQty;
+        if (widget.editedPrice > 0) {
+          globals.productCartCopy[startIndex].goodPrice = globals.newPrice;
+        } else {
+          globals.productCartCopy[startIndex].goodPrice = widget.price;
+        }
+
+        globals.productCartCopy[startIndex].discount = _discount;
+        globals.productCartCopy[startIndex].discountType = _discountType;
+        globals.productCartCopy[startIndex].discountBase =
+            _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
+        globals.productCartCopy[startIndex].goodAmount = _totalNet;
+        globals.productCartCopy[startIndex].isFree = _isFreeProduct;
+        globals.productCartCopy[startIndex].vatGroupId =
+            widget.product.vatGroupId;
+        globals.productCartCopy[startIndex].vatGroupCode =
+            widget.product.vatGroupCode;
+        globals.productCartCopy[startIndex].vatType = widget.product.vatType;
+        globals.productCartCopy[startIndex].vatRate = widget.product.vatRate;
+        globals.editingProductCart = null;
+        // List<ProductCart> temp = globals.productCart.where((element) => element.rowIndex == globals.editingProductCart.rowIndex).toList();
+        // print('Index: $startIndex');
+        // globals.productCart.replaceRange(startIndex, startIndex, temp);
+        // print('Updated: ' + globals.editingProductCart.goodName1);
+      } else {
+        ProductCart order = new ProductCart()
+          ..productCartId = UniqueKey().toString()
+          ..rowIndex = row
+          ..goodId = widget.product.goodId
+          ..goodCode = widget.product.goodCode
+          ..goodName1 = widget.product.goodName1
+          ..mainGoodUnitId = widget.product.mainGoodUnitId
+          ..goodQty = _goodQty
+          ..goodPrice = widget.price
+          ..discount = _discount
+          ..discountType = _discountType
+          ..discountBase =
+              _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
+          ..goodAmount = _totalNet
+          ..isFree = _isFreeProduct
+          ..vatGroupId = widget.product.vatGroupId
+          ..vatGroupCode = widget.product.vatGroupCode
+          ..vatType = widget.product.vatType
+          ..vatRate = widget.product.vatRate;
+
+        if (widget.editedPrice > 0) {
+          order.goodPrice = globals.newPrice;
+        }
+
+        print('Add: ' + order.goodName1);
+        globals.productCartCopy.add(order);
       }
     }
     else {
@@ -295,26 +376,29 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
 
       if (globals.editingProductCart != null) {
         print('globals.editingProductCart != null');
-        int startIndex = globals.productCartDraft.indexWhere(
-                (element) => element.rowIndex == globals.editingProductCart?.rowIndex);
+        int startIndex = globals.productCartDraft.indexWhere((element) =>
+        element.rowIndex == globals.editingProductCart?.rowIndex);
         globals.productCartDraft[startIndex].goodId = widget.product.goodId;
         globals.productCartDraft[startIndex].goodCode = widget.product.goodCode;
-        globals.productCartDraft[startIndex].goodName1 = widget.product.goodName1;
+        globals.productCartDraft[startIndex].goodName1 =
+            widget.product.goodName1;
         globals.productCartDraft[startIndex].goodQty = _goodQty;
-        if(widget.editedPrice > 0) {
+        if (widget.editedPrice > 0) {
           globals.productCartDraft[startIndex].goodPrice = globals.newPrice;
-        }
-        else {
+        } else {
           globals.productCartDraft[startIndex].goodPrice = widget.price;
         }
 
         globals.productCartDraft[startIndex].discount = _discount;
         globals.productCartDraft[startIndex].discountType = _discountType;
-        globals.productCartDraft[startIndex].discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
+        globals.productCartDraft[startIndex].discountBase =
+        _discountType == 'PER' ? _totalNet * _discount / 100 : _discount;
         globals.productCartDraft[startIndex].goodAmount = _totalNet;
         globals.productCartDraft[startIndex].isFree = _isFreeProduct;
-        globals.productCartDraft[startIndex].vatGroupId = widget.product.vatGroupId;
-        globals.productCartDraft[startIndex].vatGroupCode = widget.product.vatGroupCode;
+        globals.productCartDraft[startIndex].vatGroupId =
+            widget.product.vatGroupId;
+        globals.productCartDraft[startIndex].vatGroupCode =
+            widget.product.vatGroupCode;
         globals.productCartDraft[startIndex].vatType = widget.product.vatType;
         globals.productCartDraft[startIndex].vatRate = widget.product.vatRate;
         globals.editingProductCart = null;
@@ -334,7 +418,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
           ..goodPrice = widget.price
           ..discount = _discount
           ..discountType = _discountType
-          ..discountBase = _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
+          ..discountBase =
+          _discountType == 'PER' ? _totalNet * _discount / 100 : _discount
           ..goodAmount = _totalNet
           ..isFree = _isFreeProduct
           ..vatGroupId = widget.product.vatGroupId
@@ -342,7 +427,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
           ..vatType = widget.product.vatType
           ..vatRate = widget.product.vatRate;
 
-        if(widget.editedPrice > 0) {
+        if (widget.editedPrice > 0) {
           order.goodPrice = globals.newPrice;
         }
 
@@ -360,21 +445,27 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
       builder: (BuildContext context) {
         // return alert dialog object
         return AlertDialog(
-          title: new Text('สินค้าคงเหลือ ' + widget.product.goodName1 + ' (' + widget.product.goodCode + ')'),
+          title: new Text('สินค้าคงเหลือ ' +
+              widget.product.goodName1 +
+              ' (' +
+              widget.product.goodCode +
+              ')'),
           content: Container(
             height: 350.0,
             width: 400,
             child: ListView(
-              children:
-              StockByProd.map((e) =>
-                  ListTile(
-                  title: Text(
-                      'Lot No. ' + e.lotNo + '               คงเหลือ:  ' +
-                          currency.format(e.remaqty)),
-                  subtitle: Text('Expire: ' + dateFormat.format(e.expiredate) +
-                      '                        ' + e.goodUnitCode),
-                  onTap: () {},
-                ) ).toList() ?? [],
+              children: StockByProd.map((e) => ListTile(
+                        title: Text('Lot No. ' +
+                            e.lotNo +
+                            '               คงเหลือ:  ' +
+                            currency.format(e.remaqty)),
+                        subtitle: Text('Expire: ' +
+                            dateFormat.format(e.expiredate) +
+                            '                        ' +
+                            e.goodUnitCode),
+                        onTap: () {},
+                      )).toList() ??
+                  [],
             ),
           ),
         );
@@ -392,73 +483,70 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
   }
 
   Widget createEmptyWidget() {
-    return ListTile(title: Text('ไม่มีข้อมูลสต๊อค'),);
+    return ListTile(
+      title: Text('ไม่มีข้อมูลสต๊อค'),
+    );
   }
 
-  void showDiscountDialog(context){
+  void showDiscountDialog(context) {
     showDialog(
         context: context,
-      builder: (BuildContext context){
-       return AlertDialog(
-            elevation: 0,
-            title: new Text('ประเภทส่วนลด'),
-            content: Container(
-                width: 250,
-                height: 180,
-                child: ListView(children: [
-                  ListTile(
+        builder: (BuildContext context) {
+          return AlertDialog(
+              elevation: 0,
+              title: new Text('ประเภทส่วนลด'),
+              content: Container(
+                  width: 250,
+                  height: 180,
+                  child: ListView(children: [
+                    ListTile(
+                        onTap: () {
+                          //discountType = globals.DiscountType.THB;
+                          _discountType = 'THB';
+                          Navigator.pop(context);
+                          setState(() {});
+                        },
+                        selected: _discountType == 'THB',
+                        selectedTileColor: Colors.black12,
+                        title: Text('THB')),
+                    ListTile(
                       onTap: () {
-                        //discountType = globals.DiscountType.THB;
-                        _discountType = 'THB';
+                        //discountType = globals.DiscountType.PER;
+                        //globals.discountType = globals.DiscountType.PER;
+                        _discountType = 'PER';
                         Navigator.pop(context);
                         setState(() {});
                       },
-                      selected: _discountType == 'THB',
+                      selected: _discountType == 'PER',
                       selectedTileColor: Colors.black12,
-                      title: Text('THB')),
-                  ListTile(
-                    onTap: () {
-                      //discountType = globals.DiscountType.PER;
-                      //globals.discountType = globals.DiscountType.PER;
-                      _discountType = 'PER';
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                    selected: _discountType == 'PER',
-                    selectedTileColor: Colors.black12,
-                    title: Text('%'),
-                  )
-                ])
-            )
-        );
-      }
-    );
+                      title: Text('%'),
+                    )
+                  ])));
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     setSelectedItem();
 
-    if(globals.newPrice == 0) {
+    if (globals.newPrice == 0) {
       globals.newPrice = widget.price;
     }
-    if(globals.newPrice != widget.price) {
+    if (globals.newPrice != widget.price) {
       calculatedPrice(_goodQty, _discount, globals.newPrice);
-    }
-    else {
+    } else {
       print('globals.newPrice == widget.price');
-      if(widget.isDraft == true && widget.productCart != null){
-        print('widget.isDraft == true | Price = ${widget.productCart?.goodPrice ?? 0} | QTY = ${widget.productCart?.goodQty ?? 0}');
-        calculatedPrice(widget.productCart?.goodQty ?? 0, widget.productCart?.discountBase ?? 0, widget.price);
-      }
-      else if(widget.productCart == null){
+      if (widget.docType != 'ORDER' && widget.productCart != null) {
+        print(
+            'widget.isDraft == true | Price = ${widget.productCart?.goodPrice ?? 0} | QTY = ${widget.productCart?.goodQty ?? 0}');
+        calculatedPrice(widget.productCart?.goodQty ?? 0,
+            widget.productCart?.discountBase ?? 0, widget.price);
+      } else if (widget.productCart == null) {
         calculatedPrice(_goodQty, _discount, widget.price);
-      }
-      else{
+      } else {
         calculatedPrice(_goodQty, _discount, null);
       }
     }
-
 
     //calculatedPrice(_goodQty, _discount, null);
     //calculatedPrice(_goodQty, _discount, widget.editedPrice);
@@ -503,15 +591,14 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                 child: Container(
                   child: ElevatedButton(
                       onPressed: () {
-                        if(widget.product == null){
+                        if (widget.product == null) {
                           return showDialog(
-                            context: context,
-                          child: AlertDialog(
-                            title: Text('แจ้งเตือน'),
-                            content: Text('กรุณาเลือกลูกค้า'),
-                          ));
-                        }
-                        else{
+                              context: context,
+                              child: AlertDialog(
+                                title: Text('แจ้งเตือน'),
+                                content: Text('กรุณาเลือกลูกค้า'),
+                              ));
+                        } else {
                           _showStockDialog(context);
                         }
                       },
@@ -519,8 +606,8 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                         'เช็คสต๊อค',
                         style: TextStyle(fontSize: 18),
                       ),
-                      style:
-                          ElevatedButton.styleFrom(padding: EdgeInsets.all(12))),
+                      style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.all(12))),
                 ),
               ),
             ],
@@ -585,7 +672,7 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     controller: txtQty,
                     focusNode: focusQty,
                     keyboardType:
-                    TextInputType.numberWithOptions(decimal: true),
+                        TextInputType.numberWithOptions(decimal: true),
                     onTap: () {
                       txtQty.selection = TextSelection(
                           baseOffset: 0,
@@ -598,13 +685,16 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     //   }
                     // },
                     onEditingComplete: () async {
-                      double qty = double.parse(txtQty.text.replaceAll(',', ''));
-                      double discAmnt = double.parse(txtDiscount.text.replaceAll(',', ''));
-                      double priceList = await _apiService.getPrice(widget.product.goodCode, qty);
+                      double qty =
+                          double.parse(txtQty.text.replaceAll(',', ''));
+                      double discAmnt =
+                          double.parse(txtDiscount.text.replaceAll(',', ''));
+                      double priceList = await _apiService.getPrice(
+                          widget.product.goodCode, qty);
 
                       print('Price List: ' + priceList.toString());
 
-                      if(widget.editedPrice == 1){
+                      if (widget.editedPrice == 1) {
                         priceList = globals.newPrice;
                       }
 
@@ -642,15 +732,18 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                     controller: txtPrice,
                     focusNode: focusPrice,
                     keyboardType:
-                    TextInputType.numberWithOptions(decimal: true),
+                        TextInputType.numberWithOptions(decimal: true),
                     onTap: () {
                       txtPrice.selection = TextSelection(
                           baseOffset: 0,
                           extentOffset: txtPrice.value.text.length);
                     },
                     onEditingComplete: () {
-                        calculatedPrice(double.parse(txtQty.text.replaceAll(',', '')), double.parse(txtDiscount.text.replaceAll(',', '')), double.parse(txtPrice.text.replaceAll(',', '')));
-                        FocusScope.of(context).unfocus();
+                      calculatedPrice(
+                          double.parse(txtQty.text.replaceAll(',', '')),
+                          double.parse(txtDiscount.text.replaceAll(',', '')),
+                          double.parse(txtPrice.text.replaceAll(',', '')));
+                      FocusScope.of(context).unfocus();
                     },
                     textAlign: TextAlign.right,
                     decoration: InputDecoration(
@@ -760,14 +853,17 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                   title: TextFormField(
                     controller: txtDiscount,
                     textAlign: TextAlign.right,
-                    onTap: (){
+                    onTap: () {
                       txtDiscount.selection = TextSelection(
                           baseOffset: 0,
                           extentOffset: txtDiscount.value.text.length);
                     },
                     onEditingComplete: () {
                       setState(() {
-                        calculatedPrice(double.parse(txtQty.text), double.parse(txtDiscount.text.replaceAll(',', '')), double.parse(txtPrice.text.replaceAll(',', '')));
+                        calculatedPrice(
+                            double.parse(txtQty.text),
+                            double.parse(txtDiscount.text.replaceAll(',', '')),
+                            double.parse(txtPrice.text.replaceAll(',', '')));
                         FocusScope.of(context).unfocus();
                       });
                     },
@@ -916,14 +1012,17 @@ class _ItemProductDetailState extends State<ItemProductDetail> {
                           primary: Colors.green,
                           padding: EdgeInsets.only(top: 15, bottom: 15)),
                       label: Text(
-                        globals.editingProductCart == null ? 'เพิ่มรายการสินค้า' : 'บันทึกการแก้ไข',
+                        globals.editingProductCart == null
+                            ? 'เพิ่มรายการสินค้า'
+                            : 'บันทึกการแก้ไข',
                         style: TextStyle(fontSize: 22),
                       ),
                       icon: Icon(
-                        globals.editingProductCart == null ? Icons.add_circle_outline : Icons.edit,
+                        globals.editingProductCart == null
+                            ? Icons.add_circle_outline
+                            : Icons.edit,
                         size: 30,
-                      )
-                  ),
+                      )),
                 ),
               ),
             ],
