@@ -23,18 +23,10 @@ String publicAddress = 'https://smartsalesbis.com';
 String company;
 List<Company> allCompany;
 bool enableEditPrice = false;
-DiscountType discountType = DiscountType.THB;
-DiscountType discountTypeCopy = DiscountType.THB;
-DiscountType discountTypeDraft = DiscountType.THB;
-Discount discountBill = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
-Discount discountBillCopy = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
-Discount discountBillDraft = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
 Employee employee;
 Customer customer;
 Customer selectedOrderCustomer;
 List<Customer> allCustomer;
-Shipto selectedShipto;
-Shipto selectedShiptoDraft;
 List<Shipto> allShipto;
 Product selectedProduct;
 List<Product> allProduct;
@@ -46,14 +38,23 @@ MasterRemark selectedRemarkDraft = MasterRemark();
 MasterRemark selectedRemarkDuplicate = MasterRemark();
 List<MasterRemark> allRemark = List<MasterRemark>();
 ProductCart editingProductCart;
-List<ProductCart> productCart = new List<ProductCart>();
-List<ProductCart> productCartDraft = new List<ProductCart>();
-List<ProductCart> productCartCopy = List<ProductCart>();
 List<GoodsUnit> allGoodsUnit = new List<GoodsUnit>();
 double newPrice;
 List<SaleOrderHeader> tempSOHD = new List<SaleOrderHeader>();
 StreamSubscription<DataConnectionStatus> listener;
+DiscountType discountType = DiscountType.THB;
+/// Sale Order
 bool isDraftInitial = false;
+bool isCopyInitial = false;
+List<ProductCart> productCart = new List<ProductCart>();
+List<ProductCart> productCartDraft = new List<ProductCart>();
+List<ProductCart> productCartCopy = List<ProductCart>();
+Shipto selectedShipto;
+Shipto selectedShiptoDraft;
+Shipto selectedShiptoCopy;
+Discount discountBill = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+Discount discountBillCopy = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
+Discount discountBillDraft = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
 
 void clearOrder(){
   productCart = new List<ProductCart>();
@@ -63,14 +64,14 @@ void clearOrder(){
 }
 
 void clearDraftOrder(){
-  productCart = new List<ProductCart>();
+  productCartDraft = new List<ProductCart>();
   editingProductCart = null;
   selectedProduct = null;
   discountBillDraft = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');
 }
 
 void clearCopyOrder(){
-  productCart = new List<ProductCart>();
+  productCartCopy = new List<ProductCart>();
   editingProductCart = null;
   selectedProduct = null;
   discountBillCopy = Discount(discountNumber: 0, discountAmount: 0, discountType: 'THB');

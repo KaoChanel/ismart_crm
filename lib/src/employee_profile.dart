@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:ismart_crm/models/employee.dart';
 import 'package:ismart_crm/globals.dart' as globals;
 import 'package:ismart_crm/api_service.dart';
+import 'package:ismart_crm/charts/lineChart.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class EmployeeProfile extends StatefulWidget {
   @override
@@ -264,8 +266,16 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
                   flex: 4,
                     child: ListView(
                       children: [
-                        Row(
+                        Column(
                           children: [
+                            LineChart(
+                              sampleData1() ,
+                              swapAnimationDuration: const Duration(milliseconds: 250),
+                            ),
+                            LineChart(
+                              sampleData2() ,
+                              swapAnimationDuration: const Duration(milliseconds: 250),
+                            ),
                           ],
                         )
                       ],

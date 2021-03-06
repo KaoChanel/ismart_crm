@@ -162,10 +162,10 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
             ?.custCode ??
         '';
     txtCustName.text = SOHD.custName ?? '';
-    txtCreditType.text = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditType.toString() ?? '-';
+    txtCreditType.text = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditType ?? '';
     txtCredit.text = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditDays.toString() ?? '0';
-    creditState = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditState ?? '-';
-    txtStatus.text = creditState == 'H' ? 'Holding' : creditState == 'I' ? 'Inactive' : 'Active' ;
+    creditState = globals.allCustomer.firstWhere((element) => element.custId == SOHD.custId).creditState ?? '';
+    txtStatus.text = creditState == 'H' ? 'Holding' : creditState == 'I' ? 'Inactive' : 'ปกติ' ;
     txtRemark.text = SOHD.remark ?? '';
     // double DiscountTotal = 0;
     // SODT.where((element) => element.soid == SOHD.soid).forEach((element) {DiscountTotal += element.goodDiscAmnt;});
@@ -328,156 +328,6 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
     return ListView(children: list);
   }
 
-  Future<dynamic> postSaleOrder(String status) async {
-    try {
-      globals.showLoaderDialog(context);
-      SaleOrderHeader header = new SaleOrderHeader();
-      List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
-      runningNo = SOHD.custPono;
-      // refNo =
-      //     '${globals.company}${globals.employee?.empCode}-${runningNo ?? ''}';
-      refNo = SOHD.refNo;
-      docuNo = SOHD.docuNo;
-
-      /// Company Info
-      header.brchId = 1;
-
-      /// document header.
-      header.soid = SOHD.soid;
-      header.saleAreaId = 1004;
-      header.vatgroupId = 1000;
-      header.docuNo = docuNo;
-      header.refNo = refNo;
-      header.docuType = 104;
-      header.docuDate = _docuDate;
-      header.shipDate = _shiptoDate;
-      header.custPodate = _orderDate;
-      header.custPono = txtCustPONo.text;
-      header.validDays = 0;
-      header.onHold = 'N';
-      header.goodType = '1';
-      header.docuStatus = 'Y';
-      header.isTransfer = status;
-      header.remark = txtRemark.text ?? '';
-      header.postdocutype = 1702;
-
-      /// VAT Info
-      header.vatgroupId = 1000;
-      header.vatRate = 7;
-      header.vatType = '2';
-      header.vatamnt = vatTotal;
-
-      /// employee information.
-      header.empId = globals.employee.empId;
-      header.deptId = globals.employee.deptId;
-
-      /// customer information.
-      header.custId = globals.customer.custId;
-      header.custName = globals.customer.custName;
-      header.creditDays = globals.customer.creditDays;
-
-      /// Cost Summary.
-      header.sumGoodAmnt = priceTotal;
-      header.billAftrDiscAmnt = priceAfterDiscount;
-      header.netAmnt = netTotal;
-      header.billDiscAmnt = globals.discountBillDraft.discountAmount;
-
-      /// Discount
-
-      /// shipment to customer.
-      header.shipToCode = globals.selectedShipto.shiptoCode;
-      header.transpId = globals.selectedShipto.transpId;
-      header.transpAreaId = globals.selectedShipto.transpAreaId;
-      header.shipToAddr1 = globals.selectedShipto.shiptoAddr1;
-      header.shipToAddr2 = globals.selectedShipto.shiptoAddr2;
-      header.district = globals.selectedShipto.district;
-      header.amphur = globals.selectedShipto.amphur;
-      header.province = globals.selectedShipto.province;
-      header.postCode = globals.selectedShipto.postcode;
-
-      bool isSuccess = false;
-      _apiService.addSaleOrderHeader(header).then((value) {
-        header = value;
-        print('Add result: ${header.soid}');
-        if (header != null) {
-          globals.productCart.forEach((e) {
-            SaleOrderDetail obj = new SaleOrderDetail();
-            obj.soid = header.soid;
-            obj.listNo = e.rowIndex;
-            obj.docuType = 104;
-            obj.goodType = '1';
-            obj.goodId = e.goodId;
-            obj.goodName = e.goodName1;
-            obj.goodUnitId2 = e.mainGoodUnitId;
-            obj.goodQty2 = e.goodQty;
-            obj.goodPrice2 = e.goodPrice;
-            obj.goodAmnt = e.goodAmount;
-            obj.afterMarkupamnt = e.goodAmount;
-            obj.goodDiscAmnt = e.discountBase;
-            detail.add(obj);
-          });
-
-          _apiService.addSaleOrderDetail(detail).then((value) {
-            if (value == true) {
-              globals.clearOrder();
-              Navigator.pop(context);
-              print('Order Successful.');
-              setState(() {});
-              return showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RichAlertDialog(
-                      //uses the custom alert dialog
-                      alertTitle: richTitle("Transaction Successfully."),
-                      alertSubtitle: richSubtitle("Your order has created. "),
-                      alertType: RichAlertType.SUCCESS,
-                    );
-                  });
-              // globals.clearOrder();
-              // print('Order Successful.');
-            } else {
-              Navigator.pop(context);
-              return showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RichAlertDialog(
-                      //uses the custom alert dialog
-                      alertTitle:
-                          richTitle("Details of Sales Order was failed."),
-                      alertSubtitle: richSubtitle(
-                          "Something was wrong while creating SO Details."),
-                      alertType: RichAlertType.ERROR,
-                    );
-                  });
-            }
-          });
-        } else {
-          Navigator.pop(context);
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return RichAlertDialog(
-                  //uses the custom alert dialog
-                  alertTitle: richTitle("Header of Sales Order was failed."),
-                  alertSubtitle: richSubtitle(
-                      "Something was wrong while creating SO Header."),
-                  alertType: RichAlertType.ERROR,
-                );
-              });
-        }
-      });
-    } catch (e) {
-      Navigator.pop(context);
-      return showAboutDialog(
-          context: context,
-          applicationName: 'Post Sale Order Exception',
-          applicationIcon: Icon(Icons.error_outline),
-          children: [
-            Text(e),
-          ]);
-    }
-  }
-
   Future<dynamic> putSaleOrder(String status) async {
     try {
       globals.showLoaderDialog(context);
@@ -507,7 +357,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       header.onHold = 'N';
       header.goodType = '1';
       header.docuStatus = 'Y';
-      header.isTransfer = 'D';
+      header.isTransfer = status;
       header.remark = txtRemark.text ?? '';
       header.postdocutype = 1702;
 
@@ -567,7 +417,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       if (res) {
         Navigator.pop(context);
         //setState(() {});
-        globals.clearOrder();
+        globals.clearDraftOrder();
         return showDialog<void>(
             context: context,
             builder: (BuildContext context) {
@@ -1141,14 +991,13 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
   Widget build(BuildContext context) {
     setSelectedShipto();
     calculateSummary();
-    print('Build Sale Order');
 
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
           appBar: AppBar(
             title: Center(
-              child: Text("Sale Order"),
+              child: Text("Sale Order (Draft)"),
             ),
           ),
           body: Container(
@@ -2107,7 +1956,7 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                   context: context,
                                   dialogType: DialogType.INFO,
                                   animType: AnimType.BOTTOMSLIDE,
-                                  width: 450,
+                                  width: 400,
                                   title: 'Confirmation',
                                   desc: 'Are you sure to save draft ?',
                                   btnCancelOnPress: () {},
@@ -2139,13 +1988,13 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                                   context: context,
                                   dialogType: DialogType.INFO,
                                   animType: AnimType.BOTTOMSLIDE,
-                                  width: 450,
+                                  width: 400,
                                   title: 'Confirmation',
                                   desc: 'Are you sure to create sales order ?',
                                   btnCancelOnPress: () {},
                                   btnOkOnPress: () async {
                                     setState(() {});
-                                    await postSaleOrder('N');
+                                    await putSaleOrder('N');
                                     // postSaleOrder().then((value) => setState((){}));
                                   },
                                 )..show();

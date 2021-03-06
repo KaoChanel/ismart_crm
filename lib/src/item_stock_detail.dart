@@ -31,7 +31,7 @@ class _ItemStockDetailState extends State<ItemStockDetail> {
     int index = 0;
     return DataTable(
       headingRowColor:
-      MaterialStateColor.resolveWith((states) => Colors.deepPurple),
+      MaterialStateColor.resolveWith((states) => Theme.of(context).primaryColor),
       headingTextStyle: TextStyle(color: Colors.white, fontStyle: FontStyle.normal),
       columns: const <DataColumn>[
         DataColumn(

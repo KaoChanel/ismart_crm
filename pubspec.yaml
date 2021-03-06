@@ -37,6 +37,10 @@ dependencies:
   shared_preferences: ^0.5.1+4
 
   # UI
+
+  # Chart
+  fl_chart: ^0.12.3
+
   #cupertino_icons: ^1.0.0
   google_fonts: ^1.1.1
   font_awesome_flutter: ^8.10.0

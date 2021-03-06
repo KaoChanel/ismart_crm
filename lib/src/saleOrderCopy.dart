@@ -261,6 +261,7 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
       ctrl_priceAfterDiscount.add(priceAfterDiscount);
       ctrl_vatTotal.add(vatTotal);
       ctrl_netTotal.add(netTotal);
+
     } catch (e) {
       showDialog(
           context: context,
@@ -346,17 +347,17 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
       globals.showLoaderDialog(context);
       SaleOrderHeader header = new SaleOrderHeader();
       List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
-      runningNo = SOHD.custPono;
+      // runningNo = custPono;
       // refNo =
       //     '${globals.company}${globals.employee?.empCode}-${runningNo ?? ''}';
-      refNo = SOHD.refNo;
-      docuNo = SOHD.docuNo;
+      refNo = refNo;
+      docuNo = docuNo;
 
       /// Company Info
       header.brchId = 1;
 
       /// document header.
-      header.soid = SOHD.soid;
+      header.soid = 0;
       header.saleAreaId = 1004;
       header.vatgroupId = 1000;
       header.docuNo = docuNo;
@@ -408,12 +409,11 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
       header.province = globals.selectedShipto.province;
       header.postCode = globals.selectedShipto.postcode;
 
-      bool isSuccess = false;
       _apiService.addSaleOrderHeader(header).then((value) {
         header = value;
         print('Add result: ${header.soid}');
         if (header != null) {
-          globals.productCart.forEach((e) {
+          globals.productCartCopy.forEach((e) {
             SaleOrderDetail obj = new SaleOrderDetail();
             obj.soid = header.soid;
             obj.listNo = e.rowIndex;
@@ -432,9 +432,8 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
 
           _apiService.addSaleOrderDetail(detail).then((value) {
             if (value == true) {
-              globals.clearOrder();
+              globals.clearCopyOrder();
               Navigator.pop(context);
-              print('Order Successful.');
               setState(() {});
               return showDialog<void>(
                   context: context,
@@ -479,206 +478,6 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
               });
         }
       });
-    } catch (e) {
-      Navigator.pop(context);
-      return showAboutDialog(
-          context: context,
-          applicationName: 'Post Sale Order Exception',
-          applicationIcon: Icon(Icons.error_outline),
-          children: [
-            Text(e),
-          ]);
-    }
-  }
-
-  Future<dynamic> putSaleOrder(String status) async {
-    try {
-      globals.showLoaderDialog(context);
-      SaleOrderHeader header = new SaleOrderHeader();
-      List<SaleOrderDetail> detail = new List<SaleOrderDetail>();
-      runningNo = '';
-      // refNo =
-      //     '${globals.company}${globals.employee?.empCode}-${runningNo ?? ''}';
-      refNo = SOHD.refNo;
-      docuNo = SOHD.docuNo;
-
-      /// Company Info
-      header.brchId = 1;
-
-      /// document header.
-      header.soid = SOHD.soid;
-      header.saleAreaId = 1004;
-      header.vatgroupId = 1000;
-      header.docuNo = docuNo;
-      header.refNo = refNo;
-      header.docuType = 104;
-      header.docuDate = _docuDate;
-      header.shipDate = _shiptoDate;
-      header.custPodate = _orderDate;
-      header.custPono = txtCustPONo.text;
-      header.validDays = 0;
-      header.onHold = 'N';
-      header.goodType = '1';
-      header.docuStatus = 'Y';
-      header.isTransfer = 'D';
-      header.remark = txtRemark.text ?? '';
-      header.postdocutype = 1702;
-
-      /// employee information.
-      header.empId = globals.employee.empId;
-      header.deptId = globals.employee.deptId;
-
-      /// customer information.
-      header.custId = globals.customer.custId;
-      header.custName = globals.customer.custName;
-      header.creditDays = globals.customer.creditDays;
-
-      /// Discount
-
-      /// shipment to customer.
-      header.shipToCode = globals.selectedShipto.shiptoCode;
-      header.transpId = globals.selectedShipto.transpId;
-      header.transpAreaId = globals.selectedShipto.transpAreaId;
-      header.shipToAddr1 = globals.selectedShipto.shiptoAddr1;
-      header.shipToAddr2 = globals.selectedShipto.shiptoAddr2;
-      header.district = globals.selectedShipto.district;
-      header.amphur = globals.selectedShipto.amphur;
-      header.province = globals.selectedShipto.province;
-      header.postCode = globals.selectedShipto.postcode;
-
-      /// VAT Info
-      header.vatgroupId = 1000;
-      header.vatRate = 7;
-      header.vatType = '2';
-      header.vatamnt = vatTotal;
-
-      /// Cost Summary.
-      header.sumGoodAmnt = priceTotal;
-      header.billAftrDiscAmnt = priceAfterDiscount;
-      header.netAmnt = netTotal;
-      header.billDiscAmnt = discountBill;
-
-      bool isSuccess = false;
-      globals.productCartCopy.forEach((e) {
-        SaleOrderDetail obj = new SaleOrderDetail();
-        obj.soid = header.soid;
-        obj.listNo = e.rowIndex;
-        obj.docuType = 104;
-        obj.goodType = '1';
-        obj.goodId = e.goodId;
-        obj.goodName = e.goodName1;
-        //obj.goodName = e.goodName2;
-        obj.goodUnitId2 = e.mainGoodUnitId;
-        obj.goodQty2 = e.goodQty;
-        obj.goodPrice2 = e.goodPrice;
-        obj.goodAmnt = e.goodAmount;
-        obj.afterMarkupamnt = e.goodAmount;
-        obj.goodDiscAmnt = e.discountBase;
-        detail.add(obj);
-      });
-
-      var res = await _apiService.saveDraft(header, detail);
-      if (res) {
-        Navigator.pop(context);
-        print('Saved Daft Successful.');
-        //setState(() {});
-        return showDialog<void>(
-            context: context,
-            builder: (BuildContext context) {
-              return RichAlertDialog(
-                //uses the custom alert dialog
-                alertTitle: richTitle("Draft has saved."),
-                alertSubtitle: richSubtitle("Your draft has saved. "),
-                alertType: RichAlertType.SUCCESS,
-                actions: [
-
-                ],
-              );
-            }).then((value) => Navigator.pop(context));
-      } else {
-        Navigator.pop(context);
-        return showDialog<void>(
-            context: context,
-            builder: (BuildContext context) {
-              return RichAlertDialog(
-                //uses the custom alert dialog
-                alertTitle: richTitle("An error occurred while saving a draft."),
-                alertSubtitle: richSubtitle(
-                    "Something was wrong while saving method on API."),
-                alertType: RichAlertType.ERROR,
-              );
-            });
-      }
-      // _apiService.updateSaleOrderHeader(header).then((value) {
-      //   print('Add result: ${header.soid}');
-      //   if (value == true) {
-      //     globals.productCartDraft.forEach((e) {
-      //       SaleOrderDetail obj = new SaleOrderDetail();
-      //       obj.soid = header.soid;
-      //       obj.listNo = e.rowIndex;
-      //       obj.docuType = 104;
-      //       obj.goodType = '1';
-      //       obj.goodId = e.goodId;
-      //       obj.goodName = e.goodName1;
-      //       //obj.goodName = e.goodName2;
-      //       obj.goodUnitId2 = e.mainGoodUnitId;
-      //       obj.goodQty2 = e.goodQty;
-      //       obj.goodPrice2 = e.goodPrice;
-      //       obj.goodAmnt = e.goodAmount;
-      //       obj.afterMarkupamnt = e.goodAmount;
-      //       obj.goodDiscAmnt = e.discountBase;
-      //       detail.add(obj);
-      //     });
-      //
-      //     _apiService.updateSaleOrderDetail(detail).then((value) {
-      //       if (value == true) {
-      //         //globals.clearOrder();
-      //         Navigator.pop(context);
-      //         print('Saved Daft Successful.');
-      //         setState(() {});
-      //         return showDialog<void>(
-      //             context: context,
-      //             builder: (BuildContext context) {
-      //               return RichAlertDialog(
-      //                 //uses the custom alert dialog
-      //                 alertTitle: richTitle("Draft has saved."),
-      //                 alertSubtitle: richSubtitle("Your draft has saved. "),
-      //                 alertType: RichAlertType.SUCCESS,
-      //               );
-      //             });
-      //         // globals.clearOrder();
-      //         // print('Order Successful.');
-      //       } else {
-      //         Navigator.pop(context);
-      //         return showDialog<void>(
-      //             context: context,
-      //             builder: (BuildContext context) {
-      //               return RichAlertDialog(
-      //                 //uses the custom alert dialog
-      //                 alertTitle:
-      //                     richTitle("Details of Sales Order was failed."),
-      //                 alertSubtitle: richSubtitle(
-      //                     "Something was wrong while creating SO Details."),
-      //                 alertType: RichAlertType.ERROR,
-      //               );
-      //             });
-      //       }
-      //     });
-      //   } else {
-      //     Navigator.pop(context);
-      //     showDialog(
-      //         context: context,
-      //         builder: (BuildContext context) {
-      //           return RichAlertDialog(
-      //             //uses the custom alert dialog
-      //             alertTitle: richTitle("Header of Sales Order was failed."),
-      //             alertSubtitle: richSubtitle(
-      //                 "Something was wrong while creating SO Header."),
-      //             alertType: RichAlertType.ERROR,
-      //           );
-      //         });
-      //   }
-      // });
     } catch (e) {
       Navigator.pop(context);
       return showAboutDialog(
@@ -924,28 +723,39 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
   }
 
   Widget saleOrderDetails() {
-    globals.productCartCopy = List<ProductCart>();
-    widget.detail.forEach((x) {
-      ProductCart cart = ProductCart()
-        ..rowIndex = x.listNo
-        ..soid = x.soid
-        ..goodId = x.goodId
-        ..goodCode = globals.allProduct
-            .firstWhere((element) => element.goodId == x.goodId,
-            orElse: null)
-            .goodCode ??
-            '-'
-        ..goodName1 = x.goodName
-        ..goodAmount = x.goodAmnt
-        ..goodQty = x.goodQty2
-        ..goodPrice = x.goodPrice2
-        ..discountBase = x.goodDiscAmnt
-        ..mainGoodUnitId = x.goodUnitId2
-        ..vatRate = x.vatrate
-        ..vatType = x.vatType;
+    if(globals.isCopyInitial == false){
+      globals.productCartCopy = List<ProductCart>();
+      widget.detail.forEach((x) {
+        ProductCart cart = ProductCart()
+          ..rowIndex = x.listNo
+          ..soid = x.soid
+          ..goodId = x.goodId
+          ..goodCode = globals.allProduct
+              .firstWhere((element) => element.goodId == x.goodId,
+              orElse: null)
+              .goodCode ??
+              '-'
+          ..goodName1 = x.goodName
+          ..goodAmount = x.goodAmnt
+          ..goodQty = x.goodQty2
+          ..goodPrice = x.goodPrice2
+          ..discountBase = x.goodDiscAmnt
+          ..mainGoodUnitId = x.goodUnitId2
+          ..vatRate = x.vatrate
+          ..vatType = x.vatType;
 
-      globals.productCartCopy.add(cart);
+        globals.productCartCopy.add(cart);
+      });
+      globals.isCopyInitial = true;
+    }
+
+    globals.productCartDraft
+        .where((element) => element.soid == SOHD.soid)
+        .forEach((element) {
+      discountTotal += element.discountBase ?? 0;
     });
+
+    calculateSummary();
 
     return DataTable(
         showBottomBorder: true,
@@ -1106,13 +916,16 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
             content: Text('คุณต้องการบันทึกฉบับร่างนี้หรือไม่ ?'),
             actions: <Widget>[
               FlatButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () {
+                  globals.isCopyInitial = false;
+                  Navigator.of(context).pop(true);
+                  },
                 child: Text('ไม่ต้องการ'),
               ),
               FlatButton(
                 onPressed: () {
-                  globals.isDraftInitial = false;
-                  putSaleOrder('D').then((value) => Navigator.of(context).pop(true));
+                  globals.isCopyInitial = false;
+                  postSaleOrder('D').then((value) => Navigator.of(context).pop(true));
                 },
                 /*Navigator.of(context).pop(true)*/
                 child: Text('บันทึก'),
@@ -1126,7 +939,6 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
   Widget build(BuildContext context) {
     setSelectedShipto();
     calculateSummary();
-    print('Build Sale Order');
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -2102,7 +1914,8 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
                                   btnCancelOnPress: () {},
                                   btnOkOnPress: () async {
                                     setState(() {});
-                                    await putSaleOrder('D');
+                                    await postSaleOrder('D');
+                                    Navigator.pop(context);
                                     // postSaleOrder().then((value) => setState((){}));
                                   },
                                 )..show();
@@ -2135,6 +1948,7 @@ class _SaleOrderCopyState extends State<SaleOrderCopy> {
                                   btnOkOnPress: () async {
                                     setState(() {});
                                     await postSaleOrder('N');
+                                    Navigator.pop(context);
                                     // postSaleOrder().then((value) => setState((){}));
                                   },
                                 )..show();
