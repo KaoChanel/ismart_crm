@@ -324,7 +324,9 @@ Widget _submitButton() {
           gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [Color(0xfffbb448), Color(0xfff7892b)])),
+              colors: [Color(0xfffbb448), Color(0xfff7892b)]
+  )
+              ),
       child: Text(
         'เข้าสู่ระบบ',
         style: TextStyle(fontSize: 20, color: Colors.white),
