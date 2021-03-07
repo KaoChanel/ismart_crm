@@ -267,19 +267,21 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
   }
 
   void setSelectedShipto() {
-    txtShiptoProvince.text = globals.selectedShipto?.province ?? '';
-    txtShiptoAddress.text = '${globals.selectedShipto.shiptoAddr1 ?? ''} '
-        '${globals.selectedShipto?.shiptoAddr2 ?? ''} '
-        '${globals.selectedShipto?.district ?? ''} '
-        '${globals.selectedShipto?.amphur ?? ''} '
-        '${globals.selectedShipto?.province ?? ''} '
-        '${globals.selectedShipto?.postcode ?? ''}';
-    txtShiptoRemark.text = globals.selectedShipto.remark ?? '';
+    globals.selectedShiptoDraft = globals.allShipto
+        ?.firstWhere((element) => element.custId == widget.saleOrderHeader.custId && element.shiptoCode == widget.saleOrderHeader.shipToCode, orElse: null) ?? new Shipto();
+    txtShiptoProvince.text = globals.selectedShiptoDraft?.province ?? '';
+    txtShiptoAddress.text = '${globals.selectedShiptoDraft?.shiptoAddr1 ?? ''} '
+        '${globals.selectedShiptoDraft?.shiptoAddr2 ?? ''} '
+        '${globals.selectedShiptoDraft?.district ?? ''} '
+        '${globals.selectedShiptoDraft?.amphur ?? ''} '
+        '${globals.selectedShiptoDraft?.province ?? ''} '
+        '${globals.selectedShiptoDraft?.postcode ?? ''}';
+    txtShiptoRemark.text = globals.selectedShiptoDraft?.remark ?? '';
   }
 
   Widget getShiptoListWidgets(BuildContext context) {
     List<Shipto> shiptoList = globals.allShipto
-        .where((element) => element.custId == globals.customer.custId)
+        .where((element) => element.custId == widget.saleOrderHeader.custId)
         .toList();
     print(shiptoList);
     List<Widget> list = new List<Widget>();
@@ -289,12 +291,12 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
             '${shiptoList[i]?.shiptoAddr1 ?? ''} ${shiptoList[i]?.district ?? ''} ${shiptoList[i]?.amphur ?? ''} ${shiptoList[i]?.province ?? ''} ${shiptoList[i]?.postcode ?? ''}'),
         //subtitle: Text(item?.custCode),
         onTap: () {
-          globals.selectedShipto = shiptoList[i];
+          globals.selectedShiptoDraft = shiptoList[i];
           Navigator.pop(context);
           setState(() {});
         },
         selected:
-            globals.selectedShipto.shiptoAddr1 == shiptoList[i]?.shiptoAddr1 ??
+            globals.selectedShiptoDraft?.shiptoAddr1 == shiptoList[i]?.shiptoAddr1 ??
                 '',
         selectedTileColor: Colors.grey[200],
         hoverColor: Colors.grey,
@@ -373,15 +375,15 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
       /// Discount
 
       /// shipment to customer.
-      header.shipToCode = globals.selectedShipto.shiptoCode;
-      header.transpId = globals.selectedShipto.transpId;
-      header.transpAreaId = globals.selectedShipto.transpAreaId;
-      header.shipToAddr1 = globals.selectedShipto.shiptoAddr1;
-      header.shipToAddr2 = globals.selectedShipto.shiptoAddr2;
-      header.district = globals.selectedShipto.district;
-      header.amphur = globals.selectedShipto.amphur;
-      header.province = globals.selectedShipto.province;
-      header.postCode = globals.selectedShipto.postcode;
+      header.shipToCode = globals.selectedShiptoDraft.shiptoCode;
+      header.transpId = globals.selectedShiptoDraft.transpId;
+      header.transpAreaId = globals.selectedShiptoDraft.transpAreaId;
+      header.shipToAddr1 = globals.selectedShiptoDraft.shiptoAddr1;
+      header.shipToAddr2 = globals.selectedShiptoDraft.shiptoAddr2;
+      header.district = globals.selectedShiptoDraft.district;
+      header.amphur = globals.selectedShiptoDraft.amphur;
+      header.province = globals.selectedShiptoDraft.province;
+      header.postCode = globals.selectedShiptoDraft.postcode;
 
       /// VAT Info
       header.vatgroupId = 1000;
@@ -1505,11 +1507,10 @@ class _SaleOrderDraftState extends State<SaleOrderDraft> {
                           child: ElevatedButton.icon(
                               onPressed: () {
                                 setState(() {
-                                  globals.selectedShipto = globals.allShipto
+                                  globals.selectedShiptoDraft = globals.allShipto
                                       .firstWhere((element) =>
                                           element.custId ==
-                                              globals.customer.custId &&
-                                          element.isDefault == 'Y');
+                                              widget.saleOrderHeader.custId && element.shiptoCode == widget.saleOrderHeader.shipToCode);
                                 });
                                 Fluttertoast.showToast(
                                     msg: "ใช้ค่าเริ่มต้นเรียบร้อย",

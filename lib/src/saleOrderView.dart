@@ -177,7 +177,7 @@ class _SaleOrderViewState extends State<SaleOrderView> {
           Navigator.pop(context);
           setState(() {});
         },
-        selected: selectedShipTo.shiptoAddr1 == shiptoList[i].shiptoAddr1 ?? '',
+        selected: selectedShipTo?.shiptoAddr1 == shiptoList[i].shiptoAddr1 ?? '',
         selectedTileColor: Colors.grey[200],
         hoverColor: Colors.grey,
       ));
